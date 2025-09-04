@@ -7,18 +7,63 @@ import type { Product } from '@/lib/definitions';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Search, ShoppingCart } from 'lucide-react';
+import { Search, ShoppingCart, Trash2 } from 'lucide-react';
 import { cn, formatPrice } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import useCart from '@/hooks/use-cart-store';
 import { useToast } from '@/hooks/use-toast';
 
+function QuantityControl({ productId }: { productId: string }) {
+    const { items, updateQuantity, removeItem } = useCart();
+    const itemInCart = items.find((item) => item.product.id === productId);
+
+    if (!itemInCart) return null;
+
+    const handleQuantityChange = (newQuantity: number) => {
+        if (newQuantity > 0) {
+            updateQuantity(productId, newQuantity);
+        } else {
+            removeItem(productId);
+        }
+    };
+
+    return (
+        <div className="flex items-center gap-1">
+            <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => handleQuantityChange(itemInCart.quantity - 1)}
+            >
+                {itemInCart.quantity === 1 ? <Trash2 className="h-4 w-4 text-destructive" /> : '-'}
+            </Button>
+            <Input
+                type="number"
+                value={itemInCart.quantity}
+                onChange={(e) => handleQuantityChange(parseInt(e.target.value))}
+                className="h-8 w-12 text-center"
+                min="1"
+                max={itemInCart.product.stock}
+            />
+            <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => handleQuantityChange(itemInCart.quantity + 1)}
+            >
+                +
+            </Button>
+        </div>
+    )
+}
+
 function PlantCard({ product }: { product: Product }) {
-  const cart = useCart();
+  const { addItem, items } = useCart();
   const { toast } = useToast();
+  const itemInCart = items.find((item) => item.product.id === product.id);
 
   const handleAddToCart = () => {
-    cart.addItem(product);
+    addItem(product);
     toast({
       title: 'Añadido al carrito',
       description: `${product.name} ha sido añadido a tu carrito.`,
@@ -53,10 +98,14 @@ function PlantCard({ product }: { product: Product }) {
         </CardContent>
         <CardFooter className="p-4 pt-0 flex justify-between items-center">
           <span className='font-bold text-lg text-primary'>{formatPrice(product.price)}</span>
-          <Button onClick={handleAddToCart} disabled={!product.available || product.stock === 0} size="sm">
-            <ShoppingCart className="mr-2 h-4 w-4" />
-            Añadir
-          </Button>
+          {itemInCart ? (
+            <QuantityControl productId={product.id} />
+          ) : (
+            <Button onClick={handleAddToCart} disabled={!product.available || product.stock === 0} size="sm">
+                <ShoppingCart className="mr-2 h-4 w-4" />
+                Añadir
+            </Button>
+          )}
         </CardFooter>
       </Card>
   );
