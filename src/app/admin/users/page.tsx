@@ -1,6 +1,6 @@
 'use client';
 
-import { createServerClient } from "@supabase/ssr";
+import { createClient } from "@/lib/supabase/client";
 import { redirect } from "next/navigation";
 import type { Profile } from "@/lib/definitions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,7 +9,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { format, parseISO } from 'date-fns';
 import { UserActions } from "@/components/admin/UserActions";
-import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -19,7 +18,6 @@ type UserWithProfile = Profile & {
     created_at: string;
 }
 
-// Define roles here to be accessible throughout the component
 const roleMap: { [key: number]: { name: string; className: string } } = {
     1: { name: 'Admin', className: 'bg-red-500 text-white' },
     2: { name: 'Empleado', className: 'bg-blue-500 text-white' },
@@ -30,17 +28,6 @@ function getInitials(name: string, lastName: string) {
     return `${name?.charAt(0) ?? ''}${lastName?.charAt(0) ?? ''}`.toUpperCase();
 }
 
-async function getUsers(): Promise<UserWithProfile[]> {
-    const supabase = createClient();
-    const { data, error } = await supabase.rpc('get_all_users_with_profiles');
-
-    if (error) {
-        console.error('Error fetching users:', error);
-        return [];
-    }
-    return data as UserWithProfile[];
-}
-
 export default function UsersPage() {
     const [users, setUsers] = useState<UserWithProfile[]>([]);
     const [filteredUsers, setFilteredUsers] = useState<UserWithProfile[]>([]);
@@ -48,19 +35,31 @@ export default function UsersPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const checkUser = async () => {
-            const supabase = createClient();
+        const supabase = createClient();
+
+        async function getUsers(): Promise<UserWithProfile[]> {
+            const { data, error } = await supabase.rpc('get_all_users_with_profiles');
+
+            if (error) {
+                console.error('Error fetching users:', error);
+                return [];
+            }
+            return data as UserWithProfile[];
+        }
+
+        const checkUserAndLoadData = async () => {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) {
                 redirect('/auth/login');
+                return;
             }
+
             const { data: profile } = await supabase.from('profiles').select('rol').eq('id', user.id).single();
             if (profile?.rol !== 1) {
                 redirect('/');
+                return;
             }
-        };
 
-        const loadUsers = async () => {
             setLoading(true);
             const userList = await getUsers();
             setUsers(userList);
@@ -68,8 +67,7 @@ export default function UsersPage() {
             setLoading(false);
         };
         
-        checkUser();
-        loadUsers();
+        checkUserAndLoadData();
     }, []);
 
     const handleRoleChange = (role: string) => {
