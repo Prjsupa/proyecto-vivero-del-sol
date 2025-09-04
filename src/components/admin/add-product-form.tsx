@@ -1,10 +1,10 @@
 'use client';
-import { useActionState, useEffect, useRef } from 'react';
+import { useActionState, useEffect, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input';
-import { Label } from "@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { AlertCircle, PlusCircle, Loader2 } from 'lucide-react';
@@ -35,7 +35,7 @@ function FieldError({ errors }: { errors?: string[] }) {
 
 export function AddProductForm() {
     const [state, formAction] = useActionState(addProduct, { message: '' });
-    const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
     const formRef = useRef<HTMLFormElement>(null);
     const { toast } = useToast();
 
