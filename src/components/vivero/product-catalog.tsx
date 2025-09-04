@@ -14,11 +14,11 @@ import useCart from '@/hooks/use-cart-store';
 import { useToast } from '@/hooks/use-toast';
 
 function ProductCard({ product }: { product: Product }) {
-  const addItemToCart = useCart((state) => state.addItem);
+  const cart = useCart();
   const { toast } = useToast();
 
    const handleAddToCart = () => {
-    addItemToCart(product);
+    cart.addItem(product);
     toast({
       title: 'Añadido al carrito',
       description: `${product.name} ha sido añadido a tu carrito.`,
