@@ -9,37 +9,23 @@ import { Badge } from "@/components/ui/badge";
 import { format, parseISO } from 'date-fns';
 import { UserActions } from "@/components/admin/UserActions";
 
-async function getUsers(): Promise<Profile[]> {
+type UserWithProfile = Profile & {
+    email?: string;
+    created_at: string;
+}
+
+async function getUsers(): Promise<UserWithProfile[]> {
     const supabase = createClient();
-    // We can't query the auth.users table directly for all users without service_role key.
-    // So we will query the profiles table instead, which should contain all users.
-    const { data, error } = await supabase
-        .from('profiles')
-        .select(`
-            id,
-            updated_at,
-            name,
-            last_name,
-            rol,
-            avatar_url,
-            users (
-                email,
-                created_at
-            )
-        `)
-        .order('created_at', { referencedTable: 'users', ascending: false });
+    // We call the RPC function to get all users with their profiles.
+    // This is more secure as the logic resides in the database and can be protected.
+    const { data, error } = await supabase.rpc('get_all_users_with_profiles');
 
     if (error) {
         console.error('Error fetching users:', error);
         return [];
     }
 
-    // Combine profile data with user data
-    return data.map((profile: any) => ({
-        ...profile,
-        email: profile.users.email,
-        created_at: profile.users.created_at,
-    }));
+    return data;
 }
 
 const roleMap: { [key: number]: { name: string; className: string } } = {
@@ -112,14 +98,14 @@ export default async function UsersPage() {
                                             <div className="font-medium">{userProfile.name} {userProfile.last_name}</div>
                                         </div>
                                     </TableCell>
-                                    <TableCell className="hidden sm:table-cell">{ (userProfile as any).email }</TableCell>
+                                    <TableCell className="hidden sm:table-cell">{ userProfile.email }</TableCell>
                                     <TableCell>
                                         <Badge className={roleMap[userProfile.rol]?.className || ''}>
                                             {roleMap[userProfile.rol]?.name || 'Desconocido'}
                                         </Badge>
                                     </TableCell>
                                     <TableCell className="hidden md:table-cell">
-                                        {format(parseISO((userProfile as any).created_at), 'dd MMM, yyyy')}
+                                        {format(parseISO(userProfile.created_at), 'dd MMM, yyyy')}
                                     </TableCell>
                                      <TableCell>
                                         <UserActions userProfile={userProfile} />
