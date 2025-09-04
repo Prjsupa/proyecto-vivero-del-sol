@@ -36,18 +36,8 @@ export default function UsersPage() {
 
     useEffect(() => {
         const supabase = createClient();
-
-        async function getUsers(): Promise<UserWithProfile[]> {
-            const { data, error } = await supabase.rpc('get_all_users_with_profiles');
-
-            if (error) {
-                console.error('Error fetching users:', error);
-                return [];
-            }
-            return data as UserWithProfile[];
-        }
-
-        const checkUserAndLoadData = async () => {
+        
+        async function checkUserAndLoadData() {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) {
                 redirect('/auth/login');
@@ -61,9 +51,17 @@ export default function UsersPage() {
             }
 
             setLoading(true);
-            const userList = await getUsers();
-            setUsers(userList);
-            setFilteredUsers(userList);
+            const { data, error } = await supabase.rpc('get_all_users_with_profiles');
+
+            if (error) {
+                console.error('Error fetching users:', error);
+                setUsers([]);
+                setFilteredUsers([]);
+            } else {
+                const userList = data as UserWithProfile[];
+                setUsers(userList);
+                setFilteredUsers(userList);
+            }
             setLoading(false);
         };
         
