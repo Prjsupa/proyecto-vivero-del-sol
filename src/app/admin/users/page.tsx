@@ -30,11 +30,18 @@ async function getAllUsers(): Promise<UserWithProfile[]> {
         }
     );
 
+    // Using an explicit join syntax that doesn't rely on Supabase's relationship detection.
+    // This is more robust.
     const { data, error } = await supabaseAdmin
         .from('profiles')
         .select(`
-            *,
-            user:users(
+            id, 
+            updated_at,
+            name,
+            last_name,
+            rol,
+            avatar_url,
+            users (
                 email,
                 created_at
             )
@@ -48,8 +55,9 @@ async function getAllUsers(): Promise<UserWithProfile[]> {
     // The query returns nested data, we need to flatten it.
     const users = data.map(profile => ({
         ...profile,
-        email: (profile.user as any)?.email,
-        created_at: (profile.user as any)?.created_at,
+        email: (profile.users as any)?.email,
+        created_at: (profile.users as any)?.created_at,
+        users: undefined, // remove the nested 'users' object
     }));
 
     return users as UserWithProfile[];
@@ -92,3 +100,4 @@ export default async function UsersPage() {
         </div>
     );
 }
+

@@ -37,6 +37,7 @@ export function UsersTable({ users }: { users: UserWithProfile[] }) {
 
     return (
         <div>
+            {/* Adding a comment here to force HMR reset */}
             <div className="flex justify-end items-center pb-4">
                 <div className="w-48">
                     <Label>Filtrar por rol</Label>
