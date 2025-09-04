@@ -1,8 +1,10 @@
 'use client';
 
-import { Sprout } from 'lucide-react';
+import { LogIn, Sprout } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -46,6 +48,12 @@ export function Header() {
               {link.label}
             </a>
           ))}
+           <Link href="/auth/login" passHref>
+            <Button variant="outline">
+              <LogIn className="mr-2 h-4 w-4" />
+              Login
+            </Button>
+          </Link>
         </nav>
       </div>
     </header>
