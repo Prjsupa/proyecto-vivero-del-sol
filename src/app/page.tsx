@@ -6,9 +6,30 @@ import { ImageGallery } from "@/components/vivero/image-gallery";
 import { ExpertChat } from "@/components/vivero/expert-chat";
 import { ContactForm } from "@/components/vivero/contact-form";
 import { Button } from "@/components/ui/button";
-import { plants } from "@/lib/placeholder-data";
+import { createClient } from "@/lib/supabase/server";
+import type { Product } from "@/lib/definitions";
 
-export default function Home() {
+async function getPlantProducts(): Promise<Product[]> {
+  const supabase = createClient();
+  const plantCategories = ['Planta de interior', 'Planta de exterior', 'Planta frutal', 'Planta ornamental', 'Suculenta'];
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .in('category', plantCategories)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching plant products:', error);
+    return [];
+  }
+
+  return data;
+}
+
+
+export default async function Home() {
+  const plants = await getPlantProducts();
+
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
@@ -44,7 +65,7 @@ export default function Home() {
         <section id="catalog" className="py-16 md:py-24 bg-muted/50">
           <div className="container px-4 md:px-6">
             <h2 className="text-3xl md:text-4xl font-headline text-center mb-12">Our Plant Catalog</h2>
-            <PlantCatalog plants={plants} />
+            <PlantCatalog products={plants} />
           </div>
         </section>
 
