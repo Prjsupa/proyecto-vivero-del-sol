@@ -1,6 +1,8 @@
 'use server';
 
 import { z } from 'zod';
+import { createClient } from './supabase/server';
+import { revalidatePath } from 'next/cache';
 
 const contactSchema = z.object({
   name: z.string().min(2, 'Name is required.'),
@@ -29,4 +31,69 @@ export async function handleContact(prevState: any, formData: FormData) {
     message: 'success',
     data: 'Thank you for your message! We will get back to you soon.',
   };
+}
+
+const productSchema = z.object({
+  name: z.string().min(3, "El nombre debe tener al menos 3 caracteres."),
+  category: z.enum(['Planta de interior', 'Planta de exterior', 'Planta frutal', 'Planta ornamental', 'Suculenta', 'Herramienta', 'Fertilizante', 'Maceta']),
+  price: z.coerce.number().min(0, "El precio no puede ser negativo."),
+  size: z.string().optional(),
+  stock: z.coerce.number().int().min(0, "El stock no puede ser negativo."),
+  available: z.coerce.boolean(),
+  image: z.instanceof(File).refine(file => file.size > 0, "La imagen es requerida.").refine(file => file.size < 4 * 1024 * 1024, "La imagen debe ser menor a 4MB."),
+});
+
+export async function addProduct(prevState: any, formData: FormData) {
+    const validatedFields = productSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return {
+            message: "Datos de formulario inválidos.",
+            errors: validatedFields.error.flatten().fieldErrors,
+        };
+    }
+    
+    const supabase = createClient();
+    const { name, category, price, size, stock, available, image } = validatedFields.data;
+
+    const imageFileName = `${crypto.randomUUID()}-${image.name}`;
+
+    const { error: uploadError } = await supabase.storage
+        .from('products')
+        .upload(imageFileName, image);
+    
+    if (uploadError) {
+        return {
+            message: `Error al subir la imagen: ${uploadError.message}`,
+        };
+    }
+
+    const { data: publicUrlData } = supabase.storage
+        .from('products')
+        .getPublicUrl(imageFileName);
+
+    const { error: insertError } = await supabase.from('plants').insert({
+        name,
+        category,
+        price,
+        size,
+        stock,
+        available,
+        img_url: publicUrlData.publicUrl,
+    });
+
+    if (insertError) {
+        // If insert fails, try to remove the uploaded image
+        await supabase.storage.from('products').remove([imageFileName]);
+        return {
+            message: `Error al crear el producto: ${insertError.message}`,
+        };
+    }
+
+    revalidatePath('/admin/products');
+
+    return {
+        message: 'success',
+        data: '¡Producto añadido exitosamente!',
+    };
 }

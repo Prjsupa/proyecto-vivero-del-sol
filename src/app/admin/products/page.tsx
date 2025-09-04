@@ -1,9 +1,8 @@
+import { AddProductForm } from "@/components/admin/add-product-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { MoreHorizontal, PlusCircle } from "lucide-react";
-import Image from "next/image";
+import { MoreHorizontal } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 
@@ -15,10 +14,7 @@ export default function ProductsPage() {
                     <h1 className="text-3xl font-bold font-headline">Gestión de Productos</h1>
                     <p className="text-muted-foreground">Añade, edita y gestiona todos los productos de tu vivero.</p>
                 </div>
-                <Button>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Añadir Producto
-                </Button>
+                <AddProductForm />
             </div>
             <Card>
                 <CardHeader>
