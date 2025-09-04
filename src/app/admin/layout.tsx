@@ -1,3 +1,4 @@
+import { Header } from "@/components/vivero/header";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider } from "@/components/ui/sidebar";
 import { Briefcase, DollarSign, Users, Settings, BarChart, Wrench, Sprout, ShoppingBag } from "lucide-react";
 import Link from 'next/link';
@@ -82,9 +83,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </SidebarMenu>
             </SidebarContent>
         </Sidebar>
-        <SidebarInset>
-            {children}
-        </SidebarInset>
+        <div className="flex flex-col w-full">
+            <Header />
+            <SidebarInset>
+                {children}
+            </SidebarInset>
+        </div>
     </SidebarProvider>
   );
 }
