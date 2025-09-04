@@ -1,16 +1,16 @@
 
+
 import { AddProductForm } from "@/components/admin/add-product-form";
-import { EditProductForm } from "@/components/admin/edit-product-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { MoreHorizontal, Database } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Database } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import type { Product } from "@/lib/definitions";
 import Image from 'next/image';
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { ProductActions } from "@/components/admin/product-actions";
 
 async function getProducts(): Promise<Product[]> {
     const supabase = createClient();
@@ -85,21 +85,7 @@ export default async function ProductsPage() {
                                         </TableCell>
                                         <TableCell className="hidden md:table-cell">{product.stock}</TableCell>
                                         <TableCell>
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button aria-haspopup="true" size="icon" variant="ghost">
-                                                        <MoreHorizontal className="h-4 w-4" />
-                                                        <span className="sr-only">Toggle menu</span>
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                                                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                                        <EditProductForm product={product} />
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem>Eliminar</DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
+                                            <ProductActions product={product} />
                                         </TableCell>
                                     </TableRow>
                                 ))
