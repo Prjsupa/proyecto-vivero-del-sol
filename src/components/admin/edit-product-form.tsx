@@ -13,6 +13,7 @@ import { updateProduct } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import type { Product } from '@/lib/definitions';
+import { Textarea } from '../ui/textarea';
 
 const productCategories = ['Planta de interior', 'Planta de exterior', 'Planta frutal', 'Planta ornamental', 'Suculenta', 'Herramienta', 'Fertilizante', 'Maceta'] as const;
 
@@ -100,6 +101,10 @@ export function EditProductForm({ product }: { product: Product }) {
                         <Label htmlFor="name">Nombre del Producto</Label>
                         <Input id="name" name="name" defaultValue={product.name} />
                         <FieldError errors={state.errors?.name} />
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="description">Descripción (Opcional)</Label>
+                        <Textarea id="description" name="description" defaultValue={product.description || ''} />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="category">Categoría</Label>

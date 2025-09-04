@@ -11,6 +11,7 @@ import { AlertCircle, PlusCircle, Loader2 } from 'lucide-react';
 import { addProduct } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
+import { Textarea } from '../ui/textarea';
 
 
 const productCategories = ['Planta de interior', 'Planta de exterior', 'Planta frutal', 'Planta ornamental', 'Suculenta', 'Herramienta', 'Fertilizante', 'Maceta'] as const;
@@ -101,6 +102,10 @@ export function AddProductForm() {
                         <Label htmlFor="name">Nombre del Producto</Label>
                         <Input id="name" name="name" />
                         <FieldError errors={state.errors?.name} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="description">Descripción (Opcional)</Label>
+                        <Textarea id="description" name="description" />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="category">Categoría</Label>

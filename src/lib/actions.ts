@@ -40,6 +40,7 @@ const productSchema = z.object({
   stock: z.coerce.number().int().min(0, "El stock no puede ser negativo."),
   available: z.coerce.boolean(),
   image: z.instanceof(File).refine(file => file.size > 0, "La imagen es requerida.").refine(file => file.size < 4 * 1024 * 1024, "La imagen debe ser menor a 4MB."),
+  description: z.string().optional(),
 });
 
 export async function addProduct(prevState: any, formData: FormData) {
@@ -53,7 +54,7 @@ export async function addProduct(prevState: any, formData: FormData) {
     }
     
     const supabase = createClient();
-    const { name, category, price, stock, available, image } = validatedFields.data;
+    const { name, category, price, stock, available, image, description } = validatedFields.data;
 
     const imageFileName = `${crypto.randomUUID()}-${image.name}`;
 
@@ -78,6 +79,7 @@ export async function addProduct(prevState: any, formData: FormData) {
         stock,
         available,
         img_url: publicUrlData.publicUrl,
+        description,
     });
 
     if (insertError) {
@@ -115,7 +117,7 @@ export async function updateProduct(prevState: any, formData: FormData) {
     }
 
     const supabase = createClient();
-    const { id, name, category, price, stock, available, image, current_img_url } = validatedFields.data;
+    const { id, name, category, price, stock, available, image, current_img_url, description } = validatedFields.data;
 
     let imageUrl = current_img_url;
 
@@ -140,7 +142,7 @@ export async function updateProduct(prevState: any, formData: FormData) {
 
     const { error: updateError } = await supabase
         .from('products')
-        .update({ name, category, price, stock, available, img_url: imageUrl })
+        .update({ name, category, price, stock, available, img_url: imageUrl, description })
         .eq('id', id);
 
     if (updateError) {
@@ -182,28 +184,30 @@ export async function updateProfile(prevState: any, formData: FormData) {
     let avatarUrl: string | undefined;
 
     if (avatar && avatar.size > 0) {
-        const { data: currentProfile } = await supabase.from('profiles').select('avatar_url').eq('id', user.id).single();
+         const { data: currentProfile } = await supabase.from('profiles').select('avatar_url').eq('id', user.id).single();
 
         // Delete old avatar if it exists
         if (currentProfile?.avatar_url) {
             const oldAvatarName = currentProfile.avatar_url.split('/').pop();
             if (oldAvatarName) {
-                await supabase.storage.from('avatars').remove([oldAvatarName]);
+                // We construct the path based on how we are saving it.
+                 const oldAvatarPath = `${user.id}/${oldAvatarName.split('/').pop()}`;
+                 await supabase.storage.from('avatars').remove([oldAvatarPath]);
             }
         }
         
-        const avatarFileName = `${user.id}/${crypto.randomUUID()}`;
+        const avatarFileName = `${crypto.randomUUID()}`;
+        // Prepend the user's ID to the file path
+        const filePath = `${user.id}/${avatarFileName}`;
+
         const { error: uploadError } = await supabase.storage
             .from('avatars')
-            .upload(avatarFileName, avatar, { 
-                upsert: true,
-                // cacheControl is not needed, owner is the key
-            });
+            .upload(filePath, avatar);
 
         if (uploadError) {
             return { message: `Error uploading avatar: ${uploadError.message}` };
         }
-        avatarUrl = supabase.storage.from('avatars').getPublicUrl(avatarFileName).data.publicUrl;
+        avatarUrl = supabase.storage.from('avatars').getPublicUrl(filePath).data.publicUrl;
     }
 
     const { error: updateError } = await supabase.from('profiles')

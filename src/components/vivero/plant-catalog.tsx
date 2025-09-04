@@ -34,7 +34,8 @@ function PlantCard({ product }: { product: Product }) {
         </CardHeader>
         <CardContent className="p-4 flex-grow">
           <h3 className="font-headline text-xl mb-1">{product.name}</h3>
-          <p className="font-body text-sm text-muted-foreground italic">{product.category}</p>
+          <p className="font-body text-sm text-muted-foreground italic mb-2">{product.category}</p>
+          {product.description && <p className="font-body text-sm text-foreground/80">{product.description}</p>}
         </CardContent>
         <CardFooter className="p-4 pt-0 flex justify-between items-center">
           <span className='font-bold text-lg text-primary'>${product.price.toFixed(2)}</span>

@@ -18,6 +18,7 @@ export type Product = {
   id: string;
   created_at: string;
   name: string;
+  description?: string | null;
   img_url: string;
   category: 'Planta de interior' | 'Planta de exterior' | 'Planta frutal' | 'Planta ornamental' | 'Suculenta' | 'Herramienta' | 'Fertilizante' | 'Maceta';
   price: number;
