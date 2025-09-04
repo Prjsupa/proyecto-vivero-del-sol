@@ -7,7 +7,8 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
-import type { User, Profile } from '@/lib/definitions';
+import type { User } from '@supabase/supabase-js';
+import type { Profile } from '@/lib/definitions';
 import {
   DropdownMenu,
   DropdownMenuContent,
