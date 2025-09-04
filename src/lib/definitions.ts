@@ -16,4 +16,11 @@ export type Profile = {
   name: string;
   last_name: string;
   rol: number;
+  avatar_url?: string;
+};
+
+export type User = {
+  id: string;
+  email?: string;
+  // Add any other user properties you need
 };
