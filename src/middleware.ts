@@ -3,7 +3,7 @@ import { updateSession } from '@/lib/supabase/middleware';
 
 export async function middleware(request: NextRequest) {
   // updateSession handles setting/refreshing the session cookie
-  // and returns an updated response
+  // and returns an updated response.
   return await updateSession(request);
 }
 

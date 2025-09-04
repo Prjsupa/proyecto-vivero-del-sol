@@ -56,5 +56,5 @@ export async function updateSession(request: NextRequest) {
 
   await supabase.auth.getSession()
 
-  return {response, supabase};
+  return response;
 }
