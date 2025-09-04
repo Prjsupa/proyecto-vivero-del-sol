@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -6,13 +7,26 @@ import type { Product } from '@/lib/definitions';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Search, ShoppingCart } from 'lucide-react';
+import { cn, formatPrice } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import useCart from '@/hooks/use-cart-store';
+import { useToast } from '../ui/use-toast';
 
 function ProductCard({ product }: { product: Product }) {
+  const addItemToCart = useCart((state) => state.addItem);
+  const { toast } = useToast();
+
+   const handleAddToCart = () => {
+    addItemToCart(product);
+    toast({
+      title: 'Añadido al carrito',
+      description: `${product.name} ha sido añadido a tu carrito.`,
+    });
+  };
+
   return (
-      <Card className="flex flex-col h-full overflow-hidden transition-all hover:shadow-xl duration-300">
+      <Card className="flex flex-col h-full overflow-hidden transition-all hover:shadow-xl duration-300 group">
         <CardHeader className="p-0">
           <div className="relative h-48 w-full">
             <Image
@@ -35,11 +49,14 @@ function ProductCard({ product }: { product: Product }) {
         <CardContent className="p-4 flex-grow">
           <h3 className="font-headline text-xl mb-1">{product.name}</h3>
           <p className="font-body text-sm text-muted-foreground italic mb-2">{product.category}</p>
-          {product.description && <p className="font-body text-sm text-foreground/80">{product.description}</p>}
+          {product.description && <p className="font-body text-sm text-foreground/80 line-clamp-3">{product.description}</p>}
         </CardContent>
         <CardFooter className="p-4 pt-0 flex justify-between items-center">
-          <span className='font-bold text-lg text-primary'>${product.price.toFixed(2)}</span>
-          <span className="text-sm text-muted-foreground">Stock: {product.stock}</span>
+          <span className='font-bold text-lg text-primary'>{formatPrice(product.price)}</span>
+           <Button onClick={handleAddToCart} disabled={!product.available || product.stock === 0} size="sm">
+            <ShoppingCart className="mr-2 h-4 w-4" />
+            Añadir
+          </Button>
         </CardFooter>
       </Card>
   );

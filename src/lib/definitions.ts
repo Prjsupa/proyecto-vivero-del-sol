@@ -1,4 +1,5 @@
 
+
 export type Profile = {
   id: string;
   updated_at: string;
@@ -24,4 +25,21 @@ export type Product = {
   price: number;
   stock: number;
   available: boolean;
-}
+};
+
+export type Order = {
+  id: string;
+  created_at: string;
+  user_id: string;
+  total_amount: number;
+  status: 'pending' | 'completed' | 'cancelled';
+  order_details: Json;
+};
+
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]

@@ -1,8 +1,10 @@
+
 'use server';
 
 import { z } from 'zod';
 import { createClient } from './supabase/server';
 import { revalidatePath } from 'next/cache';
+import type { CartItem } from '@/hooks/use-cart-store';
 
 const contactSchema = z.object({
   name: z.string().min(2, 'Name is required.'),
@@ -184,20 +186,9 @@ export async function updateProfile(prevState: any, formData: FormData) {
     let avatarUrl: string | undefined;
 
     if (avatar && avatar.size > 0) {
-         const { data: currentProfile } = await supabase.from('profiles').select('avatar_url').eq('id', user.id).single();
+        const { data: currentProfile } = await supabase.from('profiles').select('avatar_url').eq('id', user.id).single();
 
-        // Delete old avatar if it exists
-        if (currentProfile?.avatar_url) {
-            const oldAvatarName = currentProfile.avatar_url.split('/').pop();
-            if (oldAvatarName) {
-                // We construct the path based on how we are saving it.
-                 const oldAvatarPath = `${user.id}/${oldAvatarName.split('/').pop()}`;
-                 await supabase.storage.from('avatars').remove([oldAvatarPath]);
-            }
-        }
-        
         const avatarFileName = `${crypto.randomUUID()}`;
-        // Prepend the user's ID to the file path
         const filePath = `${user.id}/${avatarFileName}`;
 
         const { error: uploadError } = await supabase.storage
@@ -207,11 +198,23 @@ export async function updateProfile(prevState: any, formData: FormData) {
         if (uploadError) {
             return { message: `Error uploading avatar: ${uploadError.message}` };
         }
+        
+        if (currentProfile?.avatar_url) {
+            const oldAvatarPath = currentProfile.avatar_url.substring(currentProfile.avatar_url.lastIndexOf(user.id));
+            if (oldAvatarPath) {
+                 await supabase.storage.from('avatars').remove([oldAvatarPath]);
+            }
+        }
+        
         avatarUrl = supabase.storage.from('avatars').getPublicUrl(filePath).data.publicUrl;
     }
 
     const { error: updateError } = await supabase.from('profiles')
-        .update({ name, last_name, avatar_url: avatarUrl })
+        .update({ 
+            name, 
+            last_name, 
+            ...(avatarUrl && { avatar_url: avatarUrl })
+        })
         .eq('id', user.id);
     
     if (updateError) {
@@ -226,4 +229,59 @@ export async function updateProfile(prevState: any, formData: FormData) {
         message: 'success',
         data: 'Profile updated successfully!',
     };
+}
+
+
+export async function handleCheckout(cartItems: CartItem[]) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { success: false, message: 'Debes iniciar sesión para comprar.' };
+  }
+
+  if (cartItems.length === 0) {
+    return { success: false, message: 'Tu carrito está vacío.' };
+  }
+  
+  // Calculate total amount
+  const total_amount = cartItems.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
+
+  // Prepare order details
+  const order_details = cartItems.map(item => ({
+    product_id: item.product.id,
+    quantity: item.quantity,
+    price_at_purchase: item.product.price
+  }));
+
+  // Create the order
+  const { data: order, error: orderError } = await supabase.from('orders').insert({
+    user_id: user.id,
+    total_amount: total_amount,
+    status: 'completed',
+    order_details: order_details
+  }).select().single();
+  
+  if (orderError) {
+    console.error("Order creation error:", orderError);
+    return { success: false, message: `No se pudo crear el pedido: ${orderError.message}` };
+  }
+  
+  // Update stock for each product
+  for (const item of cartItems) {
+    const { error: stockError } = await supabase.rpc('update_product_stock', {
+        p_id: item.product.id,
+        quantity_sold: item.quantity
+    });
+
+    if (stockError) {
+         console.error("Stock update error:", stockError);
+         // Here you might want to implement a rollback mechanism for the order
+         return { success: false, message: `Error al actualizar el stock para ${item.product.name}.` };
+    }
+  }
+
+  revalidatePath('/');
+
+  return { success: true, message: 'Pedido realizado con éxito.' };
 }
