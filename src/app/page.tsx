@@ -1,7 +1,6 @@
 import Image from "next/image";
 import { Header } from "@/components/vivero/header";
 import { Footer } from "@/components/vivero/footer";
-import { PlantRecommender } from "@/components/vivero/plant-recommender";
 import { PlantCatalog } from "@/components/vivero/plant-catalog";
 import { ImageGallery } from "@/components/vivero/image-gallery";
 import { ExpertChat } from "@/components/vivero/expert-chat";
@@ -42,12 +41,6 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="recommender" className="py-16 md:py-24 bg-background">
-          <div className="container px-4 md:px-6">
-            <PlantRecommender />
-          </div>
-        </section>
-        
         <section id="catalog" className="py-16 md:py-24 bg-muted/50">
           <div className="container px-4 md:px-6">
             <h2 className="text-3xl md:text-4xl font-headline text-center mb-12">Our Plant Catalog</h2>

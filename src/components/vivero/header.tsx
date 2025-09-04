@@ -18,7 +18,6 @@ export function Header() {
   }, []);
 
   const navLinks = [
-    { href: '#recommender', label: 'AI Helper' },
     { href: '#catalog', label: 'Catalog' },
     { href: '#gallery', label: 'Gallery' },
     { href: '#contact', label: 'Contact' },
