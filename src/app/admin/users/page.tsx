@@ -16,8 +16,6 @@ type UserWithProfile = Profile & {
 async function getAllUsers(): Promise<UserWithProfile[]> {
     const cookieStore = cookies();
     
-    // We need to use the service_role key to bypass RLS and get all users.
-    // This is safe because this code only runs on the server.
     const supabaseAdmin = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -30,37 +28,42 @@ async function getAllUsers(): Promise<UserWithProfile[]> {
         }
     );
 
-    // Using an explicit join syntax that doesn't rely on Supabase's relationship detection.
-    // This is more robust.
-    const { data, error } = await supabaseAdmin
-        .from('profiles')
-        .select(`
-            id, 
-            updated_at,
-            name,
-            last_name,
-            rol,
-            avatar_url,
-            users (
-                email,
-                created_at
-            )
-        `);
+    const { data: usersData, error: usersError } = await supabaseAdmin.auth.admin.listUsers();
 
-    if (error) {
-        console.error('Error fetching users with service role:', error);
+    if (usersError) {
+        console.error('Error fetching users:', usersError);
         return [];
     }
-    
-    // The query returns nested data, we need to flatten it.
-    const users = data.map(profile => ({
-        ...profile,
-        email: (profile.users as any)?.email,
-        created_at: (profile.users as any)?.created_at,
-        users: undefined, // remove the nested 'users' object
-    }));
 
-    return users as UserWithProfile[];
+    const userIds = usersData.users.map(u => u.id);
+
+    const { data: profilesData, error: profilesError } = await supabaseAdmin
+        .from('profiles')
+        .select('*')
+        .in('id', userIds);
+    
+    if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
+        return [];
+    }
+
+    const profilesMap = new Map(profilesData.map(p => [p.id, p]));
+
+    const allUsers = usersData.users.map(user => {
+        const profile = profilesMap.get(user.id);
+        return {
+            id: user.id,
+            name: profile?.name || 'N/A',
+            last_name: profile?.last_name || 'N/A',
+            rol: profile?.rol || 3,
+            avatar_url: profile?.avatar_url,
+            updated_at: profile?.updated_at || new Date().toISOString(),
+            email: user.email,
+            created_at: user.created_at,
+        };
+    });
+
+    return allUsers as UserWithProfile[];
 }
 
 
@@ -100,4 +103,3 @@ export default async function UsersPage() {
         </div>
     );
 }
-

@@ -10,7 +10,6 @@ import { UserActions } from "@/components/admin/UserActions";
 import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { CardDescription, CardTitle } from "../ui/card";
 
 type UserWithProfile = Profile & {
     email?: string;
@@ -37,7 +36,6 @@ export function UsersTable({ users }: { users: UserWithProfile[] }) {
 
     return (
         <div>
-            {/* Adding a comment here to force HMR reset */}
             <div className="flex justify-end items-center pb-4">
                 <div className="w-48">
                     <Label>Filtrar por rol</Label>
@@ -105,4 +103,3 @@ export function UsersTable({ users }: { users: UserWithProfile[] }) {
         </div>
     );
 }
-
