@@ -1,7 +1,7 @@
 
 'use client';
 
-import { LogIn, Sprout, User as UserIcon, LogOut, LayoutDashboard, UserPlus } from 'lucide-react';
+import { Sprout, LogIn, User as UserIcon, LogOut, LayoutDashboard, UserPlus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
