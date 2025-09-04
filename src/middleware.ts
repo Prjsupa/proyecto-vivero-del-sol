@@ -1,8 +1,35 @@
-import { type NextRequest } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
+import { createClient } from '@/lib/supabase/server';
 
 export async function middleware(request: NextRequest) {
-  return await updateSession(request);
+  const { response, supabase } = await updateSession(request);
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  const { pathname } = request.nextUrl;
+
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('rol')
+      .eq('id', user.id)
+      .single();
+
+    if (pathname.startsWith('/admin') && profile?.rol !== 1) {
+      return NextResponse.redirect(new URL('/', request.url));
+    }
+    
+    if (pathname.startsWith('/auth')) {
+        return NextResponse.redirect(new URL('/', request.url));
+    }
+  } else {
+    if (pathname.startsWith('/admin')) {
+        return NextResponse.redirect(new URL('/auth/login', request.url));
+    }
+  }
+
+
+  return response;
 }
 
 export const config = {

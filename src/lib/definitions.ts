@@ -9,3 +9,11 @@ export type Plant = {
   size: 'small' | 'medium' | 'large';
   careInstructions: string;
 };
+
+export type Profile = {
+  id: string;
+  updated_at: string;
+  name: string;
+  last_name: string;
+  rol: number;
+};
