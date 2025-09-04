@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Database, DollarSign, ShoppingCart, CreditCard, PackageWarning } from "lucide-react";
+import { Database, DollarSign, ShoppingCart, AlertTriangle } from "lucide-react";
 import Link from "next/link";
 
 const StatCard = ({ title, value, count, icon: Icon, color }: { title: string, value: string, count: number, icon: React.ElementType, color: string }) => (
@@ -97,7 +97,7 @@ export default function AdminDashboard() {
              <TableRow>
                 <TableCell colSpan={5} className="h-48 text-center">
                      <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
-                        <PackageWarning className="h-12 w-12" />
+                        <AlertTriangle className="h-12 w-12" />
                         <p>Sin Datos</p>
                     </div>
                 </TableCell>
