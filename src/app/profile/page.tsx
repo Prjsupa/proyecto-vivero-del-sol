@@ -23,7 +23,8 @@ export default async function ProfilePage() {
   if (error || !profile) {
     // This could happen if a user is created in auth but the profile row fails
     // Or if the user is deleted from profiles but not auth
-    // We redirect to login to be safe.
+    // We can sign the user out to be safe, then redirect.
+    await supabase.auth.signOut();
     redirect('/auth/login');
   }
 

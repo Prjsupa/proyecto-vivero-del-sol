@@ -1,10 +1,19 @@
 import Image from 'next/image';
+import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
 
-export default function AuthLayout({
+export default async function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (user) {
+    redirect('/');
+  }
+
   return (
     <div className="flex min-h-screen w-full">
       <div className="hidden lg:flex lg:w-1/2 xl:w-2/3 items-center justify-center relative bg-primary/10">

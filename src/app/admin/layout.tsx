@@ -2,8 +2,27 @@ import { Header } from "@/components/vivero/header";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider } from "@/components/ui/sidebar";
 import { Briefcase, DollarSign, Users, Settings, BarChart, Wrench, Sprout, ShoppingBag } from "lucide-react";
 import Link from 'next/link';
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect('/auth/login');
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('rol')
+    .eq('id', user.id)
+    .single();
+
+  if (profile?.rol !== 1) {
+    redirect('/');
+  }
+
   return (
     <SidebarProvider>
         <Sidebar>

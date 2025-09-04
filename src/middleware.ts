@@ -1,41 +1,10 @@
-import { type NextRequest, NextResponse } from 'next/server';
+import { type NextRequest } from 'next/server';
 import { updateSession } from '@/lib/supabase/middleware';
 
 export async function middleware(request: NextRequest) {
-  const { response, supabase } = await updateSession(request);
-  const { data: { user } } = await supabase.auth.getUser();
-  const { pathname } = request.nextUrl;
-
-  const authRoutes = ['/auth/login', '/auth/signup'];
-  const protectedRoutes = ['/admin', '/profile'];
-
-  // If user is logged in
-  if (user) {
-    // and tries to access an auth page, redirect to home
-    if (authRoutes.some(route => pathname.startsWith(route))) {
-      return NextResponse.redirect(new URL('/', request.url));
-    }
-
-    // and tries to access admin but is not admin, redirect to home
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('rol')
-      .eq('id', user.id)
-      .single();
-    
-    if (pathname.startsWith('/admin') && profile?.rol !== 1) {
-      return NextResponse.redirect(new URL('/', request.url));
-    }
-  } 
-  // If user is not logged in
-  else {
-    // and tries to access a protected route, redirect to login
-    if (protectedRoutes.some(route => pathname.startsWith(route))) {
-      return NextResponse.redirect(new URL('/auth/login', request.url));
-    }
-  }
-
-  return response;
+  // updateSession handles setting/refreshing the session cookie
+  // and returns an updated response
+  return await updateSession(request);
 }
 
 export const config = {
