@@ -11,7 +11,7 @@ import { Search, ShoppingCart } from 'lucide-react';
 import { cn, formatPrice } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import useCart from '@/hooks/use-cart-store';
-import { useToast } from '../ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 function PlantCard({ product }: { product: Product }) {
   const addItemToCart = useCart((state) => state.addItem);

@@ -9,7 +9,7 @@ import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger
 import useCart from '@/hooks/use-cart-store';
 import { ShoppingCart, Trash2, X } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
-import { useToast } from '../ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { handleCheckout } from '@/lib/actions';
 import { useActionState, useState } from 'react';
 import { useRouter } from 'next/navigation';
