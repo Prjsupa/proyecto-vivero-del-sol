@@ -89,6 +89,7 @@ export async function addProduct(prevState: any, formData: FormData) {
     }
 
     revalidatePath('/admin/products');
+    revalidatePath('/');
 
     return {
         message: 'success',
@@ -147,9 +148,71 @@ export async function updateProduct(prevState: any, formData: FormData) {
     }
 
     revalidatePath('/admin/products');
+    revalidatePath('/');
 
     return {
         message: 'success',
         data: '¡Producto actualizado exitosamente!',
+    };
+}
+
+const profileSchema = z.object({
+  name: z.string().min(1, 'Name is required.'),
+  last_name: z.string().min(1, 'Last name is required.'),
+  avatar: z.instanceof(File).optional().refine(file => !file || file.size < 4 * 1024 * 1024, "La imagen debe ser menor a 4MB."),
+});
+
+export async function updateProfile(prevState: any, formData: FormData) {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        return { message: 'You must be logged in to update your profile.' };
+    }
+
+    const validatedFields = profileSchema.safeParse(Object.fromEntries(formData.entries()));
+     if (!validatedFields.success) {
+        return {
+            message: "Invalid form data.",
+            errors: validatedFields.error.flatten().fieldErrors,
+        };
+    }
+
+    const { name, last_name, avatar } = validatedFields.data;
+    let avatarUrl: string | undefined;
+
+    if (avatar && avatar.size > 0) {
+        const { data: currentProfile } = await supabase.from('profiles').select('avatar_url').single();
+
+        // Delete old avatar if it exists
+        if (currentProfile?.avatar_url) {
+            const oldAvatarName = currentProfile.avatar_url.split('/').pop();
+            if (oldAvatarName) {
+                await supabase.storage.from('avatars').remove([oldAvatarName]);
+            }
+        }
+        
+        const avatarFileName = `${user.id}-${avatar.name}`;
+        const { error: uploadError } = await supabase.storage.from('avatars').upload(avatarFileName, avatar, { upsert: true });
+
+        if (uploadError) {
+            return { message: `Error uploading avatar: ${uploadError.message}` };
+        }
+        avatarUrl = supabase.storage.from('avatars').getPublicUrl(avatarFileName).data.publicUrl;
+    }
+
+    const { error: updateError } = await supabase.from('profiles')
+        .update({ name, last_name, avatar_url: avatarUrl })
+        .eq('id', user.id);
+    
+    if (updateError) {
+        return { message: `Error updating profile: ${updateError.message}` };
+    }
+
+    revalidatePath('/profile');
+
+    return {
+        message: 'success',
+        data: 'Profile updated successfully!',
     };
 }
