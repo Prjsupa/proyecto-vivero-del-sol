@@ -1,5 +1,5 @@
 
-import { createClient } from "@/lib/supabase/server";
+import { createServerClient } from "@supabase/ssr";
 import { redirect } from "next/navigation";
 import type { Profile } from "@/lib/definitions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,24 +8,52 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { format, parseISO } from 'date-fns';
 import { UserActions } from "@/components/admin/UserActions";
+import { createClient } from "@/lib/supabase/server";
 
 type UserWithProfile = Profile & {
     email?: string;
     created_at: string;
 }
 
+// Esta función ahora usa la clave de servicio para obtener todos los usuarios de forma segura.
 async function getUsers(): Promise<UserWithProfile[]> {
-    const supabase = createClient();
-    // We call the RPC function to get all users with their profiles.
-    // This is more secure as the logic resides in the database and can be protected.
-    const { data, error } = await supabase.rpc('get_all_users_with_profiles');
+    // Es seguro usar process.env aquí porque este es un Server Component.
+    const supabaseAdmin = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { cookies: { get: () => undefined } } // No necesitamos cookies para el cliente de admin
+    );
 
-    if (error) {
-        console.error('Error fetching users:', error);
+    const { data: { users }, error: usersError } = await supabaseAdmin.auth.admin.listUsers();
+    
+    if (usersError) {
+        console.error('Error fetching users from auth:', usersError);
         return [];
     }
 
-    return data;
+    const { data: profiles, error: profilesError } = await supabaseAdmin
+        .from('profiles')
+        .select('*');
+
+    if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
+        return [];
+    }
+
+    const combined = users.map(user => {
+        const profile = profiles.find(p => p.id === user.id);
+        return {
+            ...profile,
+            id: user.id,
+            email: user.email,
+            created_at: user.created_at,
+            name: profile?.name || 'No',
+            last_name: profile?.last_name || 'Profile',
+            rol: profile?.rol || 3, // Default to client if no profile
+        };
+    });
+
+    return combined as UserWithProfile[];
 }
 
 const roleMap: { [key: number]: { name: string; className: string } } = {
