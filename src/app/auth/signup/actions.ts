@@ -4,6 +4,8 @@ import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
 
 const signupSchema = z.object({
+  name: z.string().min(1, 'Name is required.'),
+  last_name: z.string().min(1, 'Last name is required.'),
   email: z.string().email(),
   password: z.string().min(6, 'Password must be at least 6 characters.'),
 });
@@ -21,11 +23,17 @@ export async function signup(prevState: { message: string, success?: boolean } |
     };
   }
   
-  const { email, password } = validatedFields.data;
+  const { name, last_name, email, password } = validatedFields.data;
   
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
+    options: {
+      data: {
+        name,
+        last_name,
+      }
+    }
   });
 
   if (error) {

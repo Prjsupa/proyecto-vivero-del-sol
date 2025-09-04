@@ -31,6 +31,16 @@ export default function SignupPage() {
       </CardHeader>
       <CardContent>
         <form action={formAction} className="space-y-4">
+           <div className="grid grid-cols-2 gap-4">
+             <div className="space-y-2">
+                <Label htmlFor="name">Name</Label>
+                <Input id="name" name="name" placeholder="John" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="last_name">Last Name</Label>
+                <Input id="last_name" name="last_name" placeholder="Doe" required />
+              </div>
+           </div>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
