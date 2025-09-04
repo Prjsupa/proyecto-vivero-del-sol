@@ -182,7 +182,7 @@ export async function updateProfile(prevState: any, formData: FormData) {
     let avatarUrl: string | undefined;
 
     if (avatar && avatar.size > 0) {
-        const { data: currentProfile } = await supabase.from('profiles').select('avatar_url').single();
+        const { data: currentProfile } = await supabase.from('profiles').select('avatar_url').eq('id', user.id).single();
 
         // Delete old avatar if it exists
         if (currentProfile?.avatar_url) {
@@ -192,8 +192,13 @@ export async function updateProfile(prevState: any, formData: FormData) {
             }
         }
         
-        const avatarFileName = `${user.id}-${avatar.name}`;
-        const { error: uploadError } = await supabase.storage.from('avatars').upload(avatarFileName, avatar, { upsert: true });
+        const avatarFileName = `${user.id}/${crypto.randomUUID()}`;
+        const { error: uploadError } = await supabase.storage
+            .from('avatars')
+            .upload(avatarFileName, avatar, { 
+                upsert: true,
+                // cacheControl is not needed, owner is the key
+            });
 
         if (uploadError) {
             return { message: `Error uploading avatar: ${uploadError.message}` };
@@ -210,6 +215,8 @@ export async function updateProfile(prevState: any, formData: FormData) {
     }
 
     revalidatePath('/profile');
+    revalidatePath('/admin');
+    revalidatePath('/');
 
     return {
         message: 'success',
