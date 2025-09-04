@@ -37,7 +37,6 @@ const productSchema = z.object({
   name: z.string().min(3, "El nombre debe tener al menos 3 caracteres."),
   category: z.enum(['Planta de interior', 'Planta de exterior', 'Planta frutal', 'Planta ornamental', 'Suculenta', 'Herramienta', 'Fertilizante', 'Maceta']),
   price: z.coerce.number().min(0, "El precio no puede ser negativo."),
-  size: z.string().optional(),
   stock: z.coerce.number().int().min(0, "El stock no puede ser negativo."),
   available: z.coerce.boolean(),
   image: z.instanceof(File).refine(file => file.size > 0, "La imagen es requerida.").refine(file => file.size < 4 * 1024 * 1024, "La imagen debe ser menor a 4MB."),
@@ -54,7 +53,7 @@ export async function addProduct(prevState: any, formData: FormData) {
     }
     
     const supabase = createClient();
-    const { name, category, price, size, stock, available, image } = validatedFields.data;
+    const { name, category, price, stock, available, image } = validatedFields.data;
 
     const imageFileName = `${crypto.randomUUID()}-${image.name}`;
 
@@ -76,7 +75,6 @@ export async function addProduct(prevState: any, formData: FormData) {
         name,
         category,
         price,
-        size,
         stock,
         available,
         img_url: publicUrlData.publicUrl,
@@ -116,7 +114,7 @@ export async function updateProduct(prevState: any, formData: FormData) {
     }
 
     const supabase = createClient();
-    const { id, name, category, price, size, stock, available, image, current_img_url } = validatedFields.data;
+    const { id, name, category, price, stock, available, image, current_img_url } = validatedFields.data;
 
     let imageUrl = current_img_url;
 
@@ -141,7 +139,7 @@ export async function updateProduct(prevState: any, formData: FormData) {
 
     const { error: updateError } = await supabase
         .from('products')
-        .update({ name, category, price, size, stock, available, img_url: imageUrl })
+        .update({ name, category, price, stock, available, img_url: imageUrl })
         .eq('id', id);
 
     if (updateError) {

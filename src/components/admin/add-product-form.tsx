@@ -128,11 +128,6 @@ export function AddProductForm() {
                              <FieldError errors={state.errors?.stock} />
                         </div>
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="size">Tamaño (opcional)</Label>
-                        <Input id="size" name="size" placeholder="Ej: Pequeño, Mediano, 5L" />
-                        <FieldError errors={state.errors?.size} />
-                    </div>
                      <div className="space-y-2">
                         <Label htmlFor="image">Imagen del Producto</Label>
                         <Input id="image" name="image" type="file" accept="image/*" onChange={handleImageChange} />
