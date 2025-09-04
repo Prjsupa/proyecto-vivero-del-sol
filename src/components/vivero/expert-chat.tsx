@@ -76,7 +76,7 @@ export function ExpertChat() {
               >
                 {message.sender === 'bot' && (
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src="/placeholder.svg" alt="Bot" />
+                    <AvatarImage src="" alt="Bot" />
                     <AvatarFallback className="bg-primary text-primary-foreground">
                       <Sprout size={20} />
                     </AvatarFallback>

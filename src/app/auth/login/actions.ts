@@ -9,7 +9,7 @@ const loginSchema = z.object({
   password: z.string().min(6),
 });
 
-export async function login(prevState: { message: string } | undefined, formData: FormData) {
+export async function login(prevState: { message: string, success?: boolean } | undefined, formData: FormData) {
   const supabase = createClient();
   const validatedFields = loginSchema.safeParse(
     Object.fromEntries(formData.entries())
@@ -18,6 +18,7 @@ export async function login(prevState: { message: string } | undefined, formData
   if (!validatedFields.success) {
     return {
       message: 'Invalid email or password.',
+      success: false,
     };
   }
 
@@ -31,8 +32,13 @@ export async function login(prevState: { message: string } | undefined, formData
   if (error) {
      return {
       message: 'Could not authenticate user. Please check your credentials.',
+      success: false,
     };
   }
 
-  return redirect('/');
+  // Redirect is handled client-side now
+  return {
+    message: 'Login successful!',
+    success: true,
+  };
 }
