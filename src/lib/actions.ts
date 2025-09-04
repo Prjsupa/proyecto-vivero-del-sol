@@ -285,3 +285,43 @@ export async function handleCheckout(cartItems: CartItem[]) {
 
   return { success: true, message: 'Pedido realizado con éxito.' };
 }
+
+const updateUserRoleSchema = z.object({
+  userId: z.string().uuid(),
+  rol: z.coerce.number().int().min(1).max(3),
+});
+
+export async function updateUserRole(prevState: any, formData: FormData) {
+  const validatedFields = updateUserRoleSchema.safeParse(Object.fromEntries(formData.entries()));
+
+  if (!validatedFields.success) {
+    return {
+      message: "Datos de formulario inválidos.",
+      errors: validatedFields.error.flatten().fieldErrors,
+    };
+  }
+
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // Check if the current user is an admin
+  const { data: adminProfile } = await supabase.from('profiles').select('rol').eq('id', user!.id).single();
+  if (adminProfile?.rol !== 1) {
+    return { message: "No tienes permiso para realizar esta acción." };
+  }
+
+  const { userId, rol } = validatedFields.data;
+
+  const { error } = await supabase.from('profiles').update({ rol }).eq('id', userId);
+
+  if (error) {
+    return { message: `Error al actualizar el rol: ${error.message}` };
+  }
+
+  revalidatePath('/admin/users');
+
+  return {
+    message: 'success',
+    data: '¡Rol de usuario actualizado exitosamente!',
+  };
+}
