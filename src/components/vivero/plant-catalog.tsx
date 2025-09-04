@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 function PlantCard({ product }: { product: Product }) {
   return (
@@ -43,22 +44,39 @@ function PlantCard({ product }: { product: Product }) {
   );
 }
 
+const plantCategories = ['Todas', 'Planta de interior', 'Planta de exterior', 'Planta frutal', 'Planta ornamental', 'Suculenta'] as const;
+type PlantCategory = typeof plantCategories[number];
+
 export function PlantCatalog({ products }: { products: Product[] }) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<PlantCategory>('Todas');
 
   const filteredPlants = products.filter(
     (product) =>
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.category.toLowerCase().includes(searchTerm.toLowerCase())
+      (product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.category.toLowerCase().includes(searchTerm.toLowerCase())) &&
+      (selectedCategory === 'Todas' || product.category === selectedCategory)
   );
 
   return (
     <div>
+       <div className="flex justify-center flex-wrap gap-2 mb-6">
+        {plantCategories.map((category) => (
+          <Button
+            key={category}
+            variant={selectedCategory === category ? 'default' : 'outline'}
+            onClick={() => setSelectedCategory(category)}
+            className="font-headline"
+          >
+            {category}
+          </Button>
+        ))}
+      </div>
       <div className="relative mb-8 max-w-md mx-auto">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
           type="text"
-          placeholder="Search plants by name or species..."
+          placeholder="Busca plantas por nombre o categoría..."
           className="pl-10"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -72,7 +90,7 @@ export function PlantCatalog({ products }: { products: Product[] }) {
           ))}
         </div>
       ) : (
-        <p className="text-center text-muted-foreground font-body">No plants found. Try a different search term.</p>
+        <p className="text-center text-muted-foreground font-body">No se encontraron plantas. Intenta con otro término de búsqueda o filtro.</p>
       )}
     </div>
   );
