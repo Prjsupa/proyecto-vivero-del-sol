@@ -10,6 +10,8 @@ import { Switch } from '@/components/ui/switch';
 import { AlertCircle, PlusCircle, Loader2 } from 'lucide-react';
 import { addProduct } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
+import Image from 'next/image';
+
 
 const productCategories = ['Planta de interior', 'Planta de exterior', 'Planta frutal', 'Planta ornamental', 'Suculenta', 'Herramienta', 'Fertilizante', 'Maceta'] as const;
 
@@ -36,6 +38,7 @@ function FieldError({ errors }: { errors?: string[] }) {
 export function AddProductForm() {
     const [state, formAction] = useActionState(addProduct, { message: '' });
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
     const formRef = useRef<HTMLFormElement>(null);
     const { toast } = useToast();
 
@@ -47,6 +50,7 @@ export function AddProductForm() {
             });
             setIsDialogOpen(false);
             formRef.current?.reset();
+            setImagePreview(null);
         } else if (state?.message && state.message !== 'success') {
              toast({
                 title: 'Error',
@@ -56,8 +60,29 @@ export function AddProductForm() {
         }
     }, [state, toast]);
 
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            setImagePreview(null);
+        }
+    };
+    
+    const onDialogChange = (open: boolean) => {
+        if (!open) {
+            formRef.current?.reset();
+            setImagePreview(null);
+        }
+        setIsDialogOpen(open);
+    }
+
     return (
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={onDialogChange}>
             <DialogTrigger asChild>
                  <Button>
                     <PlusCircle className="mr-2 h-4 w-4" />
@@ -110,9 +135,17 @@ export function AddProductForm() {
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="image">Imagen del Producto</Label>
-                        <Input id="image" name="image" type="file" accept="image/*" />
+                        <Input id="image" name="image" type="file" accept="image/*" onChange={handleImageChange} />
                         <FieldError errors={state.errors?.image} />
                     </div>
+                    {imagePreview && (
+                        <div className="space-y-2">
+                            <Label>Vista Previa</Label>
+                            <div className="relative h-48 w-full rounded-md border overflow-hidden">
+                                <Image src={imagePreview} alt="Image preview" fill className="object-contain" />
+                            </div>
+                        </div>
+                    )}
                      <div className="flex items-center space-x-2">
                         <Switch id="available" name="available" defaultChecked />
                         <Label htmlFor="available">Disponible para la venta</Label>
