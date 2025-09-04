@@ -8,18 +8,17 @@ import { ContactForm } from "@/components/vivero/contact-form";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import type { Product } from "@/lib/definitions";
+import { ProductCatalog } from "@/components/vivero/product-catalog";
 
-async function getPlantProducts(): Promise<Product[]> {
+async function getAllProducts(): Promise<Product[]> {
   const supabase = createClient();
-  const plantCategories = ['Planta de interior', 'Planta de exterior', 'Planta frutal', 'Planta ornamental', 'Suculenta'];
   const { data, error } = await supabase
     .from('products')
     .select('*')
-    .in('category', plantCategories)
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error fetching plant products:', error);
+    console.error('Error fetching products:', error);
     return [];
   }
 
@@ -28,7 +27,10 @@ async function getPlantProducts(): Promise<Product[]> {
 
 
 export default async function Home() {
-  const plants = await getPlantProducts();
+  const allProducts = await getAllProducts();
+  const plantCategories = ['Planta de interior', 'Planta de exterior', 'Planta frutal', 'Planta ornamental', 'Suculenta'];
+  const plantProducts = allProducts.filter(p => plantCategories.includes(p.category));
+
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -65,18 +67,25 @@ export default async function Home() {
         <section id="catalog" className="py-16 md:py-24 bg-muted/50">
           <div className="container px-4 md:px-6">
             <h2 className="text-3xl md:text-4xl font-headline text-center mb-12">Our Plant Catalog</h2>
-            <PlantCatalog products={plants} />
+            <PlantCatalog products={plantProducts} />
+          </div>
+        </section>
+        
+        <section id="all-products" className="py-16 md:py-24 bg-background">
+          <div className="container px-4 md:px-6">
+            <h2 className="text-3xl md:text-4xl font-headline text-center mb-12">All Our Products</h2>
+            <ProductCatalog products={allProducts} />
           </div>
         </section>
 
-        <section id="gallery" className="py-16 md:py-24 bg-background">
+        <section id="gallery" className="py-16 md:py-24 bg-muted/50">
            <div className="container px-4 md:px-6">
              <h2 className="text-3xl md:text-4xl font-headline text-center mb-12">Inspiration Gallery</h2>
              <ImageGallery />
            </div>
         </section>
         
-        <section id="contact" className="py-16 md:py-24 bg-muted/50">
+        <section id="contact" className="py-16 md:py-24 bg-background">
           <div className="container px-4 md:px-6">
             <div className="grid md:grid-cols-2 gap-12 lg:gap-24 items-start">
               <div>

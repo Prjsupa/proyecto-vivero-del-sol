@@ -10,7 +10,7 @@ import { Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
-function PlantCard({ product }: { product: Product }) {
+function ProductCard({ product }: { product: Product }) {
   return (
       <Card className="flex flex-col h-full overflow-hidden transition-all hover:shadow-xl duration-300">
         <CardHeader className="p-0">
@@ -18,7 +18,7 @@ function PlantCard({ product }: { product: Product }) {
             <Image
               src={product.img_url || 'https://placehold.co/400x300'}
               alt={product.name}
-              data-ai-hint="plant"
+              data-ai-hint="product image"
               fill
               className="object-cover"
             />
@@ -44,14 +44,14 @@ function PlantCard({ product }: { product: Product }) {
   );
 }
 
-const plantCategories = ['Todas', 'Planta de interior', 'Planta de exterior', 'Planta frutal', 'Planta ornamental', 'Suculenta'] as const;
-type PlantCategory = typeof plantCategories[number];
+const allCategories = ['Todas', 'Planta de interior', 'Planta de exterior', 'Planta frutal', 'Planta ornamental', 'Suculenta', 'Herramienta', 'Fertilizante', 'Maceta'] as const;
+type ProductCategory = typeof allCategories[number];
 
-export function PlantCatalog({ products }: { products: Product[] }) {
+export function ProductCatalog({ products }: { products: Product[] }) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<PlantCategory>('Todas');
+  const [selectedCategory, setSelectedCategory] = useState<ProductCategory>('Todas');
 
-  const filteredPlants = products.filter(
+  const filteredProducts = products.filter(
     (product) =>
       (product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.category.toLowerCase().includes(searchTerm.toLowerCase())) &&
@@ -61,7 +61,7 @@ export function PlantCatalog({ products }: { products: Product[] }) {
   return (
     <div>
        <div className="flex justify-center flex-wrap gap-2 mb-6">
-        {plantCategories.map((category) => (
+        {allCategories.map((category) => (
           <Button
             key={category}
             variant={selectedCategory === category ? 'default' : 'outline'}
@@ -76,21 +76,21 @@ export function PlantCatalog({ products }: { products: Product[] }) {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
           type="text"
-          placeholder="Busca plantas por nombre o categoría..."
+          placeholder="Busca productos por nombre o categoría..."
           className="pl-10"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
 
-      {filteredPlants.length > 0 ? (
+      {filteredProducts.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {filteredPlants.map((product) => (
-            <PlantCard key={product.id} product={product} />
+          {filteredProducts.map((product) => (
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       ) : (
-        <p className="text-center text-muted-foreground font-body">No se encontraron plantas. Intenta con otro término de búsqueda o filtro.</p>
+        <p className="text-center text-muted-foreground font-body">No se encontraron productos. Intenta con otro término de búsqueda o filtro.</p>
       )}
     </div>
   );
