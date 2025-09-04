@@ -97,3 +97,61 @@ export async function addProduct(prevState: any, formData: FormData) {
         data: '¡Producto añadido exitosamente!',
     };
 }
+
+
+const updateProductSchema = productSchema.extend({
+    image: z.instanceof(File).optional().refine(file => !file || file.size < 4 * 1024 * 1024, "La imagen debe ser menor a 4MB."),
+    id: z.string().uuid(),
+    current_img_url: z.string().url(),
+});
+
+export async function updateProduct(prevState: any, formData: FormData) {
+    const validatedFields = updateProductSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return {
+            message: "Datos de formulario inválidos.",
+            errors: validatedFields.error.flatten().fieldErrors,
+        };
+    }
+
+    const supabase = createClient();
+    const { id, name, category, price, size, stock, available, image, current_img_url } = validatedFields.data;
+
+    let imageUrl = current_img_url;
+
+    if (image && image.size > 0) {
+        const imageFileName = `${crypto.randomUUID()}-${image.name}`;
+        const { error: uploadError } = await supabase.storage
+            .from('products')
+            .upload(imageFileName, image);
+
+        if (uploadError) {
+            return { message: `Error al subir la nueva imagen: ${uploadError.message}` };
+        }
+
+        imageUrl = supabase.storage.from('products').getPublicUrl(imageFileName).data.publicUrl;
+
+        // Delete old image
+        const oldImageName = current_img_url.split('/').pop();
+        if (oldImageName) {
+            await supabase.storage.from('products').remove([oldImageName]);
+        }
+    }
+
+    const { error: updateError } = await supabase
+        .from('products')
+        .update({ name, category, price, size, stock, available, img_url: imageUrl })
+        .eq('id', id);
+
+    if (updateError) {
+        return { message: `Error al actualizar el producto: ${updateError.message}` };
+    }
+
+    revalidatePath('/admin/products');
+
+    return {
+        message: 'success',
+        data: '¡Producto actualizado exitosamente!',
+    };
+}

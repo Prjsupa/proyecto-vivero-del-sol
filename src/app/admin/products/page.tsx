@@ -1,5 +1,6 @@
 
 import { AddProductForm } from "@/components/admin/add-product-form";
+import { EditProductForm } from "@/components/admin/edit-product-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -93,7 +94,9 @@ export default async function ProductsPage() {
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
                                                     <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                                                    <DropdownMenuItem>Editar</DropdownMenuItem>
+                                                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                                        <EditProductForm product={product} />
+                                                    </DropdownMenuItem>
                                                     <DropdownMenuItem>Eliminar</DropdownMenuItem>
                                                 </DropdownMenuContent>
                                             </DropdownMenu>
@@ -118,4 +121,3 @@ export default async function ProductsPage() {
         </div>
     );
 }
-
