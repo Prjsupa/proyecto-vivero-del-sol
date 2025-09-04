@@ -72,7 +72,7 @@ export async function addProduct(prevState: any, formData: FormData) {
         .from('products')
         .getPublicUrl(imageFileName);
 
-    const { error: insertError } = await supabase.from('plants').insert({
+    const { error: insertError } = await supabase.from('products').insert({
         name,
         category,
         price,
