@@ -1,5 +1,5 @@
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider } from "@/components/ui/sidebar";
-import { Briefcase, DollarSign, Users, Settings, BarChart, Wrench, Sprout } from "lucide-react";
+import { Briefcase, DollarSign, Users, Settings, BarChart, Wrench, Sprout, ShoppingBag } from "lucide-react";
 import Link from 'next/link';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -25,6 +25,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                                         <SidebarMenuButton>
                                             <Briefcase />
                                             Resumen ejecutivo
+                                        </SidebarMenuButton>
+                                    </Link>
+                                </SidebarMenuItem>
+                                <SidebarMenuItem>
+                                     <Link href="/admin/products">
+                                        <SidebarMenuButton>
+                                            <ShoppingBag />
+                                            Gestión de productos
                                         </SidebarMenuButton>
                                     </Link>
                                 </SidebarMenuItem>
