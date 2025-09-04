@@ -1,3 +1,4 @@
+
 export type Plant = {
   id: string;
   name: string;
@@ -24,3 +25,15 @@ export type User = {
   email?: string;
   // Add any other user properties you need
 };
+
+export type Product = {
+  id: string;
+  created_at: string;
+  name: string;
+  img_url: string | null;
+  category: 'Planta de interior' | 'Planta de exterior' | 'Planta frutal' | 'Planta ornamental' | 'Suculenta' | 'Herramienta' | 'Fertilizante' | 'Maceta';
+  price: number;
+  size: string | null;
+  stock: number;
+  available: boolean;
+}
