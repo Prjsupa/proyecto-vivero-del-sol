@@ -1,0 +1,53 @@
+'use client';
+
+import { Sprout } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useEffect, useState } from 'react';
+
+export function Header() {
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const navLinks = [
+    { href: '#recommender', label: 'AI Helper' },
+    { href: '#catalog', label: 'Catalog' },
+    { href: '#gallery', label: 'Gallery' },
+    { href: '#contact', label: 'Contact' },
+  ];
+
+  return (
+    <header
+      className={cn(
+        'sticky top-0 z-50 w-full transition-all duration-300',
+        isScrolled ? 'bg-background/80 shadow-md backdrop-blur-sm' : 'bg-transparent'
+      )}
+    >
+      <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
+        <a href="#home" className="flex items-center gap-2">
+          <Sprout className="h-8 w-8 text-primary" />
+          <span className="font-headline text-2xl font-bold tracking-wide text-foreground">
+            Vivero Del Sol
+          </span>
+        </a>
+        <nav className="hidden items-center gap-6 md:flex">
+          {navLinks.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              className="font-headline text-lg text-foreground/80 transition-colors hover:text-primary"
+            >
+              {link.label}
+            </a>
+          ))}
+        </nav>
+      </div>
+    </header>
+  );
+}
