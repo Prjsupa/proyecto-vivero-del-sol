@@ -1,7 +1,7 @@
 
 'use client';
 
-import { LogIn, Sprout, User as UserIcon, LogOut, LayoutDashboard } from 'lucide-react';
+import { LogIn, Sprout, User as UserIcon, LogOut, LayoutDashboard, UserPlus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -158,12 +158,20 @@ export function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Link href="/auth/login" passHref>
-              <Button variant="outline">
-                <LogIn className="mr-2 h-4 w-4" />
-                Login
-              </Button>
-            </Link>
+            <div className="flex items-center gap-2">
+                <Link href="/auth/login" passHref>
+                  <Button variant="outline">
+                    <LogIn className="mr-2 h-4 w-4" />
+                    Login
+                  </Button>
+                </Link>
+                 <Link href="/auth/signup" passHref>
+                  <Button>
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Sign Up
+                  </Button>
+                </Link>
+            </div>
           )}
         </nav>
       </div>
