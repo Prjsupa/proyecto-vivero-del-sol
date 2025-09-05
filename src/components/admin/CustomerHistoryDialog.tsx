@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState } from 'react';
@@ -88,7 +89,7 @@ export function CustomerHistoryDialog({ customer }: { customer: Profile }) {
                                         <ul className="list-disc pl-5 text-sm text-muted-foreground">
                                            {Array.isArray(order.order_details) && order.order_details.map((detail: any, index: number) => (
                                                 <li key={index}>
-                                                    {detail.quantity} x (ID: {detail.product_id.substring(0,8)}) - {formatPrice(detail.price_at_purchase)} c/u
+                                                    {detail.quantity} x {detail.product_name || `(ID: ${detail.product_id.substring(0,8)})`} - {formatPrice(detail.price_at_purchase)} c/u
                                                 </li>
                                             ))}
                                         </ul>

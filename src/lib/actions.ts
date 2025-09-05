@@ -9,6 +9,7 @@ import type { CartItem } from '@/hooks/use-cart-store';
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
 import { createClient as createServiceRoleClient } from '@supabase/supabase-js';
+import type { Order } from './definitions';
 
 const contactSchema = z.object({
   name: z.string().min(2, 'Name is required.'),
@@ -332,30 +333,65 @@ export async function updateUserRole(prevState: any, formData: FormData) {
 
 
 export async function getCustomerOrders(customerId: string) {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    // Check if the current user is an admin
-    const { data: adminProfile } = await supabase.from('profiles').select('rol').eq('id', user!.id).single();
-    if (adminProfile?.rol !== 1) {
-        return { success: false, message: "No tienes permiso para realizar esta acción." };
-    }
-
-    // Create a new Supabase client with the service role key to bypass RLS
     const supabaseAdmin = createServiceRoleClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!,
     );
     
-    const { data, error } = await supabaseAdmin
+    // 1. Fetch orders for the customer
+    const { data: orders, error: ordersError } = await supabaseAdmin
         .from('orders')
         .select('*')
         .eq('user_id', customerId)
         .order('created_at', { ascending: false });
 
-    if (error) {
-        return { success: false, message: `Error al obtener los pedidos: ${error.message}` };
+    if (ordersError) {
+        return { success: false, message: `Error fetching orders: ${ordersError.message}` };
+    }
+    if (!orders || orders.length === 0) {
+        return { success: true, data: [] };
     }
 
-    return { success: true, data };
+    // 2. Collect all unique product IDs from all orders
+    const productIds = new Set<string>();
+    orders.forEach(order => {
+        if (Array.isArray(order.order_details)) {
+            order.order_details.forEach((detail: any) => {
+                if (detail.product_id) {
+                    productIds.add(detail.product_id);
+                }
+            });
+        }
+    });
+
+    if (productIds.size === 0) {
+        return { success: true, data: orders }; // Return orders even if no product details
+    }
+    
+    // 3. Fetch product names for the collected IDs
+    const { data: products, error: productsError } = await supabaseAdmin
+        .from('products')
+        .select('id, name')
+        .in('id', Array.from(productIds));
+
+    if (productsError) {
+         return { success: false, message: `Error fetching product details: ${productsError.message}` };
+    }
+
+    // 4. Create a map for quick lookup
+    const productMap = new Map(products.map(p => [p.id, p.name]));
+
+    // 5. Augment order_details with product names
+    const augmentedOrders = orders.map(order => {
+        if (Array.isArray(order.order_details)) {
+            const augmentedDetails = order.order_details.map((detail: any) => ({
+                ...detail,
+                product_name: productMap.get(detail.product_id) || 'Producto no encontrado'
+            }));
+            return { ...order, order_details: augmentedDetails };
+        }
+        return order;
+    });
+
+    return { success: true, data: augmentedOrders as Order[] };
 }
