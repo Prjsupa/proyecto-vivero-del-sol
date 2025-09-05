@@ -8,6 +8,7 @@ import { revalidatePath } from 'next/cache';
 import type { CartItem } from '@/hooks/use-cart-store';
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
+import { createClient as createServiceRoleClient } from '@supabase/supabase-js';
 
 const contactSchema = z.object({
   name: z.string().min(2, 'Name is required.'),
@@ -331,7 +332,6 @@ export async function updateUserRole(prevState: any, formData: FormData) {
 
 
 export async function getCustomerOrders(customerId: string) {
-    const cookieStore = cookies();
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -341,19 +341,12 @@ export async function getCustomerOrders(customerId: string) {
         return { success: false, message: "No tienes permiso para realizar esta acción." };
     }
 
-    // Create a Supabase client with the service role key to bypass RLS
-    const supabaseAdmin = createServerClient(
+    // Create a new Supabase client with the service role key to bypass RLS
+    const supabaseAdmin = createServiceRoleClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!,
-        {
-            cookies: {
-                get(name: string) {
-                    return cookieStore.get(name)?.value
-                },
-            },
-        }
     );
-
+    
     const { data, error } = await supabaseAdmin
         .from('orders')
         .select('*')
