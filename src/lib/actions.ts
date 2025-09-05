@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import { z } from 'zod';
@@ -324,4 +325,28 @@ export async function updateUserRole(prevState: any, formData: FormData) {
     message: 'success',
     data: '¡Rol de usuario actualizado exitosamente!',
   };
+}
+
+
+export async function getCustomerOrders(customerId: string) {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Check if the current user is an admin
+    const { data: adminProfile } = await supabase.from('profiles').select('rol').eq('id', user!.id).single();
+    if (adminProfile?.rol !== 1) {
+        return { success: false, message: "No tienes permiso para realizar esta acción." };
+    }
+
+    const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('user_id', customerId)
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        return { success: false, message: `Error al obtener los pedidos: ${error.message}` };
+    }
+
+    return { success: true, data };
 }

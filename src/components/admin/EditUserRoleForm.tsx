@@ -38,7 +38,7 @@ export function EditUserRoleForm({ userProfile }: { userProfile: Profile }) {
 
     // Define roles directly in the component
     const roles = [
-        { id: 1, name: 'Admin' },
+        { id: 1, name: 'Super Admin' },
         { id: 2, name: 'Empleado' },
         { id: 3, name: 'Cliente' },
     ];

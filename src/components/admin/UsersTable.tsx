@@ -17,7 +17,7 @@ type UserWithProfile = Profile & {
 }
 
 const roleMap: { [key: number]: { name: string; className: string } } = {
-    1: { name: 'Admin', className: 'bg-red-500 text-white' },
+    1: { name: 'Super Admin', className: 'bg-red-500 text-white' },
     2: { name: 'Empleado', className: 'bg-blue-500 text-white' },
     3: { name: 'Cliente', className: 'bg-green-500 text-white' },
 };
@@ -45,7 +45,7 @@ export function UsersTable({ users }: { users: UserWithProfile[] }) {
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="todos">Todos</SelectItem>
-                            <SelectItem value="1">Admin</SelectItem>
+                            <SelectItem value="1">Super Admin</SelectItem>
                             <SelectItem value="2">Empleado</SelectItem>
                             <SelectItem value="3">Cliente</SelectItem>
                         </SelectContent>

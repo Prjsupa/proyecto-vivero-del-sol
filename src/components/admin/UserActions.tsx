@@ -1,11 +1,12 @@
 
 'use client';
 
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 import type { Profile } from "@/lib/definitions";
 import { EditUserRoleForm } from "./EditUserRoleForm";
+import { CustomerHistoryDialog } from "./CustomerHistoryDialog";
 
 export function UserActions({ userProfile }: { userProfile: Profile }) {
     return (
@@ -18,6 +19,14 @@ export function UserActions({ userProfile }: { userProfile: Profile }) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                {userProfile.rol === 3 && (
+                    <>
+                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                            <CustomerHistoryDialog customer={userProfile} />
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                    </>
+                )}
                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                     <EditUserRoleForm userProfile={userProfile} />
                 </DropdownMenuItem>
