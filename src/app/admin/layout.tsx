@@ -1,6 +1,6 @@
 import { Header } from "@/components/vivero/header";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider } from "@/components/ui/sidebar";
-import { Briefcase, Package, DollarSign, Users, Settings, BarChart, Wrench } from "lucide-react";
+import { Briefcase, Package, DollarSign, Users, Settings, BarChart, Wrench, LayoutGrid } from "lucide-react";
 import Link from 'next/link';
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
@@ -54,6 +54,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                                 <SidebarMenuButton>
                                     <Package />
                                     Productos
+                                </SidebarMenuButton>
+                            </Link>
+                        </SidebarMenuItem>
+                         <SidebarMenuItem>
+                                <Link href="/admin/categories">
+                                <SidebarMenuButton>
+                                    <LayoutGrid />
+                                    Categorías
                                 </SidebarMenuButton>
                             </Link>
                         </SidebarMenuItem>

@@ -86,6 +86,7 @@ export async function addProduct(prevState: any, formData: FormData) {
     }
 
     revalidatePath('/admin/products');
+    revalidatePath('/admin/categories');
     revalidatePath('/');
 
     return {
@@ -128,6 +129,7 @@ export async function updateProduct(prevState: any, formData: FormData) {
     }
 
     revalidatePath('/admin/products');
+    revalidatePath('/admin/categories');
     revalidatePath('/');
 
     return {
@@ -485,9 +487,34 @@ export async function deleteProduct(productId: string) {
     }
     
     revalidatePath('/admin/products');
+    revalidatePath('/admin/categories');
     revalidatePath('/');
     
     return { message: 'success', data: '¡Producto eliminado exitosamente!' };
 }
 
+export async function deleteSelectedProducts(productIds: string[]) {
+    if (!productIds || productIds.length === 0) {
+        return { message: "No se seleccionaron productos." };
+    }
+
+    const supabase = createClient();
     
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { message: 'No autenticado' };
+    
+    const { data: profile } = await supabase.from('profiles').select('rol').eq('id', user.id).single();
+    if (profile?.rol !== 1) return { message: 'No autorizado' };
+
+    const { error } = await supabase.from('products').delete().in('id', productIds);
+
+    if (error) {
+        return { message: `Error al eliminar los productos: ${error.message}` };
+    }
+    
+    revalidatePath('/admin/products');
+    revalidatePath('/admin/categories');
+    revalidatePath('/');
+    
+    return { message: 'success', data: `¡${productIds.length} producto(s) eliminado(s) exitosamente!` };
+}
