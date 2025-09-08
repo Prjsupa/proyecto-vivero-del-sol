@@ -2,7 +2,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Header } from "@/components/vivero/header";
-import { Footer } from "@/components/vivero/footer";
 import { ProfileForm } from "./_components/profile-form";
 
 export default async function ProfilePage() {
@@ -22,7 +21,7 @@ export default async function ProfilePage() {
     
   if (error || !profile) {
     // This could happen if a user is created in auth but the profile row fails
-    // Or if the user is deleted from profiles but not auth
+    // or if the user is deleted from profiles but not auth
     // We can sign the user out to be safe, then redirect.
     await supabase.auth.signOut();
     redirect('/auth/login');
@@ -40,7 +39,6 @@ export default async function ProfilePage() {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 }
