@@ -52,15 +52,15 @@ export function UploadCsvForm() {
                     Importar CSV
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-lg">
-                 <form action={formAction} ref={formRef} className="flex flex-col max-h-[80vh]">
-                    <DialogHeader>
-                        <DialogTitle>Importar Productos desde CSV</DialogTitle>
-                        <DialogDescription>
-                            Añade productos en lote subiendo un archivo .csv. Asegúrate de que el archivo tenga una fila de cabecera con los campos correctos.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <ScrollArea className="flex-grow my-4 pr-6">
+            <DialogContent className="sm:max-w-lg max-h-[80vh] flex flex-col">
+                <DialogHeader className="shrink-0">
+                    <DialogTitle>Importar Productos desde CSV</DialogTitle>
+                    <DialogDescription>
+                        Añade productos en lote subiendo un archivo .csv. Asegúrate de que el archivo tenga una fila de cabecera con los campos correctos.
+                    </DialogDescription>
+                </DialogHeader>
+                 <form action={formAction} ref={formRef} className="flex-grow overflow-hidden flex flex-col">
+                    <ScrollArea className="flex-grow pr-6 -mr-6">
                         <div className="space-y-4">
                             <div className="space-y-2">
                                 <Label htmlFor="csv-file">Archivo CSV</Label>
@@ -85,7 +85,7 @@ export function UploadCsvForm() {
                                 </AlertDescription>
                             </Alert>
 
-                            <Button variant="link" asChild className="p-0 h-auto self-start">
+                             <Button variant="link" asChild className="p-0 h-auto">
                                 <Link href="/api/sample-csv">
                                     <Download className="mr-2 h-4 w-4" />
                                     Descargar CSV de ejemplo
@@ -93,8 +93,8 @@ export function UploadCsvForm() {
                             </Button>
                         </div>
                     </ScrollArea>
-
-                    <DialogFooter className="pt-4 border-t">
+                    
+                    <DialogFooter className="pt-4 border-t mt-4 shrink-0">
                         <DialogClose asChild>
                             <Button variant="outline">Cancelar</Button>
                         </DialogClose>
