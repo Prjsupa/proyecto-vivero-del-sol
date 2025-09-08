@@ -1,5 +1,5 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Package, Search } from "lucide-react";
@@ -15,13 +15,27 @@ export function ProductList({ products, categories }: { products: Product[], cat
     const [categoryFilter, setCategoryFilter] = useState('Todas');
     const [availabilityFilter, setAvailabilityFilter] = useState('all');
     const [stockSort, setStockSort] = useState('none');
+    const [priceSort, setPriceSort] = useState('none');
+
+
+    useEffect(() => {
+        if (priceSort !== 'none') {
+            setStockSort('none');
+        }
+    }, [priceSort]);
+
+    useEffect(() => {
+        if (stockSort !== 'none') {
+            setPriceSort('none');
+        }
+    }, [stockSort]);
 
     const productCategories = useMemo(() => {
         return ['Todas', ...categories];
     }, [categories]);
 
     const filteredAndSortedProducts = useMemo(() => {
-        let filtered = products;
+        let filtered = [...products];
 
         if (searchTerm) {
             filtered = filtered.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -46,9 +60,19 @@ export function ProductList({ products, categories }: { products: Product[], cat
             });
         }
 
+        if (priceSort !== 'none') {
+             filtered.sort((a, b) => {
+                if (priceSort === 'asc') {
+                    return a.price - b.price;
+                } else {
+                    return b.price - a.price;
+                }
+            });
+        }
+
 
         return filtered;
-    }, [products, searchTerm, categoryFilter, availabilityFilter, stockSort]);
+    }, [products, searchTerm, categoryFilter, availabilityFilter, stockSort, priceSort]);
 
     return (
         <Card>
@@ -91,6 +115,16 @@ export function ProductList({ products, categories }: { products: Product[], cat
                             <SelectItem value="none">Sin orden</SelectItem>
                             <SelectItem value="asc">Stock: Menor a mayor</SelectItem>
                             <SelectItem value="desc">Stock: Mayor a menor</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <Select value={priceSort} onValueChange={setPriceSort}>
+                        <SelectTrigger className="md:w-[180px]">
+                            <SelectValue placeholder="Ordenar por precio" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="none">Sin orden</SelectItem>
+                            <SelectItem value="asc">Precio: Menor a mayor</SelectItem>
+                            <SelectItem value="desc">Precio: Mayor a menor</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>

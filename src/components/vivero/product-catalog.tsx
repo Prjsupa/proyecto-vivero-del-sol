@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import { cn, formatPrice } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 function ProductCard({ product }: { product: Product }) {
   return (
@@ -36,18 +37,40 @@ function ProductCard({ product }: { product: Product }) {
 export function ProductCatalog({ products }: { products: Product[] }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('Todas');
+  const [priceSort, setPriceSort] = useState('none');
 
   const allCategories = useMemo(() => {
     const categories = new Set(products.map(p => p.category));
     return ['Todas', ...Array.from(categories).sort()];
   }, [products]);
 
-  const filteredProducts = products.filter(
-    (product) =>
-      (product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.category.toLowerCase().includes(searchTerm.toLowerCase())) &&
-      (selectedCategory === 'Todas' || product.category === selectedCategory)
-  );
+  const filteredAndSortedProducts = useMemo(() => {
+    let filtered = [...products];
+
+    if (searchTerm) {
+        filtered = filtered.filter(
+            (product) =>
+            product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            product.category.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }
+    
+    if (selectedCategory !== 'Todas') {
+        filtered = filtered.filter(product => product.category === selectedCategory);
+    }
+    
+    if (priceSort !== 'none') {
+        filtered.sort((a, b) => {
+            if (priceSort === 'asc') {
+                return a.price - b.price;
+            } else {
+                return b.price - a.price;
+            }
+        });
+    }
+
+    return filtered;
+  }, [products, searchTerm, selectedCategory, priceSort]);
 
   return (
     <div>
@@ -63,20 +86,34 @@ export function ProductCatalog({ products }: { products: Product[] }) {
           </Button>
         ))}
       </div>
-      <div className="relative mb-8 max-w-md mx-auto">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-        <Input
-          type="text"
-          placeholder="Busca productos por nombre o categoría..."
-          className="pl-10"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+      <div className="flex flex-col md:flex-row justify-center items-center gap-4 mb-8">
+        <div className="relative max-w-md w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+            <Input
+            type="text"
+            placeholder="Busca productos por nombre o categoría..."
+            className="pl-10"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            />
+        </div>
+        <div className="w-full md:w-auto">
+             <Select value={priceSort} onValueChange={setPriceSort}>
+                <SelectTrigger className="w-full md:w-[180px]">
+                    <SelectValue placeholder="Ordenar por precio" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="none">Sin orden</SelectItem>
+                    <SelectItem value="asc">Precio: Menor a mayor</SelectItem>
+                    <SelectItem value="desc">Precio: Mayor a menor</SelectItem>
+                </SelectContent>
+            </Select>
+        </div>
       </div>
 
-      {filteredProducts.length > 0 ? (
+      {filteredAndSortedProducts.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {filteredProducts.map((product) => (
+          {filteredAndSortedProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
