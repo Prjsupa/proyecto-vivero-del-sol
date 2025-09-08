@@ -41,7 +41,10 @@ const baseProductSchema = z.object({
   name: z.string().min(3, "El nombre debe tener al menos 3 caracteres."),
   category: z.string().optional(),
   new_category: z.string().optional(),
-  price: z.coerce.number().min(0, "El precio no puede ser negativo."),
+  price: z.preprocess(
+    (val) => (typeof val === 'string' ? val.replace(',', '.') : val),
+    z.coerce.number().min(0, "El precio no puede ser negativo.")
+  ),
   stock: z.coerce.number().int().min(0, "El stock no puede ser negativo."),
   available: z.coerce.boolean(),
   description: z.string().optional(),

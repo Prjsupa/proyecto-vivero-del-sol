@@ -132,7 +132,7 @@ export function EditProductForm({ product, categories }: { product: Product, cat
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="price">Precio</Label>
-                            <Input id="price" name="price" type="number" step="0.01" defaultValue={product.price} />
+                            <Input id="price" name="price" type="text" defaultValue={product.price} />
                             <FieldError errors={state.errors?.price} />
                         </div>
                         <div className="space-y-2">
