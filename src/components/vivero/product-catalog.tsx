@@ -33,7 +33,7 @@ function ProductCard({ product }: { product: Product }) {
   );
 }
 
-const allCategories = ['Todas', 'Planta de interior', 'Planta de exterior', 'Planta frutal', 'Planta ornamental', 'Suculenta', 'Herramienta', 'Fertilizante', 'Maceta'] as const;
+const allCategories = ['Todas', 'Planta de interior', 'Planta de exterior', 'Planta frutal', 'Planta ornamental', 'Suculenta', 'Herramienta', 'Fertilizante', 'Maceta', 'Plantines'] as const;
 type ProductCategory = typeof allCategories[number];
 
 export function ProductCatalog({ products }: { products: Product[] }) {

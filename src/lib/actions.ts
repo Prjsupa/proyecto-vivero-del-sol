@@ -39,7 +39,7 @@ export async function handleContact(prevState: any, formData: FormData) {
 
 const productSchema = z.object({
   name: z.string().min(3, "El nombre debe tener al menos 3 caracteres."),
-  category: z.enum(['Planta de interior', 'Planta de exterior', 'Planta frutal', 'Planta ornamental', 'Suculenta', 'Herramienta', 'Fertilizante', 'Maceta']),
+  category: z.enum(['Planta de interior', 'Planta de exterior', 'Planta frutal', 'Planta ornamental', 'Suculenta', 'Herramienta', 'Fertilizante', 'Maceta', 'Plantines']),
   price: z.coerce.number().min(0, "El precio no puede ser negativo."),
   stock: z.coerce.number().int().min(0, "El stock no puede ser negativo."),
   available: z.coerce.boolean(),
@@ -371,7 +371,7 @@ export async function updatePassword(prevState: any, formData: FormData) {
 
 const csvProductSchema = z.object({
   name: z.string().min(3),
-  category: z.enum(['Planta de interior', 'Planta de exterior', 'Planta frutal', 'Planta ornamental', 'Suculenta', 'Herramienta', 'Fertilizante', 'Maceta']),
+  category: z.enum(['Planta de interior', 'Planta de exterior', 'Planta frutal', 'Planta ornamental', 'Suculenta', 'Herramienta', 'Fertilizante', 'Maceta', 'Plantines']),
   price: z.coerce.number().min(0),
   stock: z.coerce.number().int().min(0),
   available: z.string().transform(val => val.toUpperCase() === 'TRUE'),
