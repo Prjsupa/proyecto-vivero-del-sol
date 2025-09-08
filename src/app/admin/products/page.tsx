@@ -1,15 +1,13 @@
-
-
 import { AddProductForm } from "@/components/admin/add-product-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Database } from "lucide-react";
+import { Package, PlusCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import type { Product } from "@/lib/definitions";
 import Image from 'next/image';
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { cn, formatPrice } from "@/lib/utils";
 import { ProductActions } from "@/components/admin/product-actions";
 
 async function getProducts(): Promise<Product[]> {
@@ -28,22 +26,16 @@ export default async function ProductsPage() {
     const products = await getProducts();
 
     return (
-        <div className="p-4 md:p-8 space-y-8">
+        <div className="space-y-6">
              <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold font-headline">Gestión de Productos</h1>
+                    <h1 className="text-2xl font-semibold">Gestión de Productos</h1>
                     <p className="text-muted-foreground">Añade, edita y gestiona todos los productos de tu vivero.</p>
                 </div>
                 <AddProductForm />
             </div>
             <Card>
-                <CardHeader>
-                    <CardTitle>Productos</CardTitle>
-                    <CardDescription>
-                        Una lista de todos los productos en tu inventario.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
+                <CardContent className="pt-6">
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -51,7 +43,6 @@ export default async function ProductsPage() {
                                     <span className="sr-only">Imagen</span>
                                 </TableHead>
                                 <TableHead>Nombre</TableHead>
-                                <TableHead>Categoría</TableHead>
                                 <TableHead>Estado</TableHead>
                                 <TableHead className="hidden md:table-cell">Precio</TableHead>
                                 <TableHead className="hidden md:table-cell">Stock</TableHead>
@@ -73,15 +64,17 @@ export default async function ProductsPage() {
                                                 width="64"
                                             />
                                         </TableCell>
-                                        <TableCell className="font-medium">{product.name}</TableCell>
-                                        <TableCell>{product.category}</TableCell>
+                                        <TableCell className="font-medium">
+                                            <div className="font-medium">{product.name}</div>
+                                            <div className="text-sm text-muted-foreground">{product.category}</div>
+                                        </TableCell>
                                         <TableCell>
-                                            <Badge variant={product.available ? 'default' : 'destructive'} className={cn(product.available ? 'bg-green-500' : 'bg-red-500', 'text-white')}>
+                                            <Badge variant={product.available ? 'default' : 'outline'} className={cn(product.available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800')}>
                                                 {product.available ? 'Disponible' : 'No disponible'}
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="hidden md:table-cell">
-                                            ${product.price.toFixed(2)}
+                                            {formatPrice(product.price)}
                                         </TableCell>
                                         <TableCell className="hidden md:table-cell">{product.stock}</TableCell>
                                         <TableCell>
@@ -91,10 +84,10 @@ export default async function ProductsPage() {
                                 ))
                            ) : (
                                 <TableRow>
-                                    <TableCell colSpan={7} className="h-48 text-center">
+                                    <TableCell colSpan={6} className="h-48 text-center">
                                         <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
-                                            <Database className="h-12 w-12" />
-                                            <p>No se encontraron productos.</p>
+                                            <Package className="h-12 w-12" />
+                                            <p className="font-semibold">No se encontraron productos.</p>
                                             <p className="text-sm">Intenta añadir un producto para empezar.</p>
                                         </div>
                                     </TableCell>

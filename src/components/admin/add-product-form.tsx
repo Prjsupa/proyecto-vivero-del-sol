@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { AlertCircle, PlusCircle, Loader2 } from 'lucide-react';
+import { AlertCircle, PlusCircle, Loader2, UploadCloud } from 'lucide-react';
 import { addProduct } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
@@ -90,9 +90,9 @@ export function AddProductForm() {
                     Añadir Producto
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
-                    <DialogTitle className="font-headline">Añadir Nuevo Producto</DialogTitle>
+                    <DialogTitle>Añadir Nuevo Producto</DialogTitle>
                     <DialogDescription>
                         Rellena los detalles del nuevo producto.
                     </DialogDescription>
@@ -103,50 +103,58 @@ export function AddProductForm() {
                         <Input id="name" name="name" />
                         <FieldError errors={state.errors?.name} />
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="description">Descripción (Opcional)</Label>
-                        <Textarea id="description" name="description" />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="category">Categoría</Label>
-                        <Select name="category">
-                            <SelectTrigger>
-                                <SelectValue placeholder="Selecciona una categoría" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {productCategories.map(cat => (
-                                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <FieldError errors={state.errors?.category} />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="price">Precio</Label>
-                            <Input id="price" name="price" type="number" step="0.01" />
-                            <FieldError errors={state.errors?.price} />
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                         <div className="space-y-2">
+                            <Label htmlFor="category">Categoría</Label>
+                            <Select name="category">
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Selecciona una categoría" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {productCategories.map(cat => (
+                                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <FieldError errors={state.errors?.category} />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="stock">Stock</Label>
-                            <Input id="stock" name="stock" type="number" />
+                            <Input id="stock" name="stock" type="number" defaultValue="0" />
                              <FieldError errors={state.errors?.stock} />
                         </div>
                     </div>
+                    
+                    <div className="space-y-2">
+                        <Label htmlFor="price">Precio</Label>
+                        <Input id="price" name="price" type="number" step="0.01" placeholder="$0.00" />
+                        <FieldError errors={state.errors?.price} />
+                    </div>
+                   
+                    <div className="space-y-2">
+                        <Label htmlFor="description">Descripción</Label>
+                        <Textarea id="description" name="description" placeholder="Describe el producto..."/>
+                    </div>
+                   
                      <div className="space-y-2">
                         <Label htmlFor="image">Imagen del Producto</Label>
-                        <Input id="image" name="image" type="file" accept="image/*" onChange={handleImageChange} />
+                        <div className="relative flex justify-center items-center w-full h-48 rounded-lg border-2 border-dashed border-border hover:border-primary transition-colors">
+                            {imagePreview ? (
+                                <Image src={imagePreview} alt="Image preview" fill className="object-contain rounded-lg p-2" />
+                            ) : (
+                                <div className="text-center text-muted-foreground">
+                                    <UploadCloud className="mx-auto h-12 w-12" />
+                                    <p>Arrastra y suelta o haz clic para subir</p>
+                                    <p className="text-xs">PNG, JPG, GIF hasta 4MB</p>
+                                </div>
+                            )}
+                            <Input id="image" name="image" type="file" accept="image/*" onChange={handleImageChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                        </div>
                         <FieldError errors={state.errors?.image} />
                     </div>
-                    {imagePreview && (
-                        <div className="space-y-2">
-                            <Label>Vista Previa</Label>
-                            <div className="relative h-48 w-full rounded-md border overflow-hidden">
-                                <Image src={imagePreview} alt="Image preview" fill className="object-contain" />
-                            </div>
-                        </div>
-                    )}
-                     <div className="flex items-center space-x-2">
+                    
+                     <div className="flex items-center space-x-2 pt-4">
                         <Switch id="available" name="available" defaultChecked />
                         <Label htmlFor="available">Disponible para la venta</Label>
                     </div>

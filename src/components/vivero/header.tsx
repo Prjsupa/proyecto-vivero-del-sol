@@ -1,8 +1,7 @@
 
 'use client';
 
-import { Sprout, LogIn, User as UserIcon, LogOut, LayoutDashboard, UserPlus } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Sprout, LogOut, LayoutDashboard, User as UserIcon, Menu } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -19,23 +18,15 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useRouter } from 'next/navigation';
-import { Cart } from './cart';
-
+import { useSidebar } from '@/components/ui/sidebar';
 
 export function Header() {
-  const [isScrolled, setIsScrolled] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const supabase = createClient();
   const router = useRouter();
+  const { toggleSidebar } = useSidebar();
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   useEffect(() => {
     const getSession = async () => {
@@ -83,33 +74,28 @@ export function Header() {
   };
   
   const getInitials = (name: string, lastName: string) => {
-    return `${name.charAt(0)}${lastName.charAt(0)}`;
+    return `${name?.charAt(0) ?? ''}${lastName?.charAt(0) ?? ''}`.toUpperCase();
   }
 
   return (
-    <header
-      className={cn(
-        'sticky top-0 z-50 w-full transition-all duration-300 border-b',
-        isScrolled ? 'bg-background/80 shadow-md backdrop-blur-sm' : 'bg-background'
-      )}
-    >
-      <div className="container mx-auto flex h-20 items-center justify-between px-4 md:px-6">
-        <a href="/admin" className="flex items-center gap-2">
-          <Sprout className="h-8 w-8 text-primary" />
-          <span className="font-headline text-2xl font-bold tracking-wide text-foreground">
-            Vivero Del Sol
-          </span>
-        </a>
-        <nav className="flex items-center gap-6 md:flex">
+    <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+       <Button
+          variant="outline"
+          size="icon"
+          className="shrink-0 md:hidden"
+          onClick={toggleSidebar}
+        >
+          <Menu className="h-5 w-5" />
+          <span className="sr-only">Toggle navigation menu</span>
+        </Button>
+        <div className="flex w-full items-center justify-end gap-4">
            {user && profile ? (
-             <div className="flex items-center gap-2">
-              {profile.rol === 3 && <Cart />}
-              <DropdownMenu>
+             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                  <Button variant="secondary" className="relative h-10 w-10 rounded-full">
                     <Avatar className='h-10 w-10'>
                       <AvatarImage src={profile.avatar_url || ''} alt="User avatar" />
-                      <AvatarFallback className="font-headline bg-secondary text-secondary-foreground">
+                      <AvatarFallback className="font-semibold bg-primary text-primary-foreground">
                         {getInitials(profile.name, profile.last_name)}
                       </AvatarFallback>
                     </Avatar>
@@ -136,35 +122,31 @@ export function Header() {
                   <DropdownMenuItem asChild>
                     <Link href="/profile">
                       <UserIcon className="mr-2 h-4 w-4" />
-                      <span>Profile</span>
+                      <span>Perfil</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
+                    <span>Cerrar sesión</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </div>
           ) : (
             <div className="flex items-center gap-2">
                 <Link href="/auth/login" passHref>
                   <Button variant="outline">
-                    <LogIn className="mr-2 h-4 w-4" />
-                    Login
+                    Iniciar Sesión
                   </Button>
                 </Link>
                  <Link href="/auth/signup" passHref>
                   <Button>
-                    <UserPlus className="mr-2 h-4 w-4" />
-                    Sign Up
+                    Registrarse
                   </Button>
                 </Link>
             </div>
           )}
-        </nav>
-      </div>
+        </div>
     </header>
   );
 }
