@@ -36,8 +36,6 @@ export function BatchEditSubcategoryForm({ productIds, allSubcategories, onActio
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const formRef = useRef<HTMLFormElement>(null);
     const { toast } = useToast();
-    const [selectedSubcategory, setSelectedSubcategory] = useState<string>('');
-    const [isAddingNew, setIsAddingNew] = useState(false);
 
     useEffect(() => {
         if (state?.message === 'success') {
@@ -56,27 +54,8 @@ export function BatchEditSubcategoryForm({ productIds, allSubcategories, onActio
         }
     }, [state, toast, onActionCompleted]);
     
-    const handleSubcategoryChange = (value: string) => {
-        if (value === 'add_new') {
-            setIsAddingNew(true);
-            setSelectedSubcategory('');
-        } else {
-            setIsAddingNew(false);
-            setSelectedSubcategory(value);
-        }
-    };
-    
-    const onDialogChange = (open: boolean) => {
-        if (!open) {
-            formRef.current?.reset();
-            setSelectedSubcategory('');
-            setIsAddingNew(false);
-        }
-        setIsDialogOpen(open);
-    }
-
     return (
-        <Dialog open={isDialogOpen} onOpenChange={onDialogChange}>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
                 <Button variant="outline" size="sm">
                     <Pencil className="mr-2 h-4 w-4" />
@@ -93,30 +72,9 @@ export function BatchEditSubcategoryForm({ productIds, allSubcategories, onActio
                 <form action={formAction} ref={formRef} className="grid gap-4 py-4">
                     <input type="hidden" name="productIds" value={productIds.join(',')} />
                     <div className="space-y-2">
-                        <Label htmlFor="subcategory-select">Subcategoría de Destino</Label>
-                         <Select onValueChange={handleSubcategoryChange} value={isAddingNew ? 'add_new' : selectedSubcategory}>
-                            <SelectTrigger id="subcategory-select">
-                                <SelectValue placeholder="Selecciona o crea una subcategoría" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {allSubcategories.map(sub => (
-                                    <SelectItem key={sub} value={sub}>{sub}</SelectItem>
-                                ))}
-                                <SelectItem value="add_new">Crear nueva subcategoría</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <input type="hidden" name="subcategory" value={selectedSubcategory} />
-                        {isAddingNew && (
-                             <div className="space-y-2 pt-2">
-                                <Label htmlFor="new-subcategory">Nueva Subcategoría</Label>
-                                <Input 
-                                    id="new-subcategory" 
-                                    name="new_subcategory" 
-                                    placeholder="Ej: Trepadoras"
-                                />
-                             </div>
-                        )}
-                        <p className="text-xs text-muted-foreground pt-2">Para eliminar la subcategoría de los productos seleccionados, crea una "nueva subcategoría" y deja el campo en blanco.</p>
+                        <Label htmlFor="subcategory">Subcategoría de Destino</Label>
+                        <Input id="subcategory" name="subcategory" placeholder="Ej: Trepadoras" />
+                        <p className="text-xs text-muted-foreground pt-2">Para eliminar la subcategoría de los productos seleccionados, deja el campo en blanco.</p>
                         <FieldError errors={state.errors?.subcategory} />
                     </div>
                     <DialogFooter>

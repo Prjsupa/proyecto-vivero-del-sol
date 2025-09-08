@@ -5,7 +5,6 @@ import { useActionState, useEffect, useState, useRef } from 'react';
 import { useFormStatus } from 'react-dom';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AlertCircle, Loader2, Pencil } from 'lucide-react';
 import { updateProductsCategory } from '@/lib/actions';
@@ -36,8 +35,6 @@ export function BatchEditCategoryForm({ productIds, allCategories, onActionCompl
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const formRef = useRef<HTMLFormElement>(null);
     const { toast } = useToast();
-    const [selectedCategory, setSelectedCategory] = useState<string>('');
-    const [isAddingNew, setIsAddingNew] = useState(false);
 
     useEffect(() => {
         if (state?.message === 'success') {
@@ -56,16 +53,6 @@ export function BatchEditCategoryForm({ productIds, allCategories, onActionCompl
         }
     }, [state, toast, onActionCompleted]);
     
-    const handleCategoryChange = (value: string) => {
-        if (value === 'add_new') {
-            setIsAddingNew(true);
-            setSelectedCategory('');
-        } else {
-            setIsAddingNew(false);
-            setSelectedCategory(value);
-        }
-    };
-
     return (
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
@@ -84,29 +71,17 @@ export function BatchEditCategoryForm({ productIds, allCategories, onActionCompl
                 <form action={formAction} ref={formRef} className="grid gap-4 py-4">
                     <input type="hidden" name="productIds" value={productIds.join(',')} />
                     <div className="space-y-2">
-                        <Label htmlFor="category-select">Categoría de Destino</Label>
-                        <Select onValueChange={handleCategoryChange} value={isAddingNew ? 'add_new' : selectedCategory}>
+                        <Label htmlFor="category">Categoría de Destino</Label>
+                        <Select name="category">
                             <SelectTrigger id="category-select">
-                                <SelectValue placeholder="Selecciona o crea una categoría" />
+                                <SelectValue placeholder="Selecciona una categoría" />
                             </SelectTrigger>
                             <SelectContent>
                                 {allCategories.map(cat => (
                                     <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                                 ))}
-                                <SelectItem value="add_new">Crear nueva categoría</SelectItem>
                             </SelectContent>
                         </Select>
-                        <input type="hidden" name="category" value={selectedCategory} />
-                            {isAddingNew && (
-                            <div className="space-y-2 pt-2">
-                                    <Label htmlFor="new-category">Nueva Categoría</Label>
-                                <Input 
-                                    id="new-category" 
-                                    name="new_category" 
-                                    placeholder="Ej: Herramientas"
-                                />
-                            </div>
-                        )}
                         <FieldError errors={state.errors?.category} />
                     </div>
                     <DialogFooter>
