@@ -32,8 +32,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                     <Image 
                         src="https://fqkxbtahfsiebrphgzwg.supabase.co/storage/v1/object/public/vivero.logos/LOGOS_BLANCOS_Mesa_de_trabajo-1.png"
                         alt="Vivero Del Sol Logo"
-                        width={180}
-                        height={120}
+                        width={210}
+                        height={140}
                         />
                 </div>
             </SidebarHeader>

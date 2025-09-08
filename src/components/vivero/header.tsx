@@ -86,8 +86,8 @@ export function Header() {
              <Image 
                 src="https://fqkxbtahfsiebrphgzwg.supabase.co/storage/v1/object/public/vivero.logos/LOGOS_VERDE_Mesa_de_trabajo-1.png"
                 alt="Vivero Del Sol Logo"
-                width={150}
-                height={100}
+                width={180}
+                height={120}
             />
          </Link>
        </div>
