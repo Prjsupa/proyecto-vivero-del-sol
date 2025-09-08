@@ -5,15 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { AlertCircle, PlusCircle, Loader2 } from 'lucide-react';
 import { addProduct } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '../ui/textarea';
-
-
-const productCategories = ['Planta de interior', 'Planta de exterior', 'Planta frutal', 'Planta ornamental', 'Suculenta', 'Herramienta', 'Fertilizante', 'Maceta', 'Plantines'] as const;
 
 function SubmitButton() {
     const { pending } = useFormStatus();
@@ -90,16 +86,7 @@ export function AddProductForm() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                          <div className="space-y-2">
                             <Label htmlFor="category">Categoría</Label>
-                            <Select name="category">
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Selecciona una categoría" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {productCategories.map(cat => (
-                                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <Input id="category" name="category" placeholder="Ej: Planta de interior" />
                             <FieldError errors={state.errors?.category} />
                         </div>
                         <div className="space-y-2">

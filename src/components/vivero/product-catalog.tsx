@@ -1,9 +1,9 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import type { Product } from '@/lib/definitions';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
@@ -33,12 +33,14 @@ function ProductCard({ product }: { product: Product }) {
   );
 }
 
-const allCategories = ['Todas', 'Planta de interior', 'Planta de exterior', 'Planta frutal', 'Planta ornamental', 'Suculenta', 'Herramienta', 'Fertilizante', 'Maceta', 'Plantines'] as const;
-type ProductCategory = typeof allCategories[number];
-
 export function ProductCatalog({ products }: { products: Product[] }) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<ProductCategory>('Todas');
+  const [selectedCategory, setSelectedCategory] = useState<string>('Todas');
+
+  const allCategories = useMemo(() => {
+    const categories = new Set(products.map(p => p.category));
+    return ['Todas', ...Array.from(categories).sort()];
+  }, [products]);
 
   const filteredProducts = products.filter(
     (product) =>

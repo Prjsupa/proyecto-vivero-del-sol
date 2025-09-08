@@ -20,8 +20,7 @@ export type Product = {
   created_at: string;
   name: string;
   description?: string | null;
-  img_url?: string | null;
-  category: 'Planta de interior' | 'Planta de exterior' | 'Planta frutal' | 'Planta ornamental' | 'Suculenta' | 'Herramienta' | 'Fertilizante' | 'Maceta' | 'Plantines';
+  category: string;
   price: number;
   stock: number;
   available: boolean;
@@ -43,3 +42,4 @@ export type Json =
   | null
   | { [key: string]: Json | undefined }
   | Json[]
+
