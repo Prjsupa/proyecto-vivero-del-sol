@@ -50,12 +50,11 @@ export function UploadCsvForm() {
                     Importar CSV
                 </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle>Importar Productos desde CSV</DialogTitle>
                     <DialogDescription>
-                        Selecciona un archivo CSV para añadir productos en lote.
-                        Asegúrate de que el archivo tenga las cabeceras: `name,category,price,stock,available,description`.
+                        Añade productos en lote subiendo un archivo .csv. Asegúrate de que el archivo tenga una fila de cabecera con los campos correctos.
                     </DialogDescription>
                 </DialogHeader>
                 <form action={formAction} ref={formRef} className="space-y-4">
@@ -66,11 +65,16 @@ export function UploadCsvForm() {
 
                     <Alert>
                         <AlertCircle className="h-4 w-4" />
-                        <AlertTitle>Formato Requerido</AlertTitle>
+                        <AlertTitle>Estructura del CSV</AlertTitle>
                         <AlertDescription>
-                            <ul className="list-disc list-inside text-xs">
-                                <li><b>category:</b> 'Planta de interior', 'Planta de exterior', etc.</li>
+                             <p className="text-xs mb-2">La primera fila debe ser la cabecera: <strong>name,category,price,stock,available,description</strong></p>
+                            <ul className="list-disc list-inside text-xs space-y-1">
+                                <li><b>name:</b> Texto (Ej: "Monstera Deliciosa")</li>
+                                <li><b>category:</b> 'Planta de interior', 'Herramienta', etc.</li>
+                                <li><b>price:</b> Número (Ej: 25.99)</li>
+                                <li><b>stock:</b> Número entero (Ej: 150)</li>
                                 <li><b>available:</b> TRUE o FALSE</li>
+                                <li><b>description:</b> Texto (opcional)</li>
                             </ul>
                         </AlertDescription>
                     </Alert>
