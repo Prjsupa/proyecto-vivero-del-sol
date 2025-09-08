@@ -7,7 +7,7 @@ import { MoreHorizontal } from "lucide-react";
 import { EditProductForm } from "./edit-product-form";
 import type { Product } from "@/lib/definitions";
 
-export function ProductActions({ product }: { product: Product }) {
+export function ProductActions({ product, categories }: { product: Product, categories: string[] }) {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -19,7 +19,7 @@ export function ProductActions({ product }: { product: Product }) {
             <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Acciones</DropdownMenuLabel>
                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                   <EditProductForm product={product} />
+                   <EditProductForm product={product} categories={categories} />
                 </DropdownMenuItem>
                 <DropdownMenuItem>Eliminar</DropdownMenuItem>
             </DropdownMenuContent>

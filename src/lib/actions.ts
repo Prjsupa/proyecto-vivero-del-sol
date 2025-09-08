@@ -39,11 +39,15 @@ export async function handleContact(prevState: any, formData: FormData) {
 
 const productSchema = z.object({
   name: z.string().min(3, "El nombre debe tener al menos 3 caracteres."),
-  category: z.string().min(1, "La categoría es requerida."),
+  category: z.string().optional(),
+  new_category: z.string().optional(),
   price: z.coerce.number().min(0, "El precio no puede ser negativo."),
   stock: z.coerce.number().int().min(0, "El stock no puede ser negativo."),
   available: z.coerce.boolean(),
   description: z.string().optional(),
+}).refine(data => data.category || data.new_category, {
+    message: "La categoría es requerida.",
+    path: ["category"],
 });
 
 export async function addProduct(prevState: any, formData: FormData) {
@@ -57,7 +61,9 @@ export async function addProduct(prevState: any, formData: FormData) {
     }
     
     const supabase = createClient();
-    const { name, category, price, stock, available, description } = validatedFields.data;
+    const { name, price, stock, available, description } = validatedFields.data;
+    const category = validatedFields.data.new_category || validatedFields.data.category;
+
 
     const { error: insertError } = await supabase.from('products').insert({
         name,
@@ -99,7 +105,8 @@ export async function updateProduct(prevState: any, formData: FormData) {
     }
 
     const supabase = createClient();
-    const { id, name, category, price, stock, available, description } = validatedFields.data;
+    const { id, name, price, stock, available, description } = validatedFields.data;
+    const category = validatedFields.data.new_category || validatedFields.data.category;
 
 
     const { error: updateError } = await supabase
@@ -370,7 +377,7 @@ export async function updatePassword(prevState: any, formData: FormData) {
 
 const csvProductSchema = z.object({
   name: z.string().min(3),
-  category: z.string().min(1),
+  category: z.string(),
   price: z.coerce.number().min(0),
   stock: z.coerce.number().int().min(0),
   available: z.string().transform(val => val.toUpperCase() === 'TRUE'),

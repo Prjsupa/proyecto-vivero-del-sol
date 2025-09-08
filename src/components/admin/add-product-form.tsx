@@ -10,6 +10,7 @@ import { AlertCircle, PlusCircle, Loader2 } from 'lucide-react';
 import { addProduct } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '../ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 function SubmitButton() {
     const { pending } = useFormStatus();
@@ -31,11 +32,14 @@ function FieldError({ errors }: { errors?: string[] }) {
 }
 
 
-export function AddProductForm() {
+export function AddProductForm({ categories }: { categories: string[] }) {
     const [state, formAction] = useActionState(addProduct, { message: '' });
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const formRef = useRef<HTMLFormElement>(null);
     const { toast } = useToast();
+    const [selectedCategory, setSelectedCategory] = useState<string>('');
+    const [isAddingNew, setIsAddingNew] = useState(false);
+
 
     useEffect(() => {
         if (state?.message === 'success') {
@@ -45,6 +49,8 @@ export function AddProductForm() {
             });
             setIsDialogOpen(false);
             formRef.current?.reset();
+            setSelectedCategory('');
+            setIsAddingNew(false);
         } else if (state?.message && state.message !== 'success') {
              toast({
                 title: 'Error',
@@ -57,9 +63,22 @@ export function AddProductForm() {
     const onDialogChange = (open: boolean) => {
         if (!open) {
             formRef.current?.reset();
+            setSelectedCategory('');
+            setIsAddingNew(false);
         }
         setIsDialogOpen(open);
     }
+    
+    const handleCategoryChange = (value: string) => {
+        if (value === 'add_new') {
+            setIsAddingNew(true);
+            setSelectedCategory('');
+        } else {
+            setIsAddingNew(false);
+            setSelectedCategory(value);
+        }
+    };
+
 
     return (
         <Dialog open={isDialogOpen} onOpenChange={onDialogChange}>
@@ -85,8 +104,29 @@ export function AddProductForm() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                          <div className="space-y-2">
-                            <Label htmlFor="category">Categoría</Label>
-                            <Input id="category" name="category" placeholder="Ej: Planta de interior" />
+                            <Label htmlFor="category-select">Categoría</Label>
+                            <Select onValueChange={handleCategoryChange} value={isAddingNew ? 'add_new' : selectedCategory}>
+                                <SelectTrigger id="category-select">
+                                    <SelectValue placeholder="Selecciona o crea una categoría" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {categories.map(cat => (
+                                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                                    ))}
+                                    <SelectItem value="add_new">Crear nueva categoría</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <input type="hidden" name="category" value={selectedCategory} />
+                             {isAddingNew && (
+                                <div className="space-y-2 pt-2">
+                                     <Label htmlFor="new-category">Nueva Categoría</Label>
+                                    <Input 
+                                        id="new-category" 
+                                        name="new_category" 
+                                        placeholder="Ej: Herramientas"
+                                    />
+                                </div>
+                            )}
                             <FieldError errors={state.errors?.category} />
                         </div>
                         <div className="space-y-2">

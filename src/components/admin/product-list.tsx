@@ -10,16 +10,15 @@ import { ProductActions } from "@/components/admin/product-actions";
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-export function ProductList({ products }: { products: Product[] }) {
+export function ProductList({ products, categories }: { products: Product[], categories: string[] }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('Todas');
     const [availabilityFilter, setAvailabilityFilter] = useState('all');
     const [stockSort, setStockSort] = useState('none');
 
     const productCategories = useMemo(() => {
-        const categories = new Set(products.map(p => p.category));
-        return ['Todas', ...Array.from(categories).sort()];
-    }, [products]);
+        return ['Todas', ...categories];
+    }, [categories]);
 
     const filteredAndSortedProducts = useMemo(() => {
         let filtered = products;
@@ -125,7 +124,7 @@ export function ProductList({ products }: { products: Product[] }) {
                                     </TableCell>
                                     <TableCell className="hidden md:table-cell">{product.stock}</TableCell>
                                     <TableCell>
-                                        <ProductActions product={product} />
+                                        <ProductActions product={product} categories={categories} />
                                     </TableCell>
                                 </TableRow>
                             ))
