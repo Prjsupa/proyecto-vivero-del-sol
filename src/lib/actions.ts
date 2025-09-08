@@ -367,3 +367,85 @@ export async function updatePassword(prevState: any, formData: FormData) {
         data: 'Password updated successfully!',
     };
 }
+
+
+const csvProductSchema = z.object({
+  name: z.string().min(3),
+  category: z.enum(['Planta de interior', 'Planta de exterior', 'Planta frutal', 'Planta ornamental', 'Suculenta', 'Herramienta', 'Fertilizante', 'Maceta']),
+  price: z.coerce.number().min(0),
+  stock: z.coerce.number().int().min(0),
+  available: z.string().transform(val => val.toUpperCase() === 'TRUE'),
+  description: z.string().optional(),
+});
+
+
+export async function uploadProductsFromCsv(prevState: any, formData: FormData) {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { message: 'Not authenticated' };
+
+    const { data: profile } = await supabase.from('profiles').select('rol').eq('id', user.id).single();
+    if (profile?.rol !== 1) return { message: 'Not authorized' };
+    
+    const file = formData.get('csv-file') as File;
+    if (!file || file.size === 0) {
+        return { message: 'Por favor, selecciona un archivo CSV.' };
+    }
+    if (file.type !== 'text/csv') {
+        return { message: 'El archivo debe ser de tipo CSV.' };
+    }
+
+    const fileContent = await file.text();
+    const rows = fileContent.split('\n').map(row => row.trim()).filter(row => row);
+    
+    if (rows.length <= 1) {
+        return { message: 'El archivo CSV está vacío o solo contiene la cabecera.' };
+    }
+
+    const headers = rows[0].split(',').map(h => h.trim());
+    const expectedHeaders = ['name', 'category', 'price', 'stock', 'available', 'description'];
+    if (JSON.stringify(headers) !== JSON.stringify(expectedHeaders)) {
+        return { message: 'Las cabeceras del CSV no coinciden. Deben ser: name,category,price,stock,available,description' };
+    }
+
+    const productsToInsert = [];
+    const errors = [];
+
+    for (let i = 1; i < rows.length; i++) {
+        const values = rows[i].split(',');
+        const rowData = {
+            name: values[0]?.trim(),
+            category: values[1]?.trim(),
+            price: values[2]?.trim(),
+            stock: values[3]?.trim(),
+            available: values[4]?.trim(),
+            description: values[5]?.trim(),
+        };
+
+        const validated = csvProductSchema.safeParse(rowData);
+
+        if (validated.success) {
+            productsToInsert.push(validated.data);
+        } else {
+            errors.push(`Fila ${i + 1}: ${validated.error.flatten().fieldErrors.name || validated.error.flatten().fieldErrors.category || 'Dato inválido'}`);
+        }
+    }
+    
+    if (errors.length > 0) {
+        return { message: `Se encontraron errores en el archivo: ${errors.join(', ')}` };
+    }
+
+    if (productsToInsert.length > 0) {
+        const { error: insertError } = await supabase.from('products').insert(productsToInsert);
+        if (insertError) {
+            return { message: `Error al insertar productos: ${insertError.message}` };
+        }
+    }
+    
+    revalidatePath('/admin/products');
+
+    return { 
+        message: 'success', 
+        data: `¡Éxito! Se han añadido ${productsToInsert.length} productos.` 
+    };
+}

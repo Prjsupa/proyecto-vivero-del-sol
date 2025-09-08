@@ -1,5 +1,6 @@
 import { AddProductForm } from "@/components/admin/add-product-form";
 import { ProductList } from "@/components/admin/product-list";
+import { UploadCsvForm } from "@/components/admin/upload-csv-form";
 import type { Product } from "@/lib/definitions";
 import { createClient } from "@/lib/supabase/server";
 
@@ -26,7 +27,10 @@ export default async function ProductsPage() {
                     <h1 className="text-2xl font-semibold">Gestión de Productos</h1>
                     <p className="text-muted-foreground">Añade, edita y gestiona todos los productos de tu vivero.</p>
                 </div>
-                <AddProductForm />
+                 <div className="flex items-center gap-2">
+                    <UploadCsvForm />
+                    <AddProductForm />
+                </div>
             </div>
             <ProductList products={products} />
         </div>
