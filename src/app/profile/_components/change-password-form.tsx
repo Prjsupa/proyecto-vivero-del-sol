@@ -8,12 +8,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, AlertCircle, KeyRound } from 'lucide-react';
+import { DialogClose } from '@/components/ui/dialog';
 
 function SubmitButton() {
     const { pending } = useFormStatus();
     return (
-        <Button type="submit" disabled={pending} className="w-full">
-            {pending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Updating...</> : 'Update Password'}
+        <Button type="submit" disabled={pending}>
+            {pending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Actualizando...</> : 'Update Password'}
         </Button>
     )
 }
@@ -28,7 +29,7 @@ function FieldError({ errors }: { errors?: string[] }) {
     )
 }
 
-export function ChangePasswordForm() {
+export function ChangePasswordForm({ setDialogOpen }: { setDialogOpen: (open: boolean) => void }) {
     const [state, formAction] = useActionState(updatePassword, { message: '' });
     const { toast } = useToast();
     const formRef = useRef<HTMLFormElement>(null);
@@ -40,24 +41,30 @@ export function ChangePasswordForm() {
                 description: state.data,
             });
             formRef.current?.reset();
-        } else if (state?.message && state.message !== 'success') {
+            setDialogOpen(false);
+        } else if (state?.message && state.message !== 'success' && !state.errors) {
              toast({
                 title: 'Error',
                 description: state.message,
                 variant: 'destructive'
             });
         }
-    }, [state, toast]);
+    }, [state, toast, setDialogOpen]);
 
 
     return (
         <form action={formAction} ref={formRef}>
-            <Card>
+            <Card className="shadow-none border-none">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><KeyRound size={24} /> Change Password</CardTitle>
-                    <CardDescription>Enter a new password for your account.</CardDescription>
+                    <CardDescription>Enter your current and new password.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                     <div className="space-y-2">
+                        <Label htmlFor="currentPassword">Current Password</Label>
+                        <Input id="currentPassword" name="currentPassword" type="password" />
+                        <FieldError errors={state.errors?.currentPassword} />
+                    </div>
                     <div className="space-y-2">
                         <Label htmlFor="password">New Password</Label>
                         <Input id="password" name="password" type="password" />
@@ -69,7 +76,10 @@ export function ChangePasswordForm() {
                          <FieldError errors={state.errors?.confirmPassword} />
                     </div>
                 </CardContent>
-                <CardFooter>
+                <CardFooter className="gap-2">
+                    <DialogClose asChild>
+                        <Button variant="outline">Cancel</Button>
+                    </DialogClose>
                     <SubmitButton />
                 </CardFooter>
             </Card>

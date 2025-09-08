@@ -355,18 +355,19 @@ export async function addUser(prevState: any, formData: FormData) {
 }
 
 const updatePasswordSchema = z.object({
+    currentPassword: z.string().min(1, 'Current password is required.'),
     password: z.string().min(6, 'Password must be at least 6 characters.'),
     confirmPassword: z.string(),
 }).refine(data => data.password === data.confirmPassword, {
     message: "Passwords do not match.",
-    path: ['confirmPassword'], // Set error on confirmPassword field
+    path: ['confirmPassword'],
 });
 
 export async function updatePassword(prevState: any, formData: FormData) {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) {
+    if (!user || !user.email) {
         return { message: 'You must be logged in to update your password.' };
     }
 
@@ -379,13 +380,26 @@ export async function updatePassword(prevState: any, formData: FormData) {
         };
     }
 
-    const { password } = validatedFields.data;
+    const { currentPassword, password } = validatedFields.data;
 
-    const { error } = await supabase.auth.updateUser({ password });
+    // Verify current password first
+    const { error: loginError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: currentPassword,
+    });
 
-    if (error) {
+    if (loginError) {
         return {
-            message: `Could not update password: ${error.message}`,
+            message: "La contraseña actual es incorrecta.",
+            errors: { currentPassword: ["La contraseña actual es incorrecta."] }
+        }
+    }
+
+    const { error: updateError } = await supabase.auth.updateUser({ password });
+
+    if (updateError) {
+        return {
+            message: `Could not update password: ${updateError.message}`,
         };
     }
 
