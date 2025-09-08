@@ -13,6 +13,7 @@ import { ScrollArea } from '../ui/scroll-area';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
 import { Checkbox } from '../ui/checkbox';
 import { Badge } from '../ui/badge';
+import { Input } from '../ui/input';
 
 function SubmitButton() {
     const { pending } = useFormStatus();
