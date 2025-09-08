@@ -5,10 +5,8 @@
 import { z } from 'zod';
 import { createClient } from './supabase/server';
 import { revalidatePath } from 'next/cache';
-import type { CartItem } from '@/hooks/use-cart-store';
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
-import { createClient as createServiceRoleClient } from '@supabase/supabase-js';
 import type { Order } from './definitions';
 
 const contactSchema = z.object({
@@ -254,8 +252,12 @@ export async function updateUserRole(prevState: any, formData: FormData) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
+  if (!user) {
+    return { message: "No has iniciado sesión." };
+  }
+  
   // Check if the current user is an admin
-  const { data: adminProfile } = await supabase.from('profiles').select('rol').eq('id', user!.id).single();
+  const { data: adminProfile } = await supabase.from('profiles').select('rol').eq('id', user.id).single();
   if (adminProfile?.rol !== 1) {
     return { message: "No tienes permiso para realizar esta acción." };
   }
@@ -275,3 +277,81 @@ export async function updateUserRole(prevState: any, formData: FormData) {
     data: '¡Rol de usuario actualizado exitosamente!',
   };
 }
+
+const addUserSchema = z.object({
+  name: z.string().min(1, 'El nombre es requerido.'),
+  last_name: z.string().min(1, 'El apellido es requerido.'),
+  email: z.string().email('El email no es válido.'),
+  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres.'),
+});
+
+export async function addUser(prevState: any, formData: FormData) {
+    const validatedFields = addUserSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return {
+            message: "Datos de formulario inválidos.",
+            errors: validatedFields.error.flatten().fieldErrors,
+        };
+    }
+    
+    const cookieStore = cookies();
+    const supabaseAdmin = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        {
+            cookies: {
+                get(name: string) {
+                    return cookieStore.get(name)?.value
+                },
+            },
+        }
+    );
+
+    const { data: { user: adminUser } } = await supabaseAdmin.auth.getUser();
+    if (!adminUser) {
+        return { message: "No autorizado. Debes ser un administrador." }
+    }
+
+    const { data: adminProfile } = await supabaseAdmin.from('profiles').select('rol').eq('id', adminUser.id).single();
+    if (adminProfile?.rol !== 1) {
+       return { message: "No tienes permiso para realizar esta acción." };
+    }
+
+    const { name, last_name, email, password } = validatedFields.data;
+    
+    const { data: newUser, error } = await supabaseAdmin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true, // Auto-confirm email
+        user_metadata: {
+            name,
+            last_name,
+        }
+    });
+
+    if (error) {
+        return { message: `Error creando el usuario: ${error.message}` };
+    }
+    
+    // The profile is created by a trigger, so we don't need to insert it manually.
+    // We just need to make sure the role is set to 3.
+    if (newUser.user) {
+        const { error: profileError } = await supabaseAdmin
+            .from('profiles')
+            .update({ rol: 3 })
+            .eq('id', newUser.user.id);
+        
+        if (profileError) {
+             return { message: `Error asignando el rol al usuario: ${profileError.message}` };
+        }
+    }
+
+
+    revalidatePath('/admin/users');
+    return {
+        message: 'success',
+        data: `Usuario ${email} creado exitosamente.`,
+    };
+}
+

@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { UsersTable } from "@/components/admin/UsersTable";
+import { AddUserForm } from "@/components/admin/add-user-form";
 
 
 type UserWithProfile = Profile & {
@@ -84,9 +85,12 @@ export default async function UsersPage() {
     
     return (
         <div className="p-4 md:p-8 space-y-8">
-            <div>
-                <h1 className="text-3xl font-bold font-headline">Gestión de Usuarios</h1>
-                <p className="text-muted-foreground">Visualiza y gestiona los roles de todos los usuarios.</p>
+             <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold font-headline">Gestión de Usuarios</h1>
+                    <p className="text-muted-foreground">Visualiza y gestiona los roles de todos los usuarios.</p>
+                </div>
+                 <AddUserForm />
             </div>
 
             <Card>

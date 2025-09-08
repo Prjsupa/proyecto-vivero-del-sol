@@ -38,7 +38,7 @@ export default function LoginPage() {
     <Card>
       <CardHeader className="text-center">
         <CardTitle className="font-headline text-3xl">Welcome Back!</CardTitle>
-        <CardDescription className="font-body">Sign in to continue to your garden.</CardDescription>
+        <CardDescription className="font-body">Sign in to continue to your dashboard.</CardDescription>
       </CardHeader>
       <CardContent>
         <form action={formAction} className="space-y-4">
@@ -66,13 +66,6 @@ export default function LoginPage() {
           )}
 
           <SubmitButton />
-
-           <p className="text-center text-sm text-muted-foreground">
-              Don&apos;t have an account?{' '}
-              <Link href="/auth/signup" className="font-semibold text-primary hover:underline">
-                Sign up
-              </Link>
-            </p>
         </form>
       </CardContent>
     </Card>
