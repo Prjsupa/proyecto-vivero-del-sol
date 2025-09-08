@@ -1,4 +1,3 @@
-
 'use client';
 import { useState, useMemo } from 'react';
 import type { Product } from "@/lib/definitions";
@@ -9,8 +8,7 @@ import { cn, formatPrice } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '../ui/badge';
 import { Checkbox } from '../ui/checkbox';
-import { BatchActions } from './batch-actions';
-import { Button } from '../ui/button';
+import { SubcategoryBatchActions } from './subcategory-batch-actions';
 
 export function SubcategoryProductManager({ allProducts, allSubcategories }: { allProducts: Product[], allSubcategories: string[] }) {
     const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(allSubcategories[0] || null);
@@ -73,9 +71,8 @@ export function SubcategoryProductManager({ allProducts, allSubcategories }: { a
             <CardContent>
                 {selectedProductIds.length > 0 && (
                     <div className="mb-4">
-                        <BatchActions 
+                        <SubcategoryBatchActions 
                             selectedProductIds={selectedProductIds} 
-                            allCategories={[]}
                             onActionCompleted={onActionCompleted} 
                         />
                     </div>

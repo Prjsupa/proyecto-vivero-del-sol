@@ -638,3 +638,46 @@ export async function updateProductsCategory(prevState: any, formData: FormData)
         data: `Se movieron ${productIds.length} producto(s) a la categoría '${category}' exitosamente.` 
     };
 }
+
+const updateProductsSubcategorySchema = z.object({
+  productIds: z.string().transform(val => val.split(',')),
+  subcategory: z.string().optional(),
+});
+
+export async function updateProductsSubcategory(prevState: any, formData: FormData) {
+    const supabase = createClient();
+    const validatedFields = updateProductsSubcategorySchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return { message: 'Datos inválidos.', errors: validatedFields.error.flatten().fieldErrors };
+    }
+    
+    const { productIds, subcategory } = validatedFields.data;
+    const finalSubcategory = subcategory === '' ? null : subcategory;
+
+
+    if (!productIds || productIds.length === 0) {
+        return { message: 'No se seleccionaron productos.' };
+    }
+   
+    const { error } = await supabase
+        .from('products')
+        .update({ subcategory: finalSubcategory })
+        .in('id', productIds);
+
+    if (error) {
+        return { message: `Error al actualizar la subcategoría de los productos: ${error.message}` };
+    }
+
+    revalidatePath('/admin/categories');
+    revalidatePath('/admin/products');
+
+    const successMessage = finalSubcategory
+     ? `Se movieron ${productIds.length} producto(s) a la subcategoría '${finalSubcategory}' exitosamente.`
+     : `Se eliminó la subcategoría de ${productIds.length} producto(s) exitosamente.`
+
+    return { 
+        message: 'success', 
+        data: successMessage
+    };
+}
