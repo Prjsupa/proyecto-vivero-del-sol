@@ -37,7 +37,7 @@ export async function handleContact(prevState: any, formData: FormData) {
   };
 }
 
-const productSchema = z.object({
+const baseProductSchema = z.object({
   name: z.string().min(3, "El nombre debe tener al menos 3 caracteres."),
   category: z.string().optional(),
   new_category: z.string().optional(),
@@ -45,7 +45,9 @@ const productSchema = z.object({
   stock: z.coerce.number().int().min(0, "El stock no puede ser negativo."),
   available: z.coerce.boolean(),
   description: z.string().optional(),
-}).refine(data => data.category || data.new_category, {
+});
+
+const productSchema = baseProductSchema.refine(data => data.category || data.new_category, {
     message: "La categoría es requerida.",
     path: ["category"],
 });
@@ -90,8 +92,11 @@ export async function addProduct(prevState: any, formData: FormData) {
 }
 
 
-const updateProductSchema = productSchema.extend({
+const updateProductSchema = baseProductSchema.extend({
     id: z.string().uuid(),
+}).refine(data => data.category || data.new_category, {
+    message: "La categoría es requerida.",
+    path: ["category"],
 });
 
 export async function updateProduct(prevState: any, formData: FormData) {
@@ -455,3 +460,5 @@ export async function uploadProductsFromCsv(prevState: any, formData: FormData) 
         data: `¡Éxito! Se han añadido ${productsToInsert.length} productos.` 
     };
 }
+
+    
