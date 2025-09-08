@@ -103,31 +103,38 @@ export function EditProductForm({ product, categories }: { product: Product, cat
                         <Label htmlFor="description">Descripción (Opcional)</Label>
                         <Textarea id="description" name="description" defaultValue={product.description || ''} />
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="category-select">Categoría</Label>
-                          <Select onValueChange={handleCategoryChange} value={isAddingNew ? 'add_new' : selectedCategory}>
-                            <SelectTrigger id="category-select">
-                                <SelectValue placeholder="Selecciona o crea una categoría" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {categories.map(cat => (
-                                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                                ))}
-                                <SelectItem value="add_new">Crear nueva categoría</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <input type="hidden" name="category" value={selectedCategory} />
-                        {isAddingNew && (
-                            <div className="space-y-2 pt-2">
-                                    <Label htmlFor="new-category">Nueva Categoría</Label>
-                                <Input 
-                                    id="new-category" 
-                                    name="new_category" 
-                                    placeholder="Ej: Herramientas"
-                                />
-                            </div>
-                        )}
-                        <FieldError errors={state.errors?.category} />
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="category-select">Categoría</Label>
+                            <Select onValueChange={handleCategoryChange} value={isAddingNew ? 'add_new' : selectedCategory}>
+                                <SelectTrigger id="category-select">
+                                    <SelectValue placeholder="Selecciona o crea una categoría" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {categories.map(cat => (
+                                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                                    ))}
+                                    <SelectItem value="add_new">Crear nueva categoría</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <input type="hidden" name="category" value={selectedCategory} />
+                            {isAddingNew && (
+                                <div className="space-y-2 pt-2">
+                                        <Label htmlFor="new-category">Nueva Categoría</Label>
+                                    <Input 
+                                        id="new-category" 
+                                        name="new_category" 
+                                        placeholder="Ej: Herramientas"
+                                    />
+                                </div>
+                            )}
+                            <FieldError errors={state.errors?.category} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="subcategory">Subcategoría (Opcional)</Label>
+                            <Input id="subcategory" name="subcategory" defaultValue={product.subcategory || ''} />
+                            <FieldError errors={state.errors?.subcategory} />
+                        </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">

@@ -24,7 +24,10 @@ function ProductCard({ product }: { product: Product }) {
               {product.available ? 'En stock' : 'Agotado'}
             </Badge>
           <h3 className="font-headline text-xl mb-1 pt-8">{product.name}</h3>
-          <p className="font-body text-sm text-muted-foreground italic mb-2">{product.category}</p>
+           <p className="font-body text-sm text-muted-foreground italic mb-2">
+            {product.category}
+            {product.subcategory && ` / ${product.subcategory}`}
+          </p>
           {product.description && <p className="font-body text-sm text-foreground/80 line-clamp-3">{product.description}</p>}
         </CardContent>
         <CardFooter className="p-4 pt-0 flex justify-between items-center">
@@ -37,12 +40,23 @@ function ProductCard({ product }: { product: Product }) {
 export function ProductCatalog({ products }: { products: Product[] }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('Todas');
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string>('Todas');
   const [priceSort, setPriceSort] = useState('none');
 
   const allCategories = useMemo(() => {
     const categories = new Set(products.map(p => p.category));
     return ['Todas', ...Array.from(categories).sort()];
   }, [products]);
+  
+  const availableSubcategories = useMemo(() => {
+    const subcategories = new Set(
+        products
+            .filter(p => selectedCategory === 'Todas' || p.category === selectedCategory)
+            .map(p => p.subcategory)
+            .filter(Boolean) as string[]
+    );
+    return ['Todas', ...Array.from(subcategories).sort()];
+  }, [products, selectedCategory]);
 
   const filteredAndSortedProducts = useMemo(() => {
     let filtered = [...products];
@@ -58,6 +72,10 @@ export function ProductCatalog({ products }: { products: Product[] }) {
     if (selectedCategory !== 'Todas') {
         filtered = filtered.filter(product => product.category === selectedCategory);
     }
+
+    if (selectedSubcategory !== 'Todas') {
+        filtered = filtered.filter(product => product.subcategory === selectedSubcategory);
+    }
     
     if (priceSort !== 'none') {
         filtered.sort((a, b) => {
@@ -70,7 +88,12 @@ export function ProductCatalog({ products }: { products: Product[] }) {
     }
 
     return filtered;
-  }, [products, searchTerm, selectedCategory, priceSort]);
+  }, [products, searchTerm, selectedCategory, selectedSubcategory, priceSort]);
+  
+  const handleCategoryChange = (category: string) => {
+      setSelectedCategory(category);
+      setSelectedSubcategory('Todas'); // Reset subcategory when category changes
+  }
 
   return (
     <div>
@@ -79,7 +102,7 @@ export function ProductCatalog({ products }: { products: Product[] }) {
           <Button
             key={category}
             variant={selectedCategory === category ? 'default' : 'outline'}
-            onClick={() => setSelectedCategory(category)}
+            onClick={() => handleCategoryChange(category)}
             className="font-headline"
           >
             {category}
@@ -96,6 +119,18 @@ export function ProductCatalog({ products }: { products: Product[] }) {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             />
+        </div>
+        <div className="w-full md:w-auto">
+             <Select value={selectedSubcategory} onValueChange={setSelectedSubcategory} disabled={availableSubcategories.length <= 1}>
+                <SelectTrigger className="w-full md:w-[180px]">
+                    <SelectValue placeholder="Subcategoría" />
+                </SelectTrigger>
+                <SelectContent>
+                   {availableSubcategories.map(sub => (
+                     <SelectItem key={sub} value={sub}>{sub}</SelectItem>
+                   ))}
+                </SelectContent>
+            </Select>
         </div>
         <div className="w-full md:w-auto">
              <Select value={priceSort} onValueChange={setPriceSort}>

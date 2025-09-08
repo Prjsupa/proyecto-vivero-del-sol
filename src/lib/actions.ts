@@ -41,6 +41,7 @@ const baseProductSchema = z.object({
   name: z.string().min(3, "El nombre debe tener al menos 3 caracteres."),
   category: z.string().optional(),
   new_category: z.string().optional(),
+  subcategory: z.string().optional().nullable(),
   price: z.preprocess(
     (val) => (typeof val === 'string' ? val.replace(',', '.') : val),
     z.coerce.number().min(0, "El precio no puede ser negativo.")
@@ -66,13 +67,14 @@ export async function addProduct(prevState: any, formData: FormData) {
     }
     
     const supabase = createClient();
-    const { name, price, stock, available, description } = validatedFields.data;
+    const { name, price, stock, available, description, subcategory } = validatedFields.data;
     const category = validatedFields.data.new_category || validatedFields.data.category;
 
 
     const { error: insertError } = await supabase.from('products').insert({
         name,
         category,
+        subcategory,
         price,
         stock,
         available,
@@ -115,13 +117,13 @@ export async function updateProduct(prevState: any, formData: FormData) {
     }
 
     const supabase = createClient();
-    const { id, name, price, stock, available, description } = validatedFields.data;
+    const { id, name, price, stock, available, description, subcategory } = validatedFields.data;
     const category = validatedFields.data.new_category || validatedFields.data.category;
 
 
     const { error: updateError } = await supabase
         .from('products')
-        .update({ name, category, price, stock, available, description })
+        .update({ name, category, price, stock, available, description, subcategory })
         .eq('id', id);
 
     if (updateError) {
@@ -389,6 +391,7 @@ export async function updatePassword(prevState: any, formData: FormData) {
 const csvProductSchema = z.object({
   name: z.string().min(3),
   category: z.string(),
+  subcategory: z.string().optional(),
   price: z.coerce.number().min(0),
   stock: z.coerce.number().int().min(0),
   available: z.string().transform(val => val.toUpperCase() === 'TRUE'),
@@ -420,9 +423,9 @@ export async function uploadProductsFromCsv(prevState: any, formData: FormData) 
     }
 
     const headers = rows[0].split(',').map(h => h.trim());
-    const expectedHeaders = ['name', 'category', 'price', 'stock', 'available', 'description'];
+    const expectedHeaders = ['name', 'category', 'subcategory', 'price', 'stock', 'available', 'description'];
     if (JSON.stringify(headers) !== JSON.stringify(expectedHeaders)) {
-        return { message: 'Las cabeceras del CSV no coinciden. Deben ser: name,category,price,stock,available,description' };
+        return { message: 'Las cabeceras del CSV no coinciden. Deben ser: name,category,subcategory,price,stock,available,description' };
     }
 
     const productsToInsert = [];
@@ -433,10 +436,11 @@ export async function uploadProductsFromCsv(prevState: any, formData: FormData) 
         const rowData = {
             name: values[0]?.trim(),
             category: values[1]?.trim(),
-            price: values[2]?.trim(),
-            stock: values[3]?.trim(),
-            available: values[4]?.trim(),
-            description: values[5]?.trim(),
+            subcategory: values[2]?.trim(),
+            price: values[3]?.trim(),
+            stock: values[4]?.trim(),
+            available: values[5]?.trim(),
+            description: values[6]?.trim(),
         };
 
         const validated = csvProductSchema.safeParse(rowData);

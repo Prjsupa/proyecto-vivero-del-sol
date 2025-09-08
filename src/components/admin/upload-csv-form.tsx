@@ -68,10 +68,11 @@ export function UploadCsvForm() {
                         <AlertCircle className="h-4 w-4" />
                         <AlertTitle>Estructura del CSV</AlertTitle>
                         <AlertDescription>
-                             <p className="text-xs mb-2">La primera fila debe ser la cabecera: <strong>name,category,price,stock,available,description</strong></p>
+                             <p className="text-xs mb-2">La primera fila debe ser la cabecera: <strong>name,category,subcategory,price,stock,available,description</strong></p>
                             <ul className="list-disc list-inside text-xs space-y-1">
                                 <li><b>name:</b> Texto (Ej: "Monstera Deliciosa")</li>
                                 <li><b>category:</b> 'Planta de interior', 'Herramienta', etc.</li>
+                                <li><b>subcategory:</b> Texto (opcional, ej: 'Hojas grandes')</li>
                                 <li><b>price:</b> Número (Ej: 25.99)</li>
                                 <li><b>stock:</b> Número entero (Ej: 150)</li>
                                 <li><b>available:</b> TRUE o FALSE</li>

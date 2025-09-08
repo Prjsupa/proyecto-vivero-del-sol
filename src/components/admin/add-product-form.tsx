@@ -1,3 +1,4 @@
+
 'use client';
 import { useActionState, useEffect, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
@@ -130,16 +131,23 @@ export function AddProductForm({ categories }: { categories: string[] }) {
                             <FieldError errors={state.errors?.category} />
                         </div>
                         <div className="space-y-2">
+                            <Label htmlFor="subcategory">Subcategoría (Opcional)</Label>
+                            <Input id="subcategory" name="subcategory" placeholder="Ej: Hojas grandes"/>
+                            <FieldError errors={state.errors?.subcategory} />
+                        </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="price">Precio</Label>
+                            <Input id="price" name="price" type="text" placeholder="1000,00" />
+                            <FieldError errors={state.errors?.price} />
+                        </div>
+                        <div className="space-y-2">
                             <Label htmlFor="stock">Stock</Label>
                             <Input id="stock" name="stock" type="number" defaultValue="0" />
                              <FieldError errors={state.errors?.stock} />
                         </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                        <Label htmlFor="price">Precio</Label>
-                        <Input id="price" name="price" type="text" placeholder="1000,00" />
-                        <FieldError errors={state.errors?.price} />
                     </div>
                    
                     <div className="space-y-2">

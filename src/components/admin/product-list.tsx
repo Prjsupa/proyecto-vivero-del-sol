@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useMemo } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,12 +14,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 export function ProductList({ products, categories }: { products: Product[], categories: string[] }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('Todas');
+    const [subcategoryFilter, setSubcategoryFilter] = useState('Todas');
     const [availabilityFilter, setAvailabilityFilter] = useState('all');
     const [sortFilter, setSortFilter] = useState('none');
 
     const productCategories = useMemo(() => {
         return ['Todas', ...categories];
     }, [categories]);
+    
+    const productSubcategories = useMemo(() => {
+        const subcategories = new Set(products.map(p => p.subcategory).filter(Boolean) as string[]);
+        return ['Todas', ...Array.from(subcategories).sort()];
+    }, [products]);
 
     const filteredAndSortedProducts = useMemo(() => {
         let filtered = [...products];
@@ -29,6 +36,10 @@ export function ProductList({ products, categories }: { products: Product[], cat
 
         if (categoryFilter !== 'Todas') {
             filtered = filtered.filter(p => p.category === categoryFilter);
+        }
+
+        if (subcategoryFilter !== 'Todas') {
+            filtered = filtered.filter(p => p.subcategory === subcategoryFilter);
         }
 
         if (availabilityFilter !== 'all') {
@@ -56,7 +67,7 @@ export function ProductList({ products, categories }: { products: Product[], cat
 
 
         return filtered;
-    }, [products, searchTerm, categoryFilter, availabilityFilter, sortFilter]);
+    }, [products, searchTerm, categoryFilter, subcategoryFilter, availabilityFilter, sortFilter]);
 
     return (
         <Card>
@@ -78,6 +89,16 @@ export function ProductList({ products, categories }: { products: Product[], cat
                         <SelectContent>
                             {productCategories.map(cat => (
                                 <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                     <Select value={subcategoryFilter} onValueChange={setSubcategoryFilter}>
+                        <SelectTrigger className="md:w-[180px]">
+                            <SelectValue placeholder="Subcategoría" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {productSubcategories.map(sub => (
+                                <SelectItem key={sub} value={sub}>{sub}</SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
@@ -122,7 +143,7 @@ export function ProductList({ products, categories }: { products: Product[], cat
                                 <TableRow key={product.id}>
                                     <TableCell className="font-medium">
                                         <div className="font-medium">{product.name}</div>
-                                        <div className="text-sm text-muted-foreground">{product.category}</div>
+                                        <div className="text-sm text-muted-foreground">{product.category}{product.subcategory && ` / ${product.subcategory}`}</div>
                                     </TableCell>
                                     <TableCell>
                                         <Badge variant={product.available ? 'default' : 'outline'} className={cn(product.available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800')}>
