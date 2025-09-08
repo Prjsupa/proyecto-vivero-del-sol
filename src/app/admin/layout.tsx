@@ -28,7 +28,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <SidebarProvider>
         <Sidebar>
             <SidebarHeader>
-                 <div className="flex flex-col items-center justify-center p-4 gap-4">
+                 <div className="flex flex-col items-center justify-center p-4">
                     <Image 
                         src="https://fqkxbtahfsiebrphgzwg.supabase.co/storage/v1/object/public/vivero.logos/LOGOS_BLANCOS-03.png"
                         alt="Vivero Del Sol Logo 1"
