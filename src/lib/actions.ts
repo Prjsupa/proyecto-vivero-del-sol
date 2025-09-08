@@ -99,6 +99,7 @@ const updateProductSchema = baseProductSchema.extend({
     path: ["category"],
 });
 
+
 export async function updateProduct(prevState: any, formData: FormData) {
     const validatedFields = updateProductSchema.safeParse(Object.fromEntries(formData.entries()));
 
@@ -459,6 +460,31 @@ export async function uploadProductsFromCsv(prevState: any, formData: FormData) 
         message: 'success', 
         data: `¡Éxito! Se han añadido ${productsToInsert.length} productos.` 
     };
+}
+
+export async function deleteProduct(productId: string) {
+    if (!productId) {
+        return { message: "ID de producto inválido." };
+    }
+
+    const supabase = createClient();
+    
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { message: 'No autenticado' };
+    
+    const { data: profile } = await supabase.from('profiles').select('rol').eq('id', user.id).single();
+    if (profile?.rol !== 1) return { message: 'No autorizado' };
+
+    const { error } = await supabase.from('products').delete().eq('id', productId);
+
+    if (error) {
+        return { message: `Error al eliminar el producto: ${error.message}` };
+    }
+    
+    revalidatePath('/admin/products');
+    revalidatePath('/');
+    
+    return { message: 'success', data: '¡Producto eliminado exitosamente!' };
 }
 
     

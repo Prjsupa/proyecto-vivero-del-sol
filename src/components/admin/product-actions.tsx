@@ -1,11 +1,12 @@
 
 'use client';
 
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 import { EditProductForm } from "./edit-product-form";
 import type { Product } from "@/lib/definitions";
+import { DeleteProductAlert } from "./delete-product-alert";
 
 export function ProductActions({ product, categories }: { product: Product, categories: string[] }) {
     return (
@@ -21,7 +22,10 @@ export function ProductActions({ product, categories }: { product: Product, cate
                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                    <EditProductForm product={product} categories={categories} />
                 </DropdownMenuItem>
-                <DropdownMenuItem>Eliminar</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive focus:bg-destructive/10 focus:text-destructive">
+                    <DeleteProductAlert productId={product.id} productName={product.name}/>
+                </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
     );
