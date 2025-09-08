@@ -37,7 +37,7 @@ function FieldError({ errors }: { errors?: string[] }) {
 }
 
 
-export function EditProductForm({ product }: { product: Product }) {
+export function EditProductForm({ product, children }: { product: Product, children: React.ReactNode }) {
     const [state, formAction] = useActionState(updateProduct, { message: '' });
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [imagePreview, setImagePreview] = useState<string | null>(product.img_url);
@@ -84,7 +84,7 @@ export function EditProductForm({ product }: { product: Product }) {
     return (
         <Dialog open={isDialogOpen} onOpenChange={onDialogChange}>
             <DialogTrigger asChild>
-                <button className="w-full text-left">Editar</button>
+                {children}
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
