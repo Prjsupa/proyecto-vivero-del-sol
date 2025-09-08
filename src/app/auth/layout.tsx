@@ -21,12 +21,11 @@ export default async function AuthLayout({
             <Image
                 src="https://fqkxbtahfsiebrphgzwg.supabase.co/storage/v1/object/public/vivero.logos/LOGOS_VERDE_Mesa_de_trabajo-1.png"
                 alt="Vivero Del Sol Logo"
-                width={450}
-                height={300}
+                width={500}
+                height={333}
                 className="mb-4"
             />
              <h1 className="text-4xl font-bold font-headline text-foreground">Bienvenido a Vivero Del Sol</h1>
-             <p className="text-xl text-muted-foreground font-body max-w-xl">Tu viaje hacia un espacio más verde comienza aquí. Inicia sesión para descubrir tus plantas compañeras perfectas.</p>
          </div>
       </div>
       <div className="w-full lg:w-1/2 xl:w-1/3 flex items-center justify-center p-6 lg:p-12 bg-background">
