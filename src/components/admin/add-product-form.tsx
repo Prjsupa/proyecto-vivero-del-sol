@@ -138,7 +138,7 @@ export function AddProductForm({ categories }: { categories: string[] }) {
                     
                     <div className="space-y-2">
                         <Label htmlFor="price">Precio</Label>
-                        <Input id="price" name="price" type="number" step="0.01" placeholder="$0.00" />
+                        <Input id="price" name="price" type="number" step="0.01" placeholder="$1000.00" />
                         <FieldError errors={state.errors?.price} />
                     </div>
                    
