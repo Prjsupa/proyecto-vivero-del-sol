@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useMemo } from 'react';
 import type { Product } from "@/lib/definitions";
@@ -9,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '../ui/badge';
 import { Checkbox } from '../ui/checkbox';
 import { SubcategoryBatchActions } from './subcategory-batch-actions';
+import { EditSubcategoryForm } from './edit-subcategory-form';
+import { DeleteSubcategoryAlert } from './delete-subcategory-alert';
 
 export function SubcategoryProductManager({ allProducts, allSubcategories }: { allProducts: Product[], allSubcategories: string[] }) {
     const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(allSubcategories[0] || null);
@@ -45,6 +48,12 @@ export function SubcategoryProductManager({ allProducts, allSubcategories }: { a
         window.location.reload(); 
     }
 
+    const onSubcategoryActionCompleted = () => {
+        setSelectedSubcategory(null);
+        window.location.reload();
+    }
+
+
     return (
         <Card>
              <CardHeader>
@@ -61,6 +70,19 @@ export function SubcategoryProductManager({ allProducts, allSubcategories }: { a
                             </SelectContent>
                         </Select>
                     </div>
+                     {selectedSubcategory && (
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <EditSubcategoryForm
+                                subcategoryName={selectedSubcategory}
+                                onSubcategoryUpdated={onSubcategoryActionCompleted}
+                            />
+                            <DeleteSubcategoryAlert
+                                subcategoryName={selectedSubcategory}
+                                productCount={productsInSubcategory.length}
+                                onSubcategoryDeleted={onSubcategoryActionCompleted}
+                            />
+                        </div>
+                    )}
                 </div>
                  {selectedSubcategory && (
                     <div className="flex items-center text-sm text-muted-foreground pt-4">
@@ -74,6 +96,7 @@ export function SubcategoryProductManager({ allProducts, allSubcategories }: { a
                         <SubcategoryBatchActions 
                             selectedProductIds={selectedProductIds} 
                             onActionCompleted={onActionCompleted} 
+                            allSubcategories={allSubcategories}
                         />
                     </div>
                 )}

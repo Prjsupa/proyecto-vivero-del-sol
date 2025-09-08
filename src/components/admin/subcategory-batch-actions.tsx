@@ -19,7 +19,7 @@ import { useState } from "react";
 import { Loader2, Trash } from "lucide-react";
 import { BatchEditSubcategoryForm } from "./batch-edit-subcategory-form";
 
-export function SubcategoryBatchActions({ selectedProductIds, onActionCompleted }: { selectedProductIds: string[], onActionCompleted: () => void }) {
+export function SubcategoryBatchActions({ selectedProductIds, allSubcategories, onActionCompleted }: { selectedProductIds: string[], allSubcategories: string[], onActionCompleted: () => void }) {
     const [isLoading, setIsLoading] = useState(false);
     const { toast } = useToast();
 
@@ -52,6 +52,7 @@ export function SubcategoryBatchActions({ selectedProductIds, onActionCompleted 
                  <BatchEditSubcategoryForm 
                     productIds={selectedProductIds}
                     onActionCompleted={onActionCompleted}
+                    allSubcategories={allSubcategories}
                  />
                 <AlertDialog>
                     <AlertDialogTrigger asChild>
@@ -62,7 +63,7 @@ export function SubcategoryBatchActions({ selectedProductIds, onActionCompleted 
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                         <AlertDialogHeader>
-                            <AlertDialogTitle>¿Estás absolutamente seguro?</AlertDialogTitle>
+                            <AlertDialogTitle>¿Estás absolutely seguro?</AlertDialogTitle>
                             <AlertDialogDescription>
                                 Esta acción no se puede deshacer. Esto eliminará permanentemente {selectedProductIds.length} producto(s) de la base de datos.
                             </AlertDialogDescription>
@@ -90,4 +91,3 @@ export function SubcategoryBatchActions({ selectedProductIds, onActionCompleted 
         </div>
     );
 }
-

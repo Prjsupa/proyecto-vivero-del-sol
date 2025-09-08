@@ -1,5 +1,4 @@
 
-
 'use server';
 
 import { z } from 'zod';
@@ -642,6 +641,10 @@ export async function updateProductsCategory(prevState: any, formData: FormData)
 const updateProductsSubcategorySchema = z.object({
   productIds: z.string().transform(val => val.split(',')),
   subcategory: z.string().optional(),
+  new_subcategory: z.string().optional(),
+}).refine(data => data.subcategory || data.new_subcategory !== undefined, {
+    message: "La subcategoría es requerida.",
+    path: ["subcategory"],
 });
 
 export async function updateProductsSubcategory(prevState: any, formData: FormData) {
@@ -652,9 +655,12 @@ export async function updateProductsSubcategory(prevState: any, formData: FormDa
         return { message: 'Datos inválidos.', errors: validatedFields.error.flatten().fieldErrors };
     }
     
-    const { productIds, subcategory } = validatedFields.data;
-    const finalSubcategory = subcategory === '' ? null : subcategory;
+    const { productIds } = validatedFields.data;
+    const subcategoryValue = validatedFields.data.new_subcategory !== undefined 
+        ? validatedFields.data.new_subcategory 
+        : validatedFields.data.subcategory;
 
+    const finalSubcategory = subcategoryValue === '' ? null : subcategoryValue;
 
     if (!productIds || productIds.length === 0) {
         return { message: 'No se seleccionaron productos.' };
@@ -680,4 +686,59 @@ export async function updateProductsSubcategory(prevState: any, formData: FormDa
         message: 'success', 
         data: successMessage
     };
+}
+
+
+const updateSubcategorySchema = z.object({
+  oldSubcategoryName: z.string().min(1, "El nombre de la subcategoría actual es requerido."),
+  newSubcategoryName: z.string().min(1, "El nuevo nombre de la subcategoría es requerido."),
+});
+
+export async function updateSubcategoryName(prevState: any, formData: FormData) {
+    const supabase = createClient();
+    const validatedFields = updateSubcategorySchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return { message: 'Datos inválidos.', errors: validatedFields.error.flatten().fieldErrors };
+    }
+
+    const { oldSubcategoryName, newSubcategoryName } = validatedFields.data;
+
+    if (oldSubcategoryName === newSubcategoryName) {
+        return { message: 'El nuevo nombre de la subcategoría es el mismo que el actual.' };
+    }
+    
+    const { error } = await supabase
+        .from('products')
+        .update({ subcategory: newSubcategoryName })
+        .eq('subcategory', oldSubcategoryName);
+
+    if (error) {
+        return { message: `Error al actualizar la subcategoría: ${error.message}` };
+    }
+
+    revalidatePath('/admin/categories');
+    revalidatePath('/admin/products');
+    return { message: 'success', data: '¡Subcategoría actualizada exitosamente!' };
+}
+
+export async function deleteSubcategory(subcategoryName: string) {
+    const supabase = createClient();
+
+    const { count, error: checkError } = await supabase
+        .from('products')
+        .select('*', { count: 'exact', head: true })
+        .eq('subcategory', subcategoryName);
+
+    if (checkError) {
+        return { message: `Error al verificar productos en la subcategoría: ${checkError.message}` };
+    }
+    
+    if (count && count > 0) {
+        return { message: `No se puede eliminar la subcategoría porque contiene ${count} producto(s).` };
+    }
+    
+    revalidatePath('/admin/categories');
+    revalidatePath('/admin/products');
+    return { message: 'success', data: `La subcategoría '${subcategoryName}' ya no está en uso y ha sido eliminada efectivamente.` };
 }

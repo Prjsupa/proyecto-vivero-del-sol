@@ -34,10 +34,10 @@ export default async function CategoriesPage() {
             </div>
             <CategoryProductManager allProducts={products} allCategories={categories} />
             
-            <Separator />
+            <Separator className="my-8"/>
 
              <div>
-                <h1 className="text-2xl font-semibold">Gestión por Subategorías</h1>
+                <h1 className="text-2xl font-semibold">Gestión por Subcategorías</h1>
                 <p className="text-muted-foreground">Administra tus productos agrupados por cada subcategoría.</p>
             </div>
             <SubcategoryProductManager allProducts={products} allSubcategories={subcategories} />
