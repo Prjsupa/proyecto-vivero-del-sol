@@ -30,16 +30,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <SidebarHeader>
                  <div className="flex flex-col items-center justify-center p-4">
                     <Image 
-                        src="https://fqkxbtahfsiebrphgzwg.supabase.co/storage/v1/object/public/vivero.logos/LOGOS_BLANCOS-03.png"
+                        src="https://fqkxbtahfsiebrphgzwg.supabase.co/storage/v1/object/public/vivero.logos/LOGOS_BLANCOS_Mesa_de_trabajo-1.png"
                         alt="Vivero Del Sol Logo 1"
                         width={210}
                         height={140}
-                        />
-                    <Image 
-                        src="https://fqkxbtahfsiebrphgzwg.supabase.co/storage/v1/object/public/vivero.logos/LOGOS_BLANCOS-02.png"
-                        alt="Vivero Del Sol Logo 2"
-                        width={180}
-                        height={120}
                         />
                 </div>
             </SidebarHeader>
