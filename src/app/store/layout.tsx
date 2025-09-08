@@ -1,5 +1,5 @@
-import { Cart } from "@/components/vivero/cart";
 import { Header } from "@/components/vivero/header";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 export default function StoreLayout({
   children,
@@ -7,11 +7,13 @@ export default function StoreLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen w-full flex-col">
-      <Header />
-      <main className="flex min-h-[calc(100vh_-_theme(spacing.16))] flex-1 flex-col gap-4 bg-muted/40 p-4 md:gap-8 md:p-10">
-        {children}
-      </main>
-    </div>
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full flex-col">
+        <Header />
+        <main className="flex min-h-[calc(100vh_-_theme(spacing.16))] flex-1 flex-col gap-4 bg-muted/40 p-4 md:gap-8 md:p-10">
+          {children}
+        </main>
+      </div>
+    </SidebarProvider>
   );
 }
