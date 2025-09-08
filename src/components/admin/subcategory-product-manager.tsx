@@ -12,6 +12,7 @@ import { Checkbox } from '../ui/checkbox';
 import { SubcategoryBatchActions } from './subcategory-batch-actions';
 import { EditSubcategoryForm } from './edit-subcategory-form';
 import { DeleteSubcategoryAlert } from './delete-subcategory-alert';
+import { AddProductsToSubcategoryForm } from './add-products-to-subcategory-form';
 
 export function SubcategoryProductManager({ allProducts, allSubcategories }: { allProducts: Product[], allSubcategories: string[] }) {
     const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(allSubcategories[0] || null);
@@ -72,6 +73,11 @@ export function SubcategoryProductManager({ allProducts, allSubcategories }: { a
                     </div>
                      {selectedSubcategory && (
                         <div className="flex items-center gap-2 flex-wrap">
+                            <AddProductsToSubcategoryForm 
+                                subcategoryName={selectedSubcategory}
+                                allProducts={allProducts}
+                                onActionCompleted={onActionCompleted}
+                            />
                             <EditSubcategoryForm
                                 subcategoryName={selectedSubcategory}
                                 onSubcategoryUpdated={onSubcategoryActionCompleted}

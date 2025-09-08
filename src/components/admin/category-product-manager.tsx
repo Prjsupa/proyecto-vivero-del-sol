@@ -13,6 +13,7 @@ import { BatchActions } from './batch-actions';
 import { Button } from '../ui/button';
 import { EditCategoryForm } from './edit-category-form';
 import { DeleteCategoryAlert } from './delete-category-alert';
+import { AddProductsToCategoryForm } from './add-products-to-category-form';
 
 export function CategoryProductManager({ allProducts, allCategories }: { allProducts: Product[], allCategories: string[] }) {
     const [selectedCategory, setSelectedCategory] = useState<string | null>(allCategories[0] || null);
@@ -75,6 +76,11 @@ export function CategoryProductManager({ allProducts, allCategories }: { allProd
                     </div>
                      {selectedCategory && (
                         <div className="flex items-center gap-2 flex-wrap">
+                            <AddProductsToCategoryForm 
+                                categoryName={selectedCategory} 
+                                allProducts={allProducts} 
+                                onActionCompleted={onActionCompleted}
+                            />
                             <EditCategoryForm 
                                 categoryName={selectedCategory} 
                                 allCategories={allCategories} 
