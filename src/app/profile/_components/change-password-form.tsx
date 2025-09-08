@@ -6,9 +6,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Loader2, AlertCircle, KeyRound } from 'lucide-react';
-import { DialogClose } from '@/components/ui/dialog';
 
 function SubmitButton() {
     const { pending } = useFormStatus();
@@ -53,36 +52,38 @@ export function ChangePasswordForm({ setDialogOpen }: { setDialogOpen: (open: bo
 
 
     return (
-        <form action={formAction} ref={formRef}>
-            <Card className="shadow-none border-none">
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><KeyRound size={24} /> Change Password</CardTitle>
-                    <CardDescription>Enter your current and new password.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                     <div className="space-y-2">
-                        <Label htmlFor="currentPassword">Current Password</Label>
-                        <Input id="currentPassword" name="currentPassword" type="password" />
-                        <FieldError errors={state.errors?.currentPassword} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="password">New Password</Label>
-                        <Input id="password" name="password" type="password" />
-                        <FieldError errors={state.errors?.password} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                        <Input id="confirmPassword" name="confirmPassword" type="password" />
-                         <FieldError errors={state.errors?.confirmPassword} />
-                    </div>
-                </CardContent>
-                <CardFooter className="gap-2">
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                    <KeyRound size={24} /> Cambiar Contraseña
+                </DialogTitle>
+                <DialogDescription>
+                    Ingresa tu contraseña actual y la nueva para actualizar tu cuenta.
+                </DialogDescription>
+            </DialogHeader>
+            <form action={formAction} ref={formRef} className="space-y-4">
+                 <div className="space-y-2">
+                    <Label htmlFor="currentPassword">Contraseña Actual</Label>
+                    <Input id="currentPassword" name="currentPassword" type="password" />
+                    <FieldError errors={state.errors?.currentPassword} />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="password">Nueva Contraseña</Label>
+                    <Input id="password" name="password" type="password" />
+                    <FieldError errors={state.errors?.password} />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="confirmPassword">Confirmar Nueva Contraseña</Label>
+                    <Input id="confirmPassword" name="confirmPassword" type="password" />
+                     <FieldError errors={state.errors?.confirmPassword} />
+                </div>
+                <DialogFooter className="gap-2 pt-4">
                     <DialogClose asChild>
-                        <Button variant="outline">Cancel</Button>
+                        <Button variant="outline">Cancelar</Button>
                     </DialogClose>
                     <SubmitButton />
-                </CardFooter>
-            </Card>
-        </form>
+                </DialogFooter>
+            </form>
+        </DialogContent>
     )
 }

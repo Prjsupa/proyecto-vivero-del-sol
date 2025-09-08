@@ -7,7 +7,7 @@ import { Header } from "@/components/vivero/header";
 import { ProfileForm } from "./_components/profile-form";
 import { ChangePasswordForm } from "./_components/change-password-form";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { useEffect, useState } from "react";
 import type { Profile } from "@/lib/definitions";
 import { KeyRound } from "lucide-react";
@@ -83,9 +83,7 @@ export default function ProfilePage() {
                         Change Password
                     </Button>
                 </DialogTrigger>
-                <DialogContent>
-                    <ChangePasswordForm setDialogOpen={setIsDialogOpen} />
-                </DialogContent>
+                <ChangePasswordForm setDialogOpen={setIsDialogOpen} />
             </Dialog>
           </div>
         </div>
