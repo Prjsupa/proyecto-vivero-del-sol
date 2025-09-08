@@ -460,6 +460,7 @@ export async function uploadProductsFromCsv(prevState: any, formData: FormData) 
     }
     
     revalidatePath('/admin/products');
+    revalidatePath('/admin/categories');
 
     return { 
         message: 'success', 
@@ -517,4 +518,74 @@ export async function deleteSelectedProducts(productIds: string[]) {
     revalidatePath('/');
     
     return { message: 'success', data: `¡${productIds.length} producto(s) eliminado(s) exitosamente!` };
+}
+
+const updateCategorySchema = z.object({
+  oldCategoryName: z.string().min(1, "El nombre de la categoría actual es requerido."),
+  newCategoryName: z.string().min(1, "El nuevo nombre de la categoría es requerido."),
+});
+
+
+export async function updateCategoryName(prevState: any, formData: FormData) {
+    const supabase = createClient();
+    const validatedFields = updateCategorySchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return { message: 'Datos inválidos.', errors: validatedFields.error.flatten().fieldErrors };
+    }
+
+    const { oldCategoryName, newCategoryName } = validatedFields.data;
+
+    if (oldCategoryName === newCategoryName) {
+        return { message: 'El nuevo nombre de la categoría es el mismo que el actual.' };
+    }
+    
+    const { count, error: checkError } = await supabase
+        .from('products')
+        .select('*', { count: 'exact', head: true })
+        .eq('category', newCategoryName);
+
+    if (checkError) {
+        return { message: `Error al verificar la categoría: ${checkError.message}` };
+    }
+    if (count && count > 0) {
+        return { message: `La categoría '${newCategoryName}' ya existe.` };
+    }
+
+    const { error } = await supabase
+        .from('products')
+        .update({ category: newCategoryName })
+        .eq('category', oldCategoryName);
+
+    if (error) {
+        return { message: `Error al actualizar la categoría: ${error.message}` };
+    }
+
+    revalidatePath('/admin/categories');
+    revalidatePath('/admin/products');
+    return { message: 'success', data: '¡Categoría actualizada exitosamente!' };
+}
+
+export async function deleteCategory(categoryName: string) {
+    const supabase = createClient();
+
+    const { count, error: checkError } = await supabase
+        .from('products')
+        .select('*', { count: 'exact', head: true })
+        .eq('category', categoryName);
+
+    if (checkError) {
+        return { message: `Error al verificar productos en la categoría: ${checkError.message}` };
+    }
+    
+    if (count && count > 0) {
+        return { message: `No se puede eliminar la categoría porque contiene ${count} producto(s).` };
+    }
+    
+    // As categories are just text fields on products, there's nothing to "delete"
+    // if no products are using it. We just confirm it's not in use.
+    
+    revalidatePath('/admin/categories');
+    revalidatePath('/admin/products');
+    return { message: 'success', data: `La categoría '${categoryName}' ya no está en uso y ha sido eliminada efectivamente.` };
 }

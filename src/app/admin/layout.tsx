@@ -61,7 +61,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                                 <Link href="/admin/categories">
                                 <SidebarMenuButton>
                                     <LayoutGrid />
-                                    Categorías
+                                    Categorías de Productos
                                 </SidebarMenuButton>
                             </Link>
                         </SidebarMenuItem>

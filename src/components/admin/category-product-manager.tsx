@@ -10,6 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '../ui/badge';
 import { Checkbox } from '../ui/checkbox';
 import { BatchActions } from './batch-actions';
+import { Button } from '../ui/button';
+import { EditCategoryForm } from './edit-category-form';
+import { DeleteCategoryAlert } from './delete-category-alert';
 
 export function CategoryProductManager({ allProducts, allCategories }: { allProducts: Product[], allCategories: string[] }) {
     const [selectedCategory, setSelectedCategory] = useState<string | null>(allCategories[0] || null);
@@ -48,10 +51,16 @@ export function CategoryProductManager({ allProducts, allCategories }: { allProd
         window.location.reload(); 
     }
 
+    const onCategoryActionCompleted = () => {
+        setSelectedCategory(null);
+        window.location.reload();
+    }
+
+
     return (
         <Card>
              <CardHeader>
-                <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex flex-col md:flex-row gap-4 items-start">
                     <div className='w-full md:w-72'>
                          <Select onValueChange={handleCategoryChange} value={selectedCategory || ''}>
                             <SelectTrigger>
@@ -64,12 +73,26 @@ export function CategoryProductManager({ allProducts, allCategories }: { allProd
                             </SelectContent>
                         </Select>
                     </div>
-                    {selectedCategory && (
-                        <div className="flex items-center text-sm text-muted-foreground">
-                            <p><span className="font-semibold text-foreground">{productsInCategory.length}</span> productos en esta categoría.</p>
+                     {selectedCategory && (
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <EditCategoryForm 
+                                categoryName={selectedCategory} 
+                                allCategories={allCategories} 
+                                onCategoryUpdated={onCategoryActionCompleted}
+                            />
+                            <DeleteCategoryAlert 
+                                categoryName={selectedCategory}
+                                productCount={productsInCategory.length}
+                                onCategoryDeleted={onCategoryActionCompleted}
+                            />
                         </div>
                     )}
                 </div>
+                 {selectedCategory && (
+                    <div className="flex items-center text-sm text-muted-foreground pt-4">
+                        <p><span className="font-semibold text-foreground">{productsInCategory.length}</span> productos en esta categoría.</p>
+                    </div>
+                )}
             </CardHeader>
             <CardContent>
                 {selectedProductIds.length > 0 && (
@@ -83,8 +106,9 @@ export function CategoryProductManager({ allProducts, allCategories }: { allProd
                             <TableHead className="w-[50px]">
                                 <Checkbox
                                     onCheckedChange={handleSelectAll}
-                                    checked={selectedProductIds.length > 0 && selectedProductIds.length === productsInCategory.length}
+                                    checked={productsInCategory.length > 0 && selectedProductIds.length === productsInCategory.length}
                                     aria-label="Select all"
+                                    disabled={productsInCategory.length === 0}
                                 />
                             </TableHead>
                             <TableHead>Nombre</TableHead>
