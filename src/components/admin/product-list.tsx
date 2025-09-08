@@ -4,7 +4,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Package, Search } from "lucide-react";
 import type { Product } from "@/lib/definitions";
-import Image from 'next/image';
 import { Badge } from "@/components/ui/badge";
 import { cn, formatPrice } from "@/lib/utils";
 import { ProductActions } from "@/components/admin/product-actions";
@@ -96,9 +95,6 @@ export function ProductList({ products }: { products: Product[] }) {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="hidden w-[100px] sm:table-cell">
-                                <span className="sr-only">Imagen</span>
-                            </TableHead>
                             <TableHead>Nombre</TableHead>
                             <TableHead>Estado</TableHead>
                             <TableHead className="hidden md:table-cell">Precio</TableHead>
@@ -112,15 +108,6 @@ export function ProductList({ products }: { products: Product[] }) {
                         {filteredAndSortedProducts.length > 0 ? (
                             filteredAndSortedProducts.map((product) => (
                                 <TableRow key={product.id}>
-                                    <TableCell className="hidden sm:table-cell">
-                                        <Image
-                                            alt={product.name}
-                                            className="aspect-square rounded-md object-cover"
-                                            height="64"
-                                            src={product.img_url || 'https://placehold.co/64'}
-                                            width="64"
-                                        />
-                                    </TableCell>
                                     <TableCell className="font-medium">
                                         <div className="font-medium">{product.name}</div>
                                         <div className="text-sm text-muted-foreground">{product.category}</div>
@@ -141,7 +128,7 @@ export function ProductList({ products }: { products: Product[] }) {
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={6} className="h-48 text-center">
+                                <TableCell colSpan={5} className="h-48 text-center">
                                     <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
                                         <Package className="h-12 w-12" />
                                         <p className="font-semibold">No se encontraron productos.</p>

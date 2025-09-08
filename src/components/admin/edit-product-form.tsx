@@ -11,7 +11,6 @@ import { Switch } from '@/components/ui/switch';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { updateProduct } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
-import Image from 'next/image';
 import type { Product } from '@/lib/definitions';
 import { Textarea } from '../ui/textarea';
 
@@ -39,7 +38,6 @@ function FieldError({ errors }: { errors?: string[] }) {
 export function EditProductForm({ product }: { product: Product }) {
     const [state, formAction] = useActionState(updateProduct, { message: '' });
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [imagePreview, setImagePreview] = useState<string | null>(product.img_url);
     const formRef = useRef<HTMLFormElement>(null);
     const { toast } = useToast();
 
@@ -59,23 +57,10 @@ export function EditProductForm({ product }: { product: Product }) {
         }
     }, [state, toast]);
 
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagePreview(reader.result as string);
-            };
-            reader.readAsDataURL(file);
-        } else {
-            setImagePreview(product.img_url);
-        }
-    };
     
     const onDialogChange = (open: boolean) => {
         if (!open) {
             formRef.current?.reset();
-            setImagePreview(product.img_url);
         }
         setIsDialogOpen(open);
     }
@@ -94,7 +79,6 @@ export function EditProductForm({ product }: { product: Product }) {
                 </DialogHeader>
                 <form action={formAction} ref={formRef} className="grid gap-4 py-4 max-h-[80vh] overflow-y-auto pr-4">
                     <input type="hidden" name="id" value={product.id} />
-                    <input type="hidden" name="current_img_url" value={product.img_url} />
 
                     <div className="space-y-2">
                         <Label htmlFor="name">Nombre del Producto</Label>
@@ -131,20 +115,6 @@ export function EditProductForm({ product }: { product: Product }) {
                              <FieldError errors={state.errors?.stock} />
                         </div>
                     </div>
-                     <div className="space-y-2">
-                        <Label htmlFor="image">Imagen del Producto</Label>
-                        <Input id="image" name="image" type="file" accept="image/*" onChange={handleImageChange} />
-                        <p className="text-xs text-muted-foreground">Deja en blanco para conservar la imagen actual.</p>
-                        <FieldError errors={state.errors?.image} />
-                    </div>
-                    {imagePreview && (
-                        <div className="space-y-2">
-                            <Label>Vista Previa</Label>
-                            <div className="relative h-48 w-full rounded-md border overflow-hidden">
-                                <Image src={imagePreview} alt="Image preview" fill className="object-contain" />
-                            </div>
-                        </div>
-                    )}
                      <div className="flex items-center space-x-2">
                         <Switch id="available" name="available" defaultChecked={product.available} />
                         <Label htmlFor="available">Disponible para la venta</Label>

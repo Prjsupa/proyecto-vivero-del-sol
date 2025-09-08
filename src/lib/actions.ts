@@ -43,7 +43,6 @@ const productSchema = z.object({
   price: z.coerce.number().min(0, "El precio no puede ser negativo."),
   stock: z.coerce.number().int().min(0, "El stock no puede ser negativo."),
   available: z.coerce.boolean(),
-  image: z.instanceof(File).refine(file => file.size > 0, "La imagen es requerida.").refine(file => file.size < 4 * 1024 * 1024, "La imagen debe ser menor a 4MB."),
   description: z.string().optional(),
 });
 
@@ -58,23 +57,7 @@ export async function addProduct(prevState: any, formData: FormData) {
     }
     
     const supabase = createClient();
-    const { name, category, price, stock, available, image, description } = validatedFields.data;
-
-    const imageFileName = `${crypto.randomUUID()}-${image.name}`;
-
-    const { error: uploadError } = await supabase.storage
-        .from('products')
-        .upload(imageFileName, image);
-    
-    if (uploadError) {
-        return {
-            message: `Error al subir la imagen: ${uploadError.message}`,
-        };
-    }
-
-    const { data: publicUrlData } = supabase.storage
-        .from('products')
-        .getPublicUrl(imageFileName);
+    const { name, category, price, stock, available, description } = validatedFields.data;
 
     const { error: insertError } = await supabase.from('products').insert({
         name,
@@ -82,13 +65,11 @@ export async function addProduct(prevState: any, formData: FormData) {
         price,
         stock,
         available,
-        img_url: publicUrlData.publicUrl,
+        img_url: null,
         description,
     });
 
     if (insertError) {
-        // If insert fails, try to remove the uploaded image
-        await supabase.storage.from('products').remove([imageFileName]);
         return {
             message: `Error al crear el producto: ${insertError.message}`,
         };
@@ -105,9 +86,7 @@ export async function addProduct(prevState: any, formData: FormData) {
 
 
 const updateProductSchema = productSchema.extend({
-    image: z.instanceof(File).optional().refine(file => !file || file.size < 4 * 1024 * 1024, "La imagen debe ser menor a 4MB."),
     id: z.string().uuid(),
-    current_img_url: z.string().url(),
 });
 
 export async function updateProduct(prevState: any, formData: FormData) {
@@ -121,32 +100,12 @@ export async function updateProduct(prevState: any, formData: FormData) {
     }
 
     const supabase = createClient();
-    const { id, name, category, price, stock, available, image, current_img_url, description } = validatedFields.data;
+    const { id, name, category, price, stock, available, description } = validatedFields.data;
 
-    let imageUrl = current_img_url;
-
-    if (image && image.size > 0) {
-        const imageFileName = `${crypto.randomUUID()}-${image.name}`;
-        const { error: uploadError } = await supabase.storage
-            .from('products')
-            .upload(imageFileName, image);
-
-        if (uploadError) {
-            return { message: `Error al subir la nueva imagen: ${uploadError.message}` };
-        }
-
-        imageUrl = supabase.storage.from('products').getPublicUrl(imageFileName).data.publicUrl;
-
-        // Delete old image
-        const oldImageName = current_img_url.split('/').pop();
-        if (oldImageName) {
-            await supabase.storage.from('products').remove([oldImageName]);
-        }
-    }
 
     const { error: updateError } = await supabase
         .from('products')
-        .update({ name, category, price, stock, available, img_url: imageUrl, description })
+        .update({ name, category, price, stock, available, description })
         .eq('id', id);
 
     if (updateError) {

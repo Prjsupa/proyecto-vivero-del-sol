@@ -7,10 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { AlertCircle, PlusCircle, Loader2, UploadCloud } from 'lucide-react';
+import { AlertCircle, PlusCircle, Loader2 } from 'lucide-react';
 import { addProduct } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
-import Image from 'next/image';
 import { Textarea } from '../ui/textarea';
 
 
@@ -39,7 +38,6 @@ function FieldError({ errors }: { errors?: string[] }) {
 export function AddProductForm() {
     const [state, formAction] = useActionState(addProduct, { message: '' });
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [imagePreview, setImagePreview] = useState<string | null>(null);
     const formRef = useRef<HTMLFormElement>(null);
     const { toast } = useToast();
 
@@ -51,7 +49,6 @@ export function AddProductForm() {
             });
             setIsDialogOpen(false);
             formRef.current?.reset();
-            setImagePreview(null);
         } else if (state?.message && state.message !== 'success') {
              toast({
                 title: 'Error',
@@ -61,23 +58,9 @@ export function AddProductForm() {
         }
     }, [state, toast]);
 
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagePreview(reader.result as string);
-            };
-            reader.readAsDataURL(file);
-        } else {
-            setImagePreview(null);
-        }
-    };
-    
     const onDialogChange = (open: boolean) => {
         if (!open) {
             formRef.current?.reset();
-            setImagePreview(null);
         }
         setIsDialogOpen(open);
     }
@@ -135,23 +118,6 @@ export function AddProductForm() {
                     <div className="space-y-2">
                         <Label htmlFor="description">Descripción</Label>
                         <Textarea id="description" name="description" placeholder="Describe el producto..."/>
-                    </div>
-                   
-                     <div className="space-y-2">
-                        <Label htmlFor="image">Imagen del Producto</Label>
-                        <div className="relative flex justify-center items-center w-full h-48 rounded-lg border-2 border-dashed border-border hover:border-primary transition-colors">
-                            {imagePreview ? (
-                                <Image src={imagePreview} alt="Image preview" fill className="object-contain rounded-lg p-2" />
-                            ) : (
-                                <div className="text-center text-muted-foreground">
-                                    <UploadCloud className="mx-auto h-12 w-12" />
-                                    <p>Arrastra y suelta o haz clic para subir</p>
-                                    <p className="text-xs">PNG, JPG, GIF hasta 4MB</p>
-                                </div>
-                            )}
-                            <Input id="image" name="image" type="file" accept="image/*" onChange={handleImageChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-                        </div>
-                        <FieldError errors={state.errors?.image} />
                     </div>
                     
                      <div className="flex items-center space-x-2 pt-4">

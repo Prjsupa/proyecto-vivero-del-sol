@@ -2,7 +2,6 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import type { Product } from '@/lib/definitions';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -15,14 +14,7 @@ function ProductCard({ product }: { product: Product }) {
   return (
       <Card className="flex flex-col h-full overflow-hidden transition-all hover:shadow-xl duration-300 group">
         <CardHeader className="p-0">
-          <div className="relative h-48 w-full">
-            <Image
-              src={product.img_url || 'https://placehold.co/400x300'}
-              alt={product.name}
-              data-ai-hint="product image"
-              fill
-              className="object-cover"
-            />
+          <div className="relative h-48 w-full bg-muted">
              <Badge
               className={cn(
                 'absolute top-2 right-2',
