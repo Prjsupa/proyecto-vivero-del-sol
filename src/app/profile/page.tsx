@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Header } from "@/components/vivero/header";
 import { ProfileForm } from "./_components/profile-form";
+import { ChangePasswordForm } from "./_components/change-password-form";
 
 export default async function ProfilePage() {
   const supabase = createClient();
@@ -33,9 +34,10 @@ export default async function ProfilePage() {
       <Header />
       <main className="flex-1 bg-muted/40 py-12 md:py-24">
         <div className="container">
-          <div className="max-w-2xl mx-auto">
-             <h1 className="text-3xl md:text-4xl font-headline mb-8">My Profile</h1>
+          <div className="max-w-2xl mx-auto space-y-8">
+             <h1 className="text-3xl md:text-4xl font-headline mb-0">My Profile</h1>
             <ProfileForm profile={profile} />
+            <ChangePasswordForm />
           </div>
         </div>
       </main>

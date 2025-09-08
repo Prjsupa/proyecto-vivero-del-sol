@@ -7,7 +7,6 @@ import { createClient } from './supabase/server';
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
-import type { Order } from './definitions';
 
 const contactSchema = z.object({
   name: z.string().min(2, 'Name is required.'),
@@ -355,3 +354,43 @@ export async function addUser(prevState: any, formData: FormData) {
     };
 }
 
+const updatePasswordSchema = z.object({
+    password: z.string().min(6, 'Password must be at least 6 characters.'),
+    confirmPassword: z.string(),
+}).refine(data => data.password === data.confirmPassword, {
+    message: "Passwords do not match.",
+    path: ['confirmPassword'], // Set error on confirmPassword field
+});
+
+export async function updatePassword(prevState: any, formData: FormData) {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        return { message: 'You must be logged in to update your password.' };
+    }
+
+    const validatedFields = updatePasswordSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return {
+            message: "Invalid form data.",
+            errors: validatedFields.error.flatten().fieldErrors,
+        };
+    }
+
+    const { password } = validatedFields.data;
+
+    const { error } = await supabase.auth.updateUser({ password });
+
+    if (error) {
+        return {
+            message: `Could not update password: ${error.message}`,
+        };
+    }
+
+    return {
+        message: 'success',
+        data: 'Password updated successfully!',
+    };
+}
