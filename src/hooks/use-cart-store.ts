@@ -21,6 +21,12 @@ type CartState = {
   totalPrice: number;
 };
 
+const calculateTotals = (items: CartItem[]) => {
+    const totalItems = items.reduce((total, item) => total + item.quantity, 0);
+    const totalPrice = items.reduce((total, item) => total + item.product.price * item.quantity, 0);
+    return { totalItems, totalPrice };
+};
+
 const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
@@ -91,23 +97,37 @@ const useCartStore = create<CartState>()(
   )
 );
 
-const calculateTotals = (items: CartItem[]) => {
-    const totalItems = items.reduce((total, item) => total + item.quantity, 0);
-    const totalPrice = items.reduce((total, item) => total + item.product.price * item.quantity, 0);
-    return { totalItems, totalPrice };
-};
 
 
-// Initial hydration fix
+
+// This is a custom hook to ensure the store is hydrated before use on the client
 const useCart = () => {
-  const cart = useCartStore();
-  const [isHydrated, setIsHydrated] = React.useState(false);
-
+  // We use a dummy state to force re-render upon hydration
+  const [_, setState] = React.useState({});
+  
+  // Zustand's persist middleware has a `onRehydrateStorage` callback and a `hasHydrated` function.
+  // We can use these to know when the store is ready.
   React.useEffect(() => {
-    setIsHydrated(true);
-  }, []);
+    // A function to be called when hydration is complete
+    const onHydrate = () => setState({});
+    
+    // Subscribe to the hydration event
+    useCartStore.persist.onFinishHydration(onHydrate);
 
-  return isHydrated ? cart : { items: [], totalItems: 0, totalPrice: 0, addItem: () => {}, removeItem: () => {}, updateQuantity: () => {}, clearCart: () => {} };
+    // Call it once in case hydration is already complete
+    if (useCartStore.persist.hasHydrated()) {
+      onHydrate();
+    }
+    
+    return () => {
+        // Here you might want to remove the listener if the store supports it, to prevent memory leaks.
+        // Zustand's listeners are managed, so this is often not strictly necessary for simple cases.
+    };
+  }, []);
+  
+  // Return the store's state. It will be the initial state until hydration is complete.
+  return useCartStore();
 };
+
 
 export default useCart;

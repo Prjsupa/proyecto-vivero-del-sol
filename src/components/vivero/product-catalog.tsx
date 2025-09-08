@@ -84,7 +84,7 @@ function ProductCard({ product }: { product: Product }) {
              <Badge
               className={cn(
                 'absolute top-2 right-2',
-                product.available ? 'bg-primary/80' : 'bg-destructive/80'
+                product.available ? 'bg-primary/80 text-primary-foreground' : 'bg-destructive text-destructive-foreground'
               )}
             >
               {product.available ? 'En stock' : 'Agotado'}

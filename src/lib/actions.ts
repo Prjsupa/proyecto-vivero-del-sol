@@ -332,7 +332,7 @@ export async function updateUserRole(prevState: any, formData: FormData) {
 }
 
 
-export async function getCustomerOrders(customerId: string) {
+export async function getCustomerOrders(customerId: string): Promise<{ success: boolean; data?: Order[]; message?: string }> {
     const supabaseAdmin = createServiceRoleClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -346,6 +346,7 @@ export async function getCustomerOrders(customerId: string) {
         .order('created_at', { ascending: false });
 
     if (ordersError) {
+        console.error("Error fetching orders:", ordersError);
         return { success: false, message: `Error fetching orders: ${ordersError.message}` };
     }
     if (!orders || orders.length === 0) {
@@ -375,6 +376,7 @@ export async function getCustomerOrders(customerId: string) {
         .in('id', Array.from(productIds));
 
     if (productsError) {
+         console.error("Error fetching product details:", productsError);
          return { success: false, message: `Error fetching product details: ${productsError.message}` };
     }
 

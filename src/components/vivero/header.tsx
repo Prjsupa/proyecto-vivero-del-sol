@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Sprout, LogOut, LayoutDashboard, User as UserIcon, Menu } from 'lucide-react';
+import { Sprout, LogOut, LayoutDashboard, User as UserIcon, Menu, ShoppingCart } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -19,6 +19,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useRouter } from 'next/navigation';
 import { useSidebar } from '@/components/ui/sidebar';
+import { Cart } from './cart';
+
 
 export function Header() {
   const [user, setUser] = useState<User | null>(null);
@@ -59,6 +61,7 @@ export function Header() {
         }
         if (event === 'SIGNED_OUT') {
             setProfile(null);
+            router.push('/auth/login');
             router.refresh();
         }
       }
@@ -90,48 +93,59 @@ export function Header() {
         </Button>
         <div className="flex w-full items-center justify-end gap-4">
            {user && profile ? (
-             <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="secondary" className="relative h-10 w-10 rounded-full">
-                    <Avatar className='h-10 w-10'>
-                      <AvatarImage src={profile.avatar_url || ''} alt="User avatar" />
-                      <AvatarFallback className="font-semibold bg-primary text-primary-foreground">
-                        {getInitials(profile.name, profile.last_name)}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">{profile.name} {profile.last_name}</p>
-                      <p className="text-xs leading-none text-muted-foreground">
-                        {user.email}
-                      </p>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {profile.rol === 1 && (
+            <div className="flex items-center gap-4">
+              {profile.rol === 3 && <Cart />}
+              <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="secondary" className="relative h-10 w-10 rounded-full">
+                      <Avatar className='h-10 w-10'>
+                        <AvatarImage src={profile.avatar_url || ''} alt="User avatar" />
+                        <AvatarFallback className="font-semibold bg-primary text-primary-foreground">
+                          {getInitials(profile.name, profile.last_name)}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">{profile.name} {profile.last_name}</p>
+                        <p className="text-xs leading-none text-muted-foreground">
+                          {user.email}
+                        </p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {profile.rol === 1 && (
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin">
+                          <LayoutDashboard className="mr-2 h-4 w-4" />
+                          <span>Dashboard</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                     {profile.rol === 3 && (
+                      <DropdownMenuItem asChild>
+                        <Link href="/store">
+                          <ShoppingCart className="mr-2 h-4 w-4" />
+                          <span>Tienda</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem asChild>
-                      <Link href="/admin">
-                        <LayoutDashboard className="mr-2 h-4 w-4" />
-                        <span>Dashboard</span>
+                      <Link href="/profile">
+                        <UserIcon className="mr-2 h-4 w-4" />
+                        <span>Perfil</span>
                       </Link>
                     </DropdownMenuItem>
-                  )}
-                  <DropdownMenuItem asChild>
-                    <Link href="/profile">
-                      <UserIcon className="mr-2 h-4 w-4" />
-                      <span>Perfil</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Cerrar sesión</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Cerrar sesión</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
           ) : (
             <div className="flex items-center gap-2">
                 <Link href="/auth/login" passHref>
