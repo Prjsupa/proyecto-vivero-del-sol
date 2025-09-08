@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { AlertCircle, Loader2, Pencil } from 'lucide-react';
+import { AlertCircle, Loader2 } from 'lucide-react';
 import { updateProduct } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
@@ -36,8 +36,7 @@ function FieldError({ errors }: { errors?: string[] }) {
     )
 }
 
-
-export function EditProductForm({ product, children }: { product: Product, children: React.ReactNode }) {
+export function EditProductForm({ product }: { product: Product }) {
     const [state, formAction] = useActionState(updateProduct, { message: '' });
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [imagePreview, setImagePreview] = useState<string | null>(product.img_url);
@@ -84,16 +83,16 @@ export function EditProductForm({ product, children }: { product: Product, child
     return (
         <Dialog open={isDialogOpen} onOpenChange={onDialogChange}>
             <DialogTrigger asChild>
-                {children}
+                <button className="w-full text-left">Editar</button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
                     <DialogTitle className="font-headline">Editar Producto</DialogTitle>
                     <DialogDescription>
                         Modifica los detalles del producto.
                     </DialogDescription>
                 </DialogHeader>
-                <form action={formAction} ref={formRef} className="grid gap-4 py-4">
+                <form action={formAction} ref={formRef} className="grid gap-4 py-4 max-h-[80vh] overflow-y-auto pr-4">
                     <input type="hidden" name="id" value={product.id} />
                     <input type="hidden" name="current_img_url" value={product.img_url} />
 
@@ -150,7 +149,7 @@ export function EditProductForm({ product, children }: { product: Product, child
                         <Switch id="available" name="available" defaultChecked={product.available} />
                         <Label htmlFor="available">Disponible para la venta</Label>
                     </div>
-                     <DialogFooter>
+                     <DialogFooter className="mt-4">
                         <DialogClose asChild>
                             <Button variant="outline">Cancelar</Button>
                         </DialogClose>

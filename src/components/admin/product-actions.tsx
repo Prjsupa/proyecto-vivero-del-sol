@@ -9,22 +9,20 @@ import type { Product } from "@/lib/definitions";
 
 export function ProductActions({ product }: { product: Product }) {
     return (
-        <EditProductForm product={product}>
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button aria-haspopup="true" size="icon" variant="ghost">
-                        <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Toggle menu</span>
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                       <button className="w-full text-left">Editar</button>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>Eliminar</DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
-        </EditProductForm>
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button aria-haspopup="true" size="icon" variant="ghost">
+                    <MoreHorizontal className="h-4 w-4" />
+                    <span className="sr-only">Toggle menu</span>
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                   <EditProductForm product={product} />
+                </DropdownMenuItem>
+                <DropdownMenuItem>Eliminar</DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
     );
 }
