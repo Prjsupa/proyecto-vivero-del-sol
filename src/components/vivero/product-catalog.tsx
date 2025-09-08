@@ -13,20 +13,16 @@ import { Button } from '@/components/ui/button';
 function ProductCard({ product }: { product: Product }) {
   return (
       <Card className="flex flex-col h-full overflow-hidden transition-all hover:shadow-xl duration-300 group">
-        <CardHeader className="p-0">
-          <div className="relative h-48 w-full bg-muted">
-             <Badge
+        <CardContent className="p-4 flex-grow relative">
+           <Badge
               className={cn(
-                'absolute top-2 right-2',
+                'absolute top-4 right-4',
                 product.available ? 'bg-primary/80 text-primary-foreground' : 'bg-destructive text-destructive-foreground'
               )}
             >
               {product.available ? 'En stock' : 'Agotado'}
             </Badge>
-          </div>
-        </CardHeader>
-        <CardContent className="p-4 flex-grow">
-          <h3 className="font-headline text-xl mb-1">{product.name}</h3>
+          <h3 className="font-headline text-xl mb-1 pt-8">{product.name}</h3>
           <p className="font-body text-sm text-muted-foreground italic mb-2">{product.category}</p>
           {product.description && <p className="font-body text-sm text-foreground/80 line-clamp-3">{product.description}</p>}
         </CardContent>
