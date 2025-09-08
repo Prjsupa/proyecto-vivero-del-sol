@@ -19,6 +19,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useRouter } from 'next/navigation';
 import { useSidebar } from '@/components/ui/sidebar';
+import Image from 'next/image';
 
 export function Header() {
   const [user, setUser] = useState<User | null>(null);
@@ -80,6 +81,16 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+       <div className="hidden md:flex items-center gap-2">
+         <Link href="/">
+             <Image 
+                src="https://fqkxbtahfsiebrphgzwg.supabase.co/storage/v1/object/public/vivero.logos/LOGOS_VERDE_Mesa_de_trabajo-1.png"
+                alt="Vivero Del Sol Logo"
+                width={120}
+                height={80}
+            />
+         </Link>
+       </div>
        <Button
           variant="outline"
           size="icon"

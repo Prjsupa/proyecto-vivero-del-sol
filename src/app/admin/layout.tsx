@@ -1,9 +1,10 @@
 import { Header } from "@/components/vivero/header";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider } from "@/components/ui/sidebar";
-import { Briefcase, Package, DollarSign, Users, Settings, BarChart, Wrench, Sprout, ShoppingBag } from "lucide-react";
+import { Briefcase, Package, DollarSign, Users, Settings, BarChart, Wrench } from "lucide-react";
 import Link from 'next/link';
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import Image from "next/image";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = createClient();
@@ -27,11 +28,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <SidebarProvider>
         <Sidebar>
             <SidebarHeader>
-                 <div className="flex items-center gap-2 p-2">
-                    <Sprout className="h-8 w-8 text-primary" />
-                    <span className="font-bold text-lg tracking-wide text-sidebar-primary">
-                        Admin
-                    </span>
+                 <div className="flex items-center justify-center p-4">
+                    <Image 
+                        src="https://fqkxbtahfsiebrphgzwg.supabase.co/storage/v1/object/public/vivero.logos/LOGOS_BLANCOS_Mesa_de_trabajo-1.png"
+                        alt="Vivero Del Sol Logo"
+                        width={150}
+                        height={100}
+                        />
                 </div>
             </SidebarHeader>
             <SidebarContent>
