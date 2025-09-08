@@ -7,9 +7,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { FileUp, Loader2, AlertCircle } from 'lucide-react';
+import { FileUp, Loader2, AlertCircle, Download } from 'lucide-react';
 import { uploadProductsFromCsv } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
+import Link from 'next/link';
 
 function SubmitButton() {
     const { pending } = useFormStatus();
@@ -78,6 +79,13 @@ export function UploadCsvForm() {
                             </ul>
                         </AlertDescription>
                     </Alert>
+
+                     <Button variant="link" asChild className="p-0 h-auto">
+                        <Link href="/api/sample-csv">
+                            <Download className="mr-2 h-4 w-4" />
+                            Descargar CSV de ejemplo
+                        </Link>
+                    </Button>
 
                     <DialogFooter>
                         <DialogClose asChild>
