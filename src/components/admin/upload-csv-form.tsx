@@ -53,15 +53,15 @@ export function UploadCsvForm() {
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-lg">
-                <DialogHeader>
-                    <DialogTitle>Importar Productos desde CSV</DialogTitle>
-                    <DialogDescription>
-                        Añade productos en lote subiendo un archivo .csv. Asegúrate de que el archivo tenga una fila de cabecera con los campos correctos.
-                    </DialogDescription>
-                </DialogHeader>
-                <form action={formAction} ref={formRef}>
-                     <ScrollArea className="max-h-[60vh] p-1">
-                        <div className="space-y-4 p-4">
+                 <form action={formAction} ref={formRef} className="flex flex-col max-h-[80vh]">
+                    <DialogHeader>
+                        <DialogTitle>Importar Productos desde CSV</DialogTitle>
+                        <DialogDescription>
+                            Añade productos en lote subiendo un archivo .csv. Asegúrate de que el archivo tenga una fila de cabecera con los campos correctos.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <ScrollArea className="flex-grow my-4 pr-6">
+                        <div className="space-y-4">
                             <div className="space-y-2">
                                 <Label htmlFor="csv-file">Archivo CSV</Label>
                                 <Input id="csv-file" name="csv-file" type="file" accept=".csv" ref={fileInputRef} />
@@ -77,7 +77,7 @@ export function UploadCsvForm() {
                                         <li><b>sku:</b> Texto (opcional, ej: 'PL-INT-001')</li>
                                         <li><b>category:</b> 'Planta de interior', 'Herramienta', etc.</li>
                                         <li><b>subcategory:</b> Texto (opcional, ej: 'Hojas grandes')</li>
-                                        <li><b>price:</b> Número (Ej: 25,99)</li>
+                                        <li><b>price:</b> Número (Ej: 25990)</li>
                                         <li><b>stock:</b> Número entero (Ej: 150)</li>
                                         <li><b>available:</b> TRUE o FALSE</li>
                                         <li><b>description:</b> Texto (opcional)</li>
@@ -94,7 +94,7 @@ export function UploadCsvForm() {
                         </div>
                     </ScrollArea>
 
-                    <DialogFooter className="pt-4">
+                    <DialogFooter className="pt-4 border-t">
                         <DialogClose asChild>
                             <Button variant="outline">Cancelar</Button>
                         </DialogClose>
