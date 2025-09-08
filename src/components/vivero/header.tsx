@@ -19,8 +19,6 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useRouter } from 'next/navigation';
 import { useSidebar } from '@/components/ui/sidebar';
-import { Cart } from './cart';
-
 
 export function Header() {
   const [user, setUser] = useState<User | null>(null);
@@ -94,7 +92,6 @@ export function Header() {
         <div className="flex w-full items-center justify-end gap-4">
            {user && profile ? (
             <div className="flex items-center gap-4">
-              {profile.rol === 3 && <Cart />}
               <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="secondary" className="relative h-10 w-10 rounded-full">
