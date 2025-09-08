@@ -589,3 +589,48 @@ export async function deleteCategory(categoryName: string) {
     revalidatePath('/admin/products');
     return { message: 'success', data: `La categoría '${categoryName}' ya no está en uso y ha sido eliminada efectivamente.` };
 }
+
+const updateProductsCategorySchema = z.object({
+  productIds: z.string().transform(val => val.split(',')),
+  category: z.string().optional(),
+  new_category: z.string().optional(),
+}).refine(data => data.category || data.new_category, {
+    message: "La categoría es requerida.",
+    path: ["category"],
+});
+
+export async function updateProductsCategory(prevState: any, formData: FormData) {
+    const supabase = createClient();
+    const validatedFields = updateProductsCategorySchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return { message: 'Datos inválidos.', errors: validatedFields.error.flatten().fieldErrors };
+    }
+    
+    const { productIds } = validatedFields.data;
+    const category = validatedFields.data.new_category || validatedFields.data.category;
+
+    if (!productIds || productIds.length === 0) {
+        return { message: 'No se seleccionaron productos.' };
+    }
+    if (!category) {
+        return { message: 'No se seleccionó ninguna categoría de destino.' };
+    }
+
+    const { error } = await supabase
+        .from('products')
+        .update({ category: category })
+        .in('id', productIds);
+
+    if (error) {
+        return { message: `Error al actualizar los productos: ${error.message}` };
+    }
+
+    revalidatePath('/admin/categories');
+    revalidatePath('/admin/products');
+
+    return { 
+        message: 'success', 
+        data: `Se movieron ${productIds.length} producto(s) a la categoría '${category}' exitosamente.` 
+    };
+}

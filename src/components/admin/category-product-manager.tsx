@@ -97,7 +97,11 @@ export function CategoryProductManager({ allProducts, allCategories }: { allProd
             <CardContent>
                 {selectedProductIds.length > 0 && (
                     <div className="mb-4">
-                        <BatchActions selectedProductIds={selectedProductIds} onActionCompleted={onActionCompleted} />
+                        <BatchActions 
+                            selectedProductIds={selectedProductIds} 
+                            allCategories={allCategories}
+                            onActionCompleted={onActionCompleted} 
+                        />
                     </div>
                 )}
                 <Table>
