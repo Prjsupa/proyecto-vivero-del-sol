@@ -25,6 +25,7 @@ export type Product = {
   price: number;
   stock: number;
   available: boolean;
+  sku?: string | null;
 };
 
 export type Order = {

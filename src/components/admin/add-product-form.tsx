@@ -97,10 +97,17 @@ export function AddProductForm({ categories }: { categories: string[] }) {
                     </DialogDescription>
                 </DialogHeader>
                 <form action={formAction} ref={formRef} className="grid gap-4 py-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="name">Nombre del Producto</Label>
-                        <Input id="name" name="name" />
-                        <FieldError errors={state.errors?.name} />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="name">Nombre del Producto</Label>
+                            <Input id="name" name="name" />
+                            <FieldError errors={state.errors?.name} />
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="sku">SKU (Opcional)</Label>
+                            <Input id="sku" name="sku" placeholder="CÓDIGO-001"/>
+                            <FieldError errors={state.errors?.sku} />
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

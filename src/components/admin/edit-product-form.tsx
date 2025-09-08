@@ -94,10 +94,17 @@ export function EditProductForm({ product, categories }: { product: Product, cat
                 <form action={formAction} ref={formRef} className="grid gap-4 py-4 max-h-[80vh] overflow-y-auto pr-4">
                     <input type="hidden" name="id" value={product.id} />
 
-                    <div className="space-y-2">
-                        <Label htmlFor="name">Nombre del Producto</Label>
-                        <Input id="name" name="name" defaultValue={product.name} />
-                        <FieldError errors={state.errors?.name} />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="name">Nombre del Producto</Label>
+                            <Input id="name" name="name" defaultValue={product.name} />
+                            <FieldError errors={state.errors?.name} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="sku">SKU (Opcional)</Label>
+                            <Input id="sku" name="sku" defaultValue={product.sku || ''} />
+                            <FieldError errors={state.errors?.sku} />
+                        </div>
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="description">Descripción (Opcional)</Label>

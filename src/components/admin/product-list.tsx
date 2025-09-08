@@ -31,7 +31,10 @@ export function ProductList({ products, categories }: { products: Product[], cat
         let filtered = [...products];
 
         if (searchTerm) {
-            filtered = filtered.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
+            filtered = filtered.filter(p => 
+                p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (p.sku && p.sku.toLowerCase().includes(searchTerm.toLowerCase()))
+            );
         }
 
         if (categoryFilter !== 'Todas') {
@@ -76,7 +79,7 @@ export function ProductList({ products, categories }: { products: Product[], cat
                     <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input 
-                            placeholder="Buscar por nombre..." 
+                            placeholder="Buscar por nombre o SKU..." 
                             className="pl-10"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
@@ -143,6 +146,7 @@ export function ProductList({ products, categories }: { products: Product[], cat
                                 <TableRow key={product.id}>
                                     <TableCell className="font-medium">
                                         <div className="font-medium">{product.name}</div>
+                                        <div className="text-xs text-muted-foreground">{product.sku}</div>
                                         <div className="text-sm text-muted-foreground">{product.category}{product.subcategory && ` / ${product.subcategory}`}</div>
                                     </TableCell>
                                     <TableCell>

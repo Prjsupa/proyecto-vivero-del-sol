@@ -38,6 +38,7 @@ export async function handleContact(prevState: any, formData: FormData) {
 
 const baseProductSchema = z.object({
   name: z.string().min(3, "El nombre debe tener al menos 3 caracteres."),
+  sku: z.string().optional().nullable(),
   category: z.string().optional(),
   new_category: z.string().optional(),
   subcategory: z.string().optional().nullable(),
@@ -66,12 +67,13 @@ export async function addProduct(prevState: any, formData: FormData) {
     }
     
     const supabase = createClient();
-    const { name, price, stock, available, description, subcategory } = validatedFields.data;
+    const { name, sku, price, stock, available, description, subcategory } = validatedFields.data;
     const category = validatedFields.data.new_category || validatedFields.data.category;
 
 
     const { error: insertError } = await supabase.from('products').insert({
         name,
+        sku,
         category,
         subcategory,
         price,
@@ -81,6 +83,9 @@ export async function addProduct(prevState: any, formData: FormData) {
     });
 
     if (insertError) {
+        if (insertError.code === '23505') { // Unique constraint violation
+             return { message: `Error al crear el producto: El SKU '${sku}' ya existe.` };
+        }
         return {
             message: `Error al crear el producto: ${insertError.message}`,
         };
@@ -116,16 +121,19 @@ export async function updateProduct(prevState: any, formData: FormData) {
     }
 
     const supabase = createClient();
-    const { id, name, price, stock, available, description, subcategory } = validatedFields.data;
+    const { id, name, sku, price, stock, available, description, subcategory } = validatedFields.data;
     const category = validatedFields.data.new_category || validatedFields.data.category;
 
 
     const { error: updateError } = await supabase
         .from('products')
-        .update({ name, category, price, stock, available, description, subcategory })
+        .update({ name, sku, category, price, stock, available, description, subcategory })
         .eq('id', id);
 
     if (updateError) {
+         if (updateError.code === '23505') { // Unique constraint violation
+             return { message: `Error al actualizar el producto: El SKU '${sku}' ya existe.` };
+        }
         return { message: `Error al actualizar el producto: ${updateError.message}` };
     }
 
@@ -389,6 +397,7 @@ export async function updatePassword(prevState: any, formData: FormData) {
 
 const csvProductSchema = z.object({
   name: z.string().min(3),
+  sku: z.string().optional(),
   category: z.string(),
   subcategory: z.string().optional(),
   price: z.coerce.number().min(0),
@@ -422,9 +431,9 @@ export async function uploadProductsFromCsv(prevState: any, formData: FormData) 
     }
 
     const headers = rows[0].split(',').map(h => h.trim());
-    const expectedHeaders = ['name', 'category', 'subcategory', 'price', 'stock', 'available', 'description'];
+    const expectedHeaders = ['name', 'sku', 'category', 'subcategory', 'price', 'stock', 'available', 'description'];
     if (JSON.stringify(headers) !== JSON.stringify(expectedHeaders)) {
-        return { message: 'Las cabeceras del CSV no coinciden. Deben ser: name,category,subcategory,price,stock,available,description' };
+        return { message: 'Las cabeceras del CSV no coinciden. Deben ser: name,sku,category,subcategory,price,stock,available,description' };
     }
 
     const productsToInsert = [];
@@ -434,12 +443,13 @@ export async function uploadProductsFromCsv(prevState: any, formData: FormData) 
         const values = rows[i].split(',');
         const rowData = {
             name: values[0]?.trim(),
-            category: values[1]?.trim(),
-            subcategory: values[2]?.trim(),
-            price: values[3]?.trim(),
-            stock: values[4]?.trim(),
-            available: values[5]?.trim(),
-            description: values[6]?.trim(),
+            sku: values[1]?.trim(),
+            category: values[2]?.trim(),
+            subcategory: values[3]?.trim(),
+            price: values[4]?.trim(),
+            stock: values[5]?.trim(),
+            available: values[6]?.trim(),
+            description: values[7]?.trim(),
         };
 
         const validated = csvProductSchema.safeParse(rowData);
@@ -458,6 +468,9 @@ export async function uploadProductsFromCsv(prevState: any, formData: FormData) 
     if (productsToInsert.length > 0) {
         const { error: insertError } = await supabase.from('products').insert(productsToInsert);
         if (insertError) {
+             if (insertError.code === '23505') { // Unique constraint violation
+                return { message: `Error al insertar productos: Uno o más SKUs ya existen.` };
+            }
             return { message: `Error al insertar productos: ${insertError.message}` };
         }
     }
