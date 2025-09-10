@@ -5,7 +5,7 @@ import { useFormStatus } from 'react-dom';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Label } from '@/components/ui/label';
-import { AlertCircle, PlusCircle, Loader2, Receipt, Search, X } from 'lucide-react';
+import { AlertCircle, PlusCircle, Loader2, Receipt, Search, X, Trash2 } from 'lucide-react';
 import { createInvoice } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
@@ -69,24 +69,57 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, tri
     
     const filteredProducts = useMemo(() => {
         if (!searchTerm) return [];
-        return products.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()) && p.available && p.stock > 0);
-    }, [products, searchTerm]);
+        const productsInCartIds = selectedProducts.map(p => p.product.id);
+        return products.filter(p => 
+            p.name.toLowerCase().includes(searchTerm.toLowerCase()) && 
+            p.available && 
+            p.stock > 0 &&
+            !productsInCartIds.includes(p.id)
+        );
+    }, [products, searchTerm, selectedProducts]);
 
     const addProductToInvoice = (product: Product) => {
         setSelectedProducts(currentProducts => {
             const existingProduct = currentProducts.find(p => p.product.id === product.id);
             if (existingProduct) {
-                return currentProducts.map(p => p.product.id === product.id ? { ...p, quantity: p.quantity + 1, total: (p.quantity + 1) * p.product.precio_venta } : p);
+                const newQuantity = existingProduct.quantity + 1;
+                if (newQuantity > product.stock) {
+                    toast({ title: "Stock insuficiente", description: `Solo quedan ${product.stock} unidades de ${product.name}.`, variant: "destructive" });
+                    return currentProducts;
+                }
+                return currentProducts.map(p => p.product.id === product.id ? { ...p, quantity: newQuantity, total: newQuantity * p.product.precio_venta } : p);
+            }
+            if (product.stock < 1) {
+                 toast({ title: "Stock insuficiente", description: `${product.name} no tiene stock disponible.`, variant: "destructive" });
+                 return currentProducts;
             }
             return [...currentProducts, { product, quantity: 1, total: product.precio_venta }];
         });
         setSearchTerm('');
     }
 
-     const removeProductFromInvoice = (productId: string) => {
+    const removeProductFromInvoice = (productId: string) => {
         setSelectedProducts(currentProducts => currentProducts.filter(p => p.product.id !== productId));
     };
+    
+    const updateProductQuantity = (productId: string, newQuantity: number) => {
+        setSelectedProducts(currentProducts => {
+            if (newQuantity === 0) {
+                return currentProducts.filter(p => p.product.id !== productId);
+            }
 
+            return currentProducts.map(p => {
+                if (p.product.id === productId) {
+                    if (newQuantity > p.product.stock) {
+                        toast({ title: "Stock insuficiente", description: `Solo quedan ${p.product.stock} unidades de ${p.product.name}.`, variant: "destructive" });
+                        return { ...p, quantity: p.product.stock, total: p.product.stock * p.product.precio_venta };
+                    }
+                    return { ...p, quantity: newQuantity, total: newQuantity * p.product.precio_venta };
+                }
+                return p;
+            });
+        });
+    }
 
     useEffect(() => {
         if (state?.message === 'success') {
@@ -97,6 +130,7 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, tri
             setIsDialogOpen(false);
             formRef.current?.reset();
             setShowSecondaryPayment(false);
+            setSelectedProducts([]);
         } else if (state?.message && state.message !== 'success' && state.message !== '') {
              toast({
                 title: 'Error',
@@ -110,6 +144,7 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, tri
         if (!open) {
             formRef.current?.reset();
             setShowSecondaryPayment(false);
+            setSelectedProducts([]);
         }
         setIsDialogOpen(open);
     }
@@ -122,6 +157,33 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, tri
     ) : (
         <span className='w-full'>Crear Factura</span>
     );
+    
+    const QuantityControl = ({ item }: { item: SelectedProduct }) => {
+        const handleQuantityChange = (newQuantity: number) => {
+            if (!isNaN(newQuantity) && newQuantity >= 0) {
+                updateProductQuantity(item.product.id, newQuantity);
+            }
+        };
+
+        return (
+            <div className="flex items-center gap-1">
+                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(item.quantity - 1)}>
+                    {item.quantity === 1 ? <Trash2 className="h-4 w-4 text-destructive" /> : '-'}
+                </Button>
+                <Input
+                    type="number"
+                    value={item.quantity}
+                    onChange={(e) => handleQuantityChange(parseInt(e.target.value, 10))}
+                    className="h-8 w-14 text-center"
+                    min="0"
+                    max={item.product.stock}
+                />
+                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(item.quantity + 1)} disabled={item.quantity >= item.product.stock}>
+                    +
+                </Button>
+            </div>
+        );
+    };
 
     return (
         <Dialog open={isDialogOpen} onOpenChange={onDialogChange}>
@@ -136,10 +198,11 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, tri
                     </DialogDescription>
                 </DialogHeader>
                  <form action={formAction} ref={formRef} className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-8 overflow-hidden">
+                    {/* Columna Izquierda - Productos */}
                     <div className="flex flex-col gap-4 overflow-y-auto pr-2">
-                        <input type="hidden" name="products" value={JSON.stringify(selectedProducts)} />
+                        <input type="hidden" name="products" value={JSON.stringify(selectedProducts.map(p => ({ productId: p.product.id, quantity: p.quantity, unitPrice: p.product.precio_venta, total: p.total })))} />
 
-                        {/* Product Search and Add */}
+                        {/* Búsqueda de Productos */}
                         <div className="space-y-4 rounded-md border p-4">
                              <Label>Añadir Productos</Label>
                              <div className="relative">
@@ -152,18 +215,23 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, tri
                                 />
                                 {searchTerm && (
                                     <div className="absolute z-10 w-full mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-y-auto">
-                                        {filteredProducts.map(p => (
+                                        {filteredProducts.length > 0 ? filteredProducts.map(p => (
                                             <div key={p.id} onClick={() => addProductToInvoice(p)} className="px-4 py-2 hover:bg-accent cursor-pointer flex justify-between">
-                                                <span>{p.name}</span>
+                                                <div>
+                                                    <p>{p.name}</p>
+                                                    <p className="text-xs text-muted-foreground">Stock: {p.stock}</p>
+                                                </div>
                                                 <span className="text-muted-foreground">{formatPrice(p.precio_venta)}</span>
                                             </div>
-                                        ))}
+                                        )) : (
+                                            <div className="px-4 py-2 text-muted-foreground">No se encontraron productos o ya están en la factura.</div>
+                                        )}
                                     </div>
                                 )}
                              </div>
                         </div>
 
-                         {/* Selected Products List */}
+                         {/* Lista de Productos Seleccionados */}
                         <div className="space-y-4 rounded-md border p-4 flex-grow">
                              <Label>Productos en la Factura</Label>
                              <ScrollArea className="h-64">
@@ -175,17 +243,15 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, tri
                                     <div className="space-y-2">
                                         {selectedProducts.map(item => (
                                             <div key={item.product.id} className="flex items-center justify-between p-2 rounded-md bg-muted/50">
-                                                <div>
+                                                <div className="flex-grow">
                                                     <p className="font-medium">{item.product.name}</p>
                                                     <p className="text-sm text-muted-foreground">
-                                                        {item.quantity} x {formatPrice(item.product.precio_venta)}
+                                                        {formatPrice(item.product.precio_venta)} c/u
                                                     </p>
                                                 </div>
                                                 <div className="flex items-center gap-4">
-                                                    <p className="font-semibold">{formatPrice(item.total)}</p>
-                                                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeProductFromInvoice(item.product.id)}>
-                                                        <X className="h-4 w-4 text-destructive" />
-                                                    </Button>
+                                                    <QuantityControl item={item} />
+                                                    <p className="font-semibold w-24 text-right">{formatPrice(item.total)}</p>
                                                 </div>
                                             </div>
                                         ))}
@@ -194,6 +260,7 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, tri
                              </ScrollArea>
                         </div>
                     </div>
+                    {/* Columna Derecha - Detalles de Factura */}
                     <div className="flex flex-col gap-4 overflow-y-auto pr-2">
                         <div className="space-y-2">
                             <Label htmlFor="clientId">Cliente</Label>
@@ -265,11 +332,13 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, tri
                          </div>
                     </div>
                  </form>
-                <DialogFooter className="col-span-1 md:col-span-2 mt-4">
+                <DialogFooter className="mt-4 border-t pt-4">
                     <DialogClose asChild>
                         <Button variant="outline">Cancelar</Button>
                     </DialogClose>
-                    <SubmitButton />
+                    <Button form="invoice-form" type="submit" disabled={selectedProducts.length === 0}>
+                       <SubmitButton />
+                    </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

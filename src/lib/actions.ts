@@ -873,7 +873,7 @@ const createInvoiceSchema = z.object({
     has_secondary_payment: z.preprocess((val) => val === 'on' || val === true, z.boolean()),
     secondary_payment_method: z.string().optional(),
     notes: z.string().optional(),
-    products: z.string().transform((val) => JSON.parse(val))
+    products: z.string().transform((val) => val ? JSON.parse(val) : [])
 });
 
 export async function createInvoice(prevState: any, formData: FormData) {
@@ -888,6 +888,10 @@ export async function createInvoice(prevState: any, formData: FormData) {
     }
     
     const { clientId, invoiceType, payment_method, has_secondary_payment, secondary_payment_method, notes, products } = validatedFields.data;
+    
+    if (!products || products.length === 0) {
+        return { message: "No se puede crear una factura sin productos." };
+    }
 
     const clientData = await supabase.from('profiles').select('name, last_name').eq('id', clientId).single();
     if (!clientData.data) {
@@ -906,7 +910,7 @@ export async function createInvoice(prevState: any, formData: FormData) {
         payment_method: payment_method,
         has_secondary_payment: has_secondary_payment,
         secondary_payment_method: secondary_payment_method,
-        status: 'pending', // Pending until products are added and paid
+        status: 'completed',
         notes: notes,
     };
 
