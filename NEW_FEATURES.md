@@ -11,6 +11,8 @@ Este documento resume las nuevas características y mejoras implementadas en el 
   - Precio.
   - Stock.
 
+---
+
 ### 2. Nueva Sección: Gestión de Servicios
 
 Se ha creado una sección completamente nueva y dedicada para la **Gestión de Servicios**, separada de los productos.
@@ -75,3 +77,13 @@ Se ha mejorado el formulario de creación de facturas para un manejo de pagos m�
 
 - **Selección de Tipo de Tarjeta en Abono**: Cuando se utiliza "Tarjeta" como método de pago secundario (abono), ahora se puede especificar el tipo de tarjeta (Visa, Mastercard, Cabal, etc.), igual que con el pago principal.
 - **Visualización Completa**: La información del tipo de tarjeta secundaria ahora se muestra tanto en la vista de detalle de la factura como en la tabla principal de facturas, ofreciendo una visión más completa de la transacción.
+
+---
+
+### Próximas Actualizaciones
+
+Con el objetivo de seguir profesionalizando la gestión y cumplir con las normativas vigentes, las próximas grandes actualizaciones se centrarán en la facturación electrónica oficial.
+
+- **Gestión de Datos Fiscales y Conexión con AFIP**:
+  - **Datos Fiscales por Cliente**: Se ampliará el perfil de cada cliente para incluir toda la información legal requerida para la facturación (CUIT, Razón Social, Condición frente al IVA, domicilio fiscal, etc.). Estos datos se guardarán de forma segura y se autocompletarán al crear una factura.
+  - **Integración con AFIP**: Se desarrollará una conexión directa con los webservices de la AFIP para la generación de facturas electrónicas válidas (con CAE) para las facturas de tipo "A", automatizando el proceso y asegurando el cumplimiento fiscal.
