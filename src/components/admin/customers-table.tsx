@@ -8,6 +8,7 @@ import { format, parseISO, isValid } from 'date-fns';
 import { MoreHorizontal, User } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
+import { CreateInvoiceForm } from "./create-invoice-form";
 
 
 type UserWithProfile = Profile & {
@@ -48,7 +49,10 @@ export function CustomersTable({ customers }: { customers: UserWithProfile[] }) 
                                         <AvatarImage src={customer.avatar_url || ''} />
                                         <AvatarFallback>{getInitials(customer.name, customer.last_name)}</AvatarFallback>
                                     </Avatar>
-                                    <div className="font-medium">{customer.name} {customer.last_name}</div>
+                                    <div>
+                                        <div className="font-medium">{customer.name} {customer.last_name}</div>
+                                        <div className="text-sm text-muted-foreground">{customer.email}</div>
+                                    </div>
                                 </div>
                             </TableCell>
                             <TableCell className="hidden md:table-cell">
@@ -65,7 +69,9 @@ export function CustomersTable({ customers }: { customers: UserWithProfile[] }) 
                                     <DropdownMenuContent align="end">
                                         <DropdownMenuLabel>Acciones</DropdownMenuLabel>
                                         <DropdownMenuItem>Ver Detalles</DropdownMenuItem>
-                                        <DropdownMenuItem>Crear Factura</DropdownMenuItem>
+                                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                            <CreateInvoiceForm customers={customers} selectedCustomerId={customer.id} triggerMode="menuitem" />
+                                        </DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             </TableCell>

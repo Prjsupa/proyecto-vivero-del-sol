@@ -866,3 +866,60 @@ export async function createSubcategoryAndAssignProducts(prevState: any, formDat
         data: `¡Subcategoría '${newSubcategoryName}' creada! Se movieron ${productIds.length} producto(s).`
     }
 }
+
+const createInvoiceSchema = z.object({
+    clientId: z.string().uuid("Debes seleccionar un cliente."),
+    invoiceType: z.enum(['A', 'B'], { required_error: "Debes seleccionar un tipo de factura." }),
+    // Add other fields as they become part of the form
+});
+
+export async function createInvoice(prevState: any, formData: FormData) {
+    const supabase = createClient();
+    const validatedFields = createInvoiceSchema.safeParse(Object.fromEntries(formData.entries()));
+    
+    if (!validatedFields.success) {
+        return {
+            message: "Datos de formulario inválidos.",
+            errors: validatedFields.error.flatten().fieldErrors,
+        };
+    }
+    
+    const { clientId, invoiceType } = validatedFields.data;
+
+    // TODO: This is a placeholder logic.
+    // In a real scenario, you would:
+    // 1. Get client details from the profiles table.
+    // 2. Get the products for the invoice (from cart, etc.).
+    // 3. Calculate total amount.
+    // 4. Generate a unique invoice number.
+    
+    const clientData = await supabase.from('profiles').select('name, last_name').eq('id', clientId).single();
+    if (!clientData.data) {
+        return { message: "Cliente no encontrado." };
+    }
+
+    const invoiceData = {
+        invoice_number: `INV-${Date.now()}`, // Placeholder
+        client_id: clientId,
+        client_name: `${clientData.data.name} ${clientData.data.last_name}`,
+        products: [], // Placeholder
+        total_amount: 0, // Placeholder
+        invoice_type: invoiceType,
+        payment_method: 'Efectivo', // Placeholder
+        status: 'completed' // Placeholder
+    };
+
+    const { error } = await supabase.from('invoices').insert(invoiceData);
+
+    if (error) {
+        return { message: `Error al crear la factura: ${error.message}` };
+    }
+    
+    revalidatePath('/admin/invoicing');
+    revalidatePath('/admin/customers');
+    
+    return {
+        message: 'success',
+        data: `Factura ${invoiceData.invoice_number} creada exitosamente.`
+    };
+}

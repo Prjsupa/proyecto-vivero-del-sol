@@ -8,6 +8,7 @@ import { cookies } from "next/headers";
 import { Button } from "@/components/ui/button";
 import { Receipt } from "lucide-react";
 import Link from "next/link";
+import { CreateInvoiceForm } from "@/components/admin/create-invoice-form";
 
 
 type UserWithProfile = Profile & {
@@ -86,12 +87,7 @@ export default async function CustomersPage() {
                     <p className="text-muted-foreground">Gestiona los clientes para la facturación.</p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button asChild>
-                        <Link href="/admin/invoicing">
-                            <Receipt className="mr-2 h-4 w-4" />
-                            Crear Factura
-                        </Link>
-                    </Button>
+                    <CreateInvoiceForm customers={customers} />
                     <AddClientForm />
                 </div>
             </div>
