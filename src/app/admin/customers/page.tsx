@@ -5,6 +5,9 @@ import { CustomersTable } from "@/components/admin/customers-table";
 import { AddClientForm } from "@/components/admin/add-client-form";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { Button } from "@/components/ui/button";
+import { Receipt } from "lucide-react";
+import Link from "next/link";
 
 
 type UserWithProfile = Profile & {
@@ -82,7 +85,15 @@ export default async function CustomersPage() {
                     <h1 className="text-2xl font-semibold">Clientes</h1>
                     <p className="text-muted-foreground">Gestiona los clientes para la facturación.</p>
                 </div>
-                <AddClientForm />
+                <div className="flex items-center gap-2">
+                    <Button asChild>
+                        <Link href="/admin/invoicing">
+                            <Receipt className="mr-2 h-4 w-4" />
+                            Crear Factura
+                        </Link>
+                    </Button>
+                    <AddClientForm />
+                </div>
             </div>
             <Card>
                 <CardHeader>
