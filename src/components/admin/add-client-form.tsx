@@ -72,7 +72,7 @@ export function AddClientForm() {
                 <DialogHeader>
                     <DialogTitle>Añadir Nuevo Cliente</DialogTitle>
                     <DialogDescription>
-                        Rellena los detalles para crear una nueva cuenta de cliente. Se generará una contraseña aleatoria si no se proporciona una.
+                        Rellena los detalles para crear una nueva cuenta de cliente.
                     </DialogDescription>
                 </DialogHeader>
                 <form action={formAction} ref={formRef} className="grid gap-4 py-4">
@@ -94,7 +94,7 @@ export function AddClientForm() {
                         <FieldError errors={state.errors?.email} />
                     </div>
                      <div className="space-y-2">
-                        <Label htmlFor="password">Contraseña (Opcional)</Label>
+                        <Label htmlFor="password">Contraseña</Label>
                         <Input id="password" name="password" type="password" />
                          <FieldError errors={state.errors?.password} />
                     </div>
