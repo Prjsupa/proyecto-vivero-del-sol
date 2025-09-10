@@ -1,6 +1,6 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import type { Profile } from "@/lib/definitions";
+import type { Profile, Product } from "@/lib/definitions";
 import { CustomersTable } from "@/components/admin/customers-table";
 import { AddClientForm } from "@/components/admin/add-client-form";
 import { createServerClient } from "@supabase/ssr";
@@ -75,9 +75,31 @@ async function getCustomers(): Promise<UserWithProfile[]> {
     return clients;
 }
 
+async function getProducts(): Promise<Product[]> {
+    const cookieStore = cookies();
+    const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+            cookies: {
+                get(name: string) {
+                    return cookieStore.get(name)?.value
+                },
+            },
+        }
+    );
+    const { data, error } = await supabase.from('products').select('*').order('name', { ascending: true });
+    if (error) {
+        console.error('Error fetching products:', error);
+        return [];
+    }
+    return data;
+}
+
 
 export default async function CustomersPage() {
     const customers = await getCustomers();
+    const products = await getProducts();
 
     return (
         <div className="space-y-8">
@@ -87,7 +109,7 @@ export default async function CustomersPage() {
                     <p className="text-muted-foreground">Gestiona los clientes para la facturación.</p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <CreateInvoiceForm customers={customers} />
+                    <CreateInvoiceForm customers={customers} products={products} />
                     <AddClientForm />
                 </div>
             </div>
@@ -97,7 +119,7 @@ export default async function CustomersPage() {
                     <CardDescription>Aquí aparecerán tus clientes registrados.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <CustomersTable customers={customers} />
+                    <CustomersTable customers={customers} products={products} />
                 </CardContent>
             </Card>
         </div>

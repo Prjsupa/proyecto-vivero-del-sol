@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { Profile } from "@/lib/definitions";
+import type { Profile, Product } from "@/lib/definitions";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format, parseISO, isValid } from 'date-fns';
@@ -20,7 +20,7 @@ function getInitials(name: string, lastName: string) {
     return `${name?.charAt(0) ?? ''}${lastName?.charAt(0) ?? ''}`.toUpperCase();
 }
 
-export function CustomersTable({ customers }: { customers: UserWithProfile[] }) {
+export function CustomersTable({ customers, products }: { customers: UserWithProfile[], products: Product[] }) {
 
     const formatDate = (dateString?: string) => {
         if (!dateString) return '-';
@@ -70,7 +70,7 @@ export function CustomersTable({ customers }: { customers: UserWithProfile[] }) 
                                         <DropdownMenuLabel>Acciones</DropdownMenuLabel>
                                         <DropdownMenuItem>Ver Detalles</DropdownMenuItem>
                                         <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                            <CreateInvoiceForm customers={customers} selectedCustomerId={customer.id} triggerMode="menuitem" />
+                                            <CreateInvoiceForm customers={customers} products={products} selectedCustomerId={customer.id} triggerMode="menuitem" />
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>

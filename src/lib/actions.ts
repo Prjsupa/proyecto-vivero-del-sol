@@ -1,5 +1,4 @@
 
-
 'use server';
 
 import { z } from 'zod';
@@ -872,7 +871,9 @@ const createInvoiceSchema = z.object({
     invoiceType: z.enum(['A', 'B'], { required_error: "Debes seleccionar un tipo de factura." }),
     payment_method: z.string().optional(),
     has_secondary_payment: z.preprocess((val) => val === 'on' || val === true, z.boolean()),
+    secondary_payment_method: z.string().optional(),
     notes: z.string().optional(),
+    products: z.string().transform((val) => JSON.parse(val))
 });
 
 export async function createInvoice(prevState: any, formData: FormData) {
@@ -886,26 +887,25 @@ export async function createInvoice(prevState: any, formData: FormData) {
         };
     }
     
-    const { clientId, invoiceType, payment_method, has_secondary_payment, notes } = validatedFields.data;
+    const { clientId, invoiceType, payment_method, has_secondary_payment, secondary_payment_method, notes, products } = validatedFields.data;
 
     const clientData = await supabase.from('profiles').select('name, last_name').eq('id', clientId).single();
     if (!clientData.data) {
         return { message: "Cliente no encontrado." };
     }
 
-    // Placeholder data for products and total, as we don't have the POS UI yet
-    const placeholderProducts = []; 
-    const placeholderTotal = 0;
+    const totalAmount = products.reduce((acc: number, p: any) => acc + p.total, 0);
 
     const invoiceData = {
         invoice_number: `INV-${Date.now()}`,
         client_id: clientId,
         client_name: `${clientData.data.name} ${clientData.data.last_name}`,
-        products: placeholderProducts,
-        total_amount: placeholderTotal,
+        products: products,
+        total_amount: totalAmount,
         invoice_type: invoiceType,
         payment_method: payment_method,
         has_secondary_payment: has_secondary_payment,
+        secondary_payment_method: secondary_payment_method,
         status: 'pending', // Pending until products are added and paid
         notes: notes,
     };

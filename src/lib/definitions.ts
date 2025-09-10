@@ -51,6 +51,7 @@ export type Invoice = {
   invoice_type: 'A' | 'B';
   payment_method?: string | null;
   has_secondary_payment?: boolean;
+  secondary_payment_method?: string | null;
   notes?: string | null;
   status: 'pending' | 'completed' | 'cancelled';
 }
