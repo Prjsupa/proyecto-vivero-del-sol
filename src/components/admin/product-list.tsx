@@ -66,6 +66,14 @@ export function ProductList({ products, categories }: { products: Product[], cat
                     return b.price - a.price;
                 }
             });
+        } else if (sortFilter.startsWith('name')) {
+            filtered.sort((a, b) => {
+                if (sortFilter === 'name_asc') {
+                    return a.name.localeCompare(b.name);
+                } else {
+                    return b.name.localeCompare(a.name);
+                }
+            });
         }
 
 
@@ -121,6 +129,8 @@ export function ProductList({ products, categories }: { products: Product[], cat
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="none">Sin orden</SelectItem>
+                            <SelectItem value="name_asc">Nombre: A-Z</SelectItem>
+                            <SelectItem value="name_desc">Nombre: Z-A</SelectItem>
                             <SelectItem value="stock_asc">Stock: Menor a mayor</SelectItem>
                             <SelectItem value="stock_desc">Stock: Mayor a menor</SelectItem>
                             <SelectItem value="price_asc">Precio: Menor a mayor</SelectItem>
