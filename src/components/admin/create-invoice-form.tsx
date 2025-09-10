@@ -29,10 +29,10 @@ type SelectedProduct = {
     total: number;
 }
 
-function SubmitButton() {
+function SubmitButton({ disabled }: { disabled: boolean }) {
     const { pending } = useFormStatus();
     return (
-        <Button type="submit" disabled={pending}>
+        <Button type="submit" disabled={pending || disabled}>
             {pending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creando...</> : 'Crear Factura'}
         </Button>
     )
@@ -197,7 +197,7 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, tri
                         Completa los detalles para generar una nueva factura.
                     </DialogDescription>
                 </DialogHeader>
-                 <form action={formAction} ref={formRef} className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-8 overflow-hidden">
+                 <form id="invoice-form" action={formAction} ref={formRef} className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-8 overflow-hidden">
                     {/* Columna Izquierda - Productos */}
                     <div className="flex flex-col gap-4 overflow-y-hidden pr-2">
                         <input type="hidden" name="products" value={JSON.stringify(selectedProducts.map(p => ({ productId: p.product.id, quantity: p.quantity, unitPrice: p.product.precio_venta, total: p.total })))} />
@@ -336,13 +336,9 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, tri
                     <DialogClose asChild>
                         <Button variant="outline">Cancelar</Button>
                     </DialogClose>
-                    <Button form="invoice-form" type="submit" disabled={selectedProducts.length === 0}>
-                       <SubmitButton />
-                    </Button>
+                    <SubmitButton form="invoice-form" disabled={selectedProducts.length === 0} />
                 </DialogFooter>
             </DialogContent>
         </Dialog>
     );
 }
-
-    
