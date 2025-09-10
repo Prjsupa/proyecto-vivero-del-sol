@@ -139,7 +139,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                                         <SidebarMenuButton>
                                             <Users />
                                             Usuarios
-                                        </SiderbarMenuButton>
+                                        </SidebarMenuButton>
                                     </Link>
                                 </SidebarMenuItem>
                                  <SidebarMenuItem>
@@ -170,4 +170,3 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
         </SidebarProvider>
     );
 }
-
