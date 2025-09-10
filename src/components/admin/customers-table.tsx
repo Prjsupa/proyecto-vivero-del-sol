@@ -9,11 +9,17 @@ import { MoreHorizontal, User } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
 
+
+type UserWithProfile = Profile & {
+    email?: string;
+    created_at: string;
+}
+
 function getInitials(name: string, lastName: string) {
     return `${name?.charAt(0) ?? ''}${lastName?.charAt(0) ?? ''}`.toUpperCase();
 }
 
-export function CustomersTable({ customers }: { customers: Profile[] }) {
+export function CustomersTable({ customers }: { customers: UserWithProfile[] }) {
 
     const formatDate = (dateString?: string) => {
         if (!dateString) return '-';
