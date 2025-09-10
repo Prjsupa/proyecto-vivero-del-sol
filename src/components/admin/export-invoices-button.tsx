@@ -7,7 +7,7 @@ import { Download, Loader2 } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import type { Invoice } from '@/lib/definitions';
 
-export function ExportInvoicesButton({ invoices }: { invoices: Invoice[] }) {
+export function ExportInvoicesButton({ invoices, disabled }: { invoices: Invoice[], disabled?: boolean }) {
     const [isLoading, setIsLoading] = useState(false);
     const { toast } = useToast();
 
@@ -17,6 +17,7 @@ export function ExportInvoicesButton({ invoices }: { invoices: Invoice[] }) {
             const invoiceIds = invoices.map(i => i.id);
             if (invoiceIds.length === 0) {
                  toast({ title: "Sin datos", description: "No hay facturas para exportar.", variant: "destructive" });
+                 setIsLoading(false);
                  return;
             }
 
@@ -60,7 +61,7 @@ export function ExportInvoicesButton({ invoices }: { invoices: Invoice[] }) {
     };
 
     return (
-        <Button onClick={handleExport} disabled={isLoading || invoices.length === 0} variant="outline">
+        <Button onClick={handleExport} disabled={isLoading || invoices.length === 0 || disabled} variant="outline">
             {isLoading ? (
                 <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

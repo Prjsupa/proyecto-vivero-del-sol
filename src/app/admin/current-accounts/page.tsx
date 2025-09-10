@@ -1,6 +1,6 @@
 
 import { createClient } from "@/lib/supabase/server";
-import type { Invoice } from "@/lib/definitions";
+import type { Invoice, Profile } from "@/lib/definitions";
 import { ExportInvoicesButton } from "@/components/admin/export-invoices-button";
 import { CurrentAccountsView } from "@/components/admin/current-accounts-view";
 
@@ -18,9 +18,25 @@ async function getInvoices(): Promise<Invoice[]> {
     return data;
 }
 
+async function getCustomers(): Promise<Profile[]> {
+    const supabase = createClient();
+    const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('rol', 3)
+        .order('last_name', { ascending: true });
+    
+    if (error) {
+        console.error('Error fetching customers:', error);
+        return [];
+    }
+    return data;
+}
+
 
 export default async function CurrentAccountsPage() {
     const invoices = await getInvoices();
+    const customers = await getCustomers();
 
     return (
         <div className="space-y-8">
@@ -29,11 +45,8 @@ export default async function CurrentAccountsPage() {
                     <h1 className="text-2xl font-semibold">Cuentas Corrientes</h1>
                     <p className="text-muted-foreground">Gestiona los saldos y movimientos de las cuentas corrientes de tus clientes.</p>
                 </div>
-                 <div className="flex items-center gap-2">
-                     <ExportInvoicesButton invoices={invoices} />
-                </div>
             </div>
-            <CurrentAccountsView invoices={invoices} />
+            <CurrentAccountsView invoices={invoices} customers={customers} />
         </div>
     )
 }
