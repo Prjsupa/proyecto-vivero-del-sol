@@ -273,7 +273,7 @@ const addUserSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido.'),
   last_name: z.string().min(1, 'El apellido es requerido.'),
   email: z.string().email('El email no es válido.'),
-  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres.'),
+  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres.').optional(),
 });
 
 export async function addUser(prevState: any, formData: FormData) {
@@ -313,7 +313,7 @@ export async function addUser(prevState: any, formData: FormData) {
     
     const { data: newUser, error } = await supabaseAdmin.auth.admin.createUser({
         email,
-        password,
+        password: password || crypto.randomUUID(), // Create a random password if not provided
         email_confirm: true, // Auto-confirm email
         user_metadata: {
             name,
@@ -340,6 +340,7 @@ export async function addUser(prevState: any, formData: FormData) {
 
 
     revalidatePath('/admin/users');
+    revalidatePath('/admin/customers');
     return {
         message: 'success',
         data: `Usuario ${email} creado exitosamente.`,
