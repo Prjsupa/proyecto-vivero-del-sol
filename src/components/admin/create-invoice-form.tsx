@@ -199,7 +199,7 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, tri
                 </DialogHeader>
                  <form action={formAction} ref={formRef} className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-8 overflow-hidden">
                     {/* Columna Izquierda - Productos */}
-                    <div className="flex flex-col gap-4 overflow-y-auto pr-2">
+                    <div className="flex flex-col gap-4 overflow-y-hidden pr-2">
                         <input type="hidden" name="products" value={JSON.stringify(selectedProducts.map(p => ({ productId: p.product.id, quantity: p.quantity, unitPrice: p.product.precio_venta, total: p.total })))} />
 
                         {/* Búsqueda de Productos */}
@@ -232,12 +232,12 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, tri
                         </div>
 
                          {/* Lista de Productos Seleccionados */}
-                        <div className="space-y-4 rounded-md border p-4 flex-grow">
+                        <div className="space-y-4 rounded-md border p-4 flex-grow flex flex-col">
                              <Label>Productos en la Factura</Label>
-                             <ScrollArea className="h-64">
+                             <ScrollArea className="flex-grow">
                                 {selectedProducts.length === 0 ? (
-                                    <div className="text-center text-muted-foreground py-10">
-                                        Aún no se han añadido productos.
+                                    <div className="text-center text-muted-foreground py-10 flex flex-col items-center justify-center h-full">
+                                        <p>Aún no se han añadido productos.</p>
                                     </div>
                                 ) : (
                                     <div className="space-y-2">
@@ -344,3 +344,5 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, tri
         </Dialog>
     );
 }
+
+    
