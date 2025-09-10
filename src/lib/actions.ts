@@ -6,6 +6,7 @@ import { createClient } from './supabase/server';
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
+import ExcelJS from 'exceljs';
 
 const contactSchema = z.object({
   name: z.string().min(2, 'Name is required.'),
@@ -397,14 +398,64 @@ export async function updatePassword(prevState: any, formData: FormData) {
 
 const csvProductSchema = z.object({
   name: z.string().min(3),
-  sku: z.string().optional(),
+  sku: z.string().optional().nullable(),
   category: z.string(),
-  subcategory: z.string().optional(),
+  subcategory: z.string().optional().nullable(),
   price: z.coerce.number().min(0),
   stock: z.coerce.number().int().min(0),
-  available: z.string().transform(val => val.toUpperCase() === 'TRUE'),
-  description: z.string().optional(),
+  available: z.preprocess((val) => {
+    if (typeof val === 'string') return val.toUpperCase() === 'TRUE';
+    if (typeof val === 'boolean') return val;
+    return false;
+  }, z.boolean()),
+  description: z.string().optional().nullable(),
 });
+
+async function parseCsv(fileContent: string): Promise<z.infer<typeof csvProductSchema>[]> {
+    const rows = fileContent.split('\n').map(row => row.trim()).filter(row => row);
+    const headers = rows[0].split(',').map(h => h.trim());
+    
+    const productsToInsert: z.infer<typeof csvProductSchema>[] = [];
+    for (let i = 1; i < rows.length; i++) {
+        const values = rows[i].split(',');
+        const rowData = headers.reduce((obj, header, index) => {
+            obj[header as keyof z.infer<typeof csvProductSchema>] = values[index]?.trim() || '';
+            return obj;
+        }, {} as any);
+        productsToInsert.push(csvProductSchema.parse(rowData));
+    }
+    return productsToInsert;
+}
+
+async function parseXlsx(buffer: ArrayBuffer): Promise<z.infer<typeof csvProductSchema>[]> {
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(buffer);
+    const worksheet = workbook.worksheets[0];
+    
+    const productsToInsert: z.infer<typeof csvProductSchema>[] = [];
+    const headers: (keyof z.infer<typeof csvProductSchema>)[] = [];
+    worksheet.getRow(1).eachCell((cell, colNumber) => {
+        headers[colNumber - 1] = cell.value as keyof z.infer<typeof csvProductSchema>;
+    });
+
+    for (let i = 2; i <= worksheet.rowCount; i++) {
+        const row = worksheet.getRow(i);
+        const rowData: any = {};
+        row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+            const header = headers[colNumber - 1];
+            if (header) {
+                // ExcelJS can return rich text objects, we only want the text
+                if (cell.value && typeof cell.value === 'object' && 'richText' in cell.value) {
+                    rowData[header] = cell.value.richText.map(rt => rt.text).join('');
+                } else {
+                    rowData[header] = cell.value;
+                }
+            }
+        });
+        productsToInsert.push(csvProductSchema.parse(rowData));
+    }
+    return productsToInsert;
+}
 
 
 export async function uploadProductsFromCsv(prevState: any, formData: FormData) {
@@ -415,64 +466,49 @@ export async function uploadProductsFromCsv(prevState: any, formData: FormData) 
     const { data: profile } = await supabase.from('profiles').select('rol').eq('id', user.id).single();
     if (profile?.rol !== 1) return { message: 'Not authorized' };
     
-    const file = formData.get('csv-file') as File;
+    const file = formData.get('file-upload') as File;
     if (!file || file.size === 0) {
-        return { message: 'Por favor, selecciona un archivo CSV.' };
+        return { message: 'Por favor, selecciona un archivo.' };
     }
-    if (file.type !== 'text/csv') {
-        return { message: 'El archivo debe ser de tipo CSV.' };
-    }
-
-    const fileContent = await file.text();
-    const rows = fileContent.split('\n').map(row => row.trim()).filter(row => row);
     
-    if (rows.length <= 1) {
-        return { message: 'El archivo CSV está vacío o solo contiene la cabecera.' };
-    }
+    let productsToInsert: z.infer<typeof csvProductSchema>[] = [];
+    let errors = [];
 
-    const headers = rows[0].split(',').map(h => h.trim());
-    const expectedHeaders = ['name', 'sku', 'category', 'subcategory', 'price', 'stock', 'available', 'description'];
-    if (JSON.stringify(headers) !== JSON.stringify(expectedHeaders)) {
-        return { message: 'Las cabeceras del CSV no coinciden. Deben ser: name,sku,category,subcategory,price,stock,available,description' };
-    }
-
-    const productsToInsert = [];
-    const errors = [];
-
-    for (let i = 1; i < rows.length; i++) {
-        const values = rows[i].split(',');
-        const rowData = {
-            name: values[0]?.trim(),
-            sku: values[1]?.trim(),
-            category: values[2]?.trim(),
-            subcategory: values[3]?.trim(),
-            price: values[4]?.trim(),
-            stock: values[5]?.trim(),
-            available: values[6]?.trim(),
-            description: values[7]?.trim(),
-        };
-
-        const validated = csvProductSchema.safeParse(rowData);
-
-        if (validated.success) {
-            productsToInsert.push(validated.data);
+    try {
+        if (file.type === 'text/csv') {
+            const fileContent = await file.text();
+            productsToInsert = await parseCsv(fileContent);
+        } else if (file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || file.name.endsWith('.xlsx')) {
+            const buffer = await file.arrayBuffer();
+            productsToInsert = await parseXlsx(buffer);
         } else {
-            errors.push(`Fila ${i + 1}: ${validated.error.flatten().fieldErrors.name || validated.error.flatten().fieldErrors.category || 'Dato inválido'}`);
+            return { message: 'Tipo de archivo no soportado. Por favor, sube un archivo .csv o .xlsx.' };
         }
+    } catch (e: any) {
+        if (e instanceof z.ZodError) {
+             const formattedErrors = Object.entries(e.flatten().fieldErrors)
+                .map(([field, messages]) => `${field}: ${messages.join(', ')}`)
+                .join('; ');
+            return { message: `Error de validación en el archivo: ${formattedErrors}` };
+        }
+        return { message: `Error procesando el archivo: ${e.message}` };
     }
     
-    if (errors.length > 0) {
-        return { message: `Se encontraron errores en el archivo: ${errors.join(', ')}` };
-    }
-
     if (productsToInsert.length > 0) {
-        const { error: insertError } = await supabase.from('products').insert(productsToInsert);
+        const { error: insertError } = await supabase.from('products').insert(productsToInsert.map(p => ({
+            ...p,
+            sku: p.sku || null,
+            subcategory: p.subcategory || null,
+            description: p.description || null,
+        })));
         if (insertError) {
              if (insertError.code === '23505') { // Unique constraint violation
                 return { message: `Error al insertar productos: Uno o más SKUs ya existen.` };
             }
             return { message: `Error al insertar productos: ${insertError.message}` };
         }
+    } else {
+         return { message: `El archivo no contiene productos para importar.` };
     }
     
     revalidatePath('/admin/products');

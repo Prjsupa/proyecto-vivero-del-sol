@@ -49,27 +49,27 @@ export function UploadCsvForm() {
             <DialogTrigger asChild>
                 <Button variant="outline">
                     <FileUp className="mr-2 h-4 w-4" />
-                    Importar CSV
+                    Importar
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-lg max-h-[80vh] flex flex-col">
                 <DialogHeader className="shrink-0">
-                    <DialogTitle>Importar Productos desde CSV</DialogTitle>
+                    <DialogTitle>Importar Productos desde Archivo</DialogTitle>
                     <DialogDescription>
-                        Añade productos en lote subiendo un archivo .csv. Asegúrate de que el archivo tenga una fila de cabecera con los campos correctos.
+                        Añade productos en lote subiendo un archivo .csv o .xlsx. Asegúrate de que el archivo tenga una fila de cabecera con los campos correctos.
                     </DialogDescription>
                 </DialogHeader>
                  <form action={formAction} ref={formRef} className="flex-grow overflow-hidden flex flex-col">
                     <ScrollArea className="flex-grow pr-6 -mr-6">
                         <div className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="csv-file">Archivo CSV</Label>
-                                <Input id="csv-file" name="csv-file" type="file" accept=".csv" ref={fileInputRef} />
+                                <Label htmlFor="file-upload">Archivo CSV o XLSX</Label>
+                                <Input id="file-upload" name="file-upload" type="file" accept=".csv, .xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ref={fileInputRef} />
                             </div>
 
                             <Alert>
                                 <AlertCircle className="h-4 w-4" />
-                                <AlertTitle>Estructura del CSV</AlertTitle>
+                                <AlertTitle>Estructura del Archivo</AlertTitle>
                                 <AlertDescription>
                                     <p className="text-xs mb-2">La primera fila debe ser la cabecera: <strong>name,sku,category,subcategory,price,stock,available,description</strong></p>
                                     <ul className="list-disc list-inside text-xs space-y-1">
@@ -84,13 +84,20 @@ export function UploadCsvForm() {
                                     </ul>
                                 </AlertDescription>
                             </Alert>
-
-                             <Button variant="link" asChild className="p-0 h-auto">
-                                <Link href="/api/sample-csv">
-                                    <Download className="mr-2 h-4 w-4" />
-                                    Descargar CSV de ejemplo
-                                </Link>
-                            </Button>
+                             <div className="flex items-center gap-4">
+                                <Button variant="link" asChild className="p-0 h-auto">
+                                    <Link href="/api/sample-csv">
+                                        <Download className="mr-2 h-4 w-4" />
+                                        Descargar .csv de ejemplo
+                                    </Link>
+                                </Button>
+                                 <Button variant="link" asChild className="p-0 h-auto">
+                                    <Link href="/api/sample-xlsx">
+                                        <Download className="mr-2 h-4 w-4" />
+                                        Descargar .xlsx de ejemplo
+                                    </Link>
+                                </Button>
+                            </div>
                         </div>
                     </ScrollArea>
                     
