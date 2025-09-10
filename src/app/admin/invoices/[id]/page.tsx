@@ -6,6 +6,8 @@ import { InvoiceView, PrintButton } from "../_components/invoice-view";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { Header } from "@/components/vivero/header";
+import { Footer } from "@/components/vivero/footer";
 
 async function getInvoiceAndProfile(invoiceId: string): Promise<{ invoice: Invoice, profile: Profile | null }> {
     const supabase = createClient();
@@ -43,7 +45,10 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
     const { invoice, profile } = await getInvoiceAndProfile(params.id);
 
     return (
-        <div className="bg-muted/40 min-h-screen">
+        <div className="bg-muted/40 min-h-screen print:bg-white" id="invoice-page">
+            <div className="print:hidden">
+              <Header />
+            </div>
             <div className="container mx-auto p-4 sm:p-8">
                 <div className="flex justify-between items-center mb-6 print:hidden">
                     <Button asChild variant="outline">
@@ -56,6 +61,9 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
                 </div>
 
                 <InvoiceView invoice={invoice} clientProfile={profile} />
+            </div>
+             <div className="print:hidden">
+                <Footer />
             </div>
         </div>
     );
