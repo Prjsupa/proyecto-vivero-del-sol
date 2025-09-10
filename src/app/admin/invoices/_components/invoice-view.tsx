@@ -115,34 +115,35 @@ export function InvoiceView({ invoice, clientProfile }: { invoice: Invoice, clie
             </div>
             <style jsx global>{`
                 @media print {
+                    body {
+                        background-color: white !important;
+                    }
                     body * {
                         visibility: hidden;
                     }
                     #invoice-page, #invoice-page * {
                         visibility: visible;
                     }
-                    #invoice-page {
+                     #invoice-page {
                         position: absolute;
                         left: 0;
                         top: 0;
                         right: 0;
-                        bottom: 0;
-                        padding: 0;
-                        margin: 0;
+                        height: auto;
                     }
                     #invoice-content {
-                        visibility: visible;
                         box-shadow: none !important;
                         border: none !important;
                         margin: 0 !important;
                         padding: 0 !important;
                         border-radius: 0 !important;
                         max-width: 100% !important;
+                        width: 100%;
                     }
                 }
                 @page {
                     size: auto;
-                    margin: 20mm;
+                    margin: 0;
                 }
             `}</style>
         </>
