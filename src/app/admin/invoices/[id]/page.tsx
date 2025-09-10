@@ -2,10 +2,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import type { Invoice, Profile } from "@/lib/definitions";
-import { InvoiceView } from "../_components/invoice-view";
+import { InvoiceView, PrintButton } from "../_components/invoice-view";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowLeft, Printer } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 
 async function getInvoiceAndProfile(invoiceId: string): Promise<{ invoice: Invoice, profile: Profile | null }> {
     const supabase = createClient();
@@ -52,7 +52,7 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
                             Volver a Facturas
                         </Link>
                     </Button>
-                     <InvoiceView.PrintButton />
+                     <PrintButton />
                 </div>
 
                 <InvoiceView invoice={invoice} clientProfile={profile} />

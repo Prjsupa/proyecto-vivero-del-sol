@@ -1,3 +1,4 @@
+
 'use client';
 import type { Invoice, Profile } from "@/lib/definitions";
 import { format, parseISO } from 'date-fns';
@@ -14,14 +15,10 @@ type ProductLine = {
     total: number;
 }
 
-function InvoiceViewComponent({ invoice, clientProfile }: { invoice: Invoice, clientProfile: Profile | null }) {
+export function InvoiceView({ invoice, clientProfile }: { invoice: Invoice, clientProfile: Profile | null }) {
     
     const productLines: ProductLine[] = Array.isArray(invoice.products) ? invoice.products : [];
 
-    const handlePrint = () => {
-        window.print();
-    };
-    
     const viveroInfo = {
         name: 'Vivero Del Sol',
         address: 'Av. Siempre Viva 742',
@@ -130,7 +127,7 @@ function InvoiceViewComponent({ invoice, clientProfile }: { invoice: Invoice, cl
     );
 }
 
-function PrintButton() {
+export function PrintButton() {
     const handlePrint = () => {
         window.print();
     };
@@ -141,7 +138,3 @@ function PrintButton() {
         </Button>
     )
 }
-
-export const InvoiceView = Object.assign(InvoiceViewComponent, {
-  PrintButton,
-});
