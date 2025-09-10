@@ -1,3 +1,4 @@
+
 import { Header } from "@/components/vivero/header";
 import { SidebarProvider } from "@/components/ui/sidebar";
 

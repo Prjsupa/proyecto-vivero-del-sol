@@ -1,3 +1,4 @@
+
 import { ProductCatalog } from "@/components/vivero/product-catalog";
 import { createClient } from "@/lib/supabase/server";
 import type { Product } from "@/lib/definitions";

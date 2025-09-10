@@ -48,7 +48,7 @@ export function BranchSwitcher() {
                                         key={branch.value}
                                         value={branch.value}
                                         onSelect={(currentValue) => {
-                                            setActiveBranch(currentValue);
+                                            setActiveBranch(currentValue as 'vivero-del-sol' | 'prueba');
                                             setOpen(false);
                                         }}
                                     >

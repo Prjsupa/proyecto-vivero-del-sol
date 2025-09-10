@@ -1,10 +1,12 @@
+
 import { Header } from "@/components/vivero/header";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider } from "@/components/ui/sidebar";
-import { Briefcase, Package, DollarSign, Users, Settings, BarChart, Wrench, LayoutGrid } from "lucide-react";
+import { Briefcase, Package, DollarSign, Users, Settings, BarChart, Wrench, LayoutGrid, Receipt } from "lucide-react";
 import Link from 'next/link';
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Image from "next/image";
+import { BranchSwitcher } from "@/components/admin/branch-switcher";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = createClient();
@@ -40,6 +42,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <SidebarContent>
                 <SidebarMenu>
                     <SidebarGroup>
+                        <SidebarGroupLabel>Sucursal</SidebarGroupLabel>
+                         <BranchSwitcher />
+                    </SidebarGroup>
+                    <SidebarGroup>
                         <SidebarGroupLabel>Menu</SidebarGroupLabel>
                         <SidebarMenuItem>
                             <Link href="/admin">
@@ -61,7 +67,23 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                                 <Link href="/admin/categories">
                                 <SidebarMenuButton>
                                     <LayoutGrid />
-                                    Categorías de Productos
+                                    Categorías
+                                </SidebarMenuButton>
+                            </Link>
+                        </SidebarMenuItem>
+                        <SidebarMenuItem>
+                                <Link href="/admin/customers">
+                                <SidebarMenuButton>
+                                    <Users />
+                                    Clientes
+                                </SidebarMenuButton>
+                            </Link>
+                        </SidebarMenuItem>
+                         <SidebarMenuItem>
+                                <Link href="/admin/invoicing">
+                                <SidebarMenuButton>
+                                    <Receipt />
+                                    Facturación
                                 </SidebarMenuButton>
                             </Link>
                         </SidebarMenuItem>
