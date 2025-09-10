@@ -169,7 +169,12 @@ export function ProductList({ products, categories }: { products: Product[], cat
                                         {formatPrice(product.precio_costo)}
                                     </TableCell>
                                     <TableCell className="hidden md:table-cell">
-                                        {formatPrice(product.precio_venta)}
+                                        <div>{formatPrice(product.precio_venta)}</div>
+                                        {product.precio_costo > 0 && (
+                                            <span className="text-xs text-green-600 font-medium">
+                                                (+{(((product.precio_venta - product.precio_costo) / product.precio_costo) * 100).toFixed(0)}%)
+                                            </span>
+                                        )}
                                     </TableCell>
                                     <TableCell className="hidden md:table-cell">{product.stock}</TableCell>
                                     <TableCell>
