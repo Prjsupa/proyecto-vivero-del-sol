@@ -4,7 +4,7 @@
 import type { Profile } from "@/lib/definitions";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, isValid } from 'date-fns';
 import { MoreHorizontal, User } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
@@ -14,6 +14,12 @@ function getInitials(name: string, lastName: string) {
 }
 
 export function CustomersTable({ customers }: { customers: Profile[] }) {
+
+    const formatDate = (dateString?: string) => {
+        if (!dateString) return '-';
+        const date = parseISO(dateString);
+        return isValid(date) ? format(date, 'dd MMM, yyyy') : '-';
+    }
 
     return (
         <Table>
@@ -40,7 +46,7 @@ export function CustomersTable({ customers }: { customers: Profile[] }) {
                                 </div>
                             </TableCell>
                             <TableCell className="hidden md:table-cell">
-                                {format(parseISO(customer.created_at), 'dd MMM, yyyy')}
+                                {formatDate(customer.created_at)}
                             </TableCell>
                             <TableCell>
                                 <DropdownMenu>
