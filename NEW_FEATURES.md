@@ -6,20 +6,10 @@ Este documento resume las nuevas características y mejoras implementadas en el 
 
 ### 1. Gestión de Productos Mejorada
 
-Se optimizó la página de **Gestión de Productos** con capacidades avanzadas de filtrado y ordenamiento.
-
-- **Filtros Combinados**: Ahora puedes filtrar la lista de productos simultáneamente por:
-  - Nombre o SKU (búsqueda de texto).
-  - Categoría.
-  - Subcategoría.
-  - Disponibilidad (Disponible, No disponible, Todos).
 - **Ordenamiento Avanzado**: Se añadió la capacidad de ordenar la lista de productos por:
   - Nombre (A-Z, Z-A).
-  - Stock (Menor a mayor, Mayor a menor).
-  - Precio de Venta (Menor a mayor, Mayor a menor).
-- **Interfaz Intuitiva**: Estos controles se han integrado en la parte superior de la tabla para un acceso rápido y fácil.
-
----
+  - Precio.
+  - Stock.
 
 ### 2. Nueva Sección: Gestión de Servicios
 
@@ -47,7 +37,28 @@ Se ha creado una sección completamente nueva y dedicada para la **Gestión de S
 
 ---
 
-### 3. Nueva Sección: Cuentas Corrientes
+### 3. Nueva Sección: Gestión de Clientes
+
+Se ha añadido un apartado dedicado para administrar a todos los clientes del sistema.
+
+- **Listado Completo**: Visualiza a todos los clientes registrados con su nombre, email y fecha de registro.
+- **Alta de Clientes**: Un formulario intuitivo para añadir nuevos clientes directamente desde el panel de administrador, sin necesidad de que se registren por sí mismos.
+- **Creación de Facturas por Cliente**: Desde el listado, puedes iniciar rápidamente el proceso de facturación para un cliente específico.
+
+---
+
+### 4. Nueva Sección: Gestión de Facturación
+
+Un centro de control para todas las facturas emitidas por el sistema.
+
+- **Listado Centralizado**: Todas las facturas generadas aparecen en una tabla central.
+- **Filtros Avanzados**: Permite filtrar las facturas por número, cliente, método de pago, tipo de tarjeta y si tienen un pago secundario.
+- **Exportación a Excel**: Exporta el listado de facturas (respetando los filtros aplicados) a un archivo .xlsx para análisis externo o registros contables.
+- **Acceso a Detalles**: Haz clic en cualquier factura para navegar a su vista de detalle completa.
+
+---
+
+### 5. Nueva Sección: Cuentas Corrientes
 
 Se ha añadido la página de **Cuentas Corrientes** para una mejor gestión financiera de los clientes.
 
@@ -58,7 +69,7 @@ Se ha añadido la página de **Cuentas Corrientes** para una mejor gestión fina
 
 ---
 
-### 4. Mejoras en la Facturación
+### 6. Mejoras en la Facturación
 
 Se ha mejorado el formulario de creación de facturas para un manejo de pagos más detallado.
 
