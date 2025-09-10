@@ -10,6 +10,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Button } from "../ui/button";
 import { CreateInvoiceForm } from "./create-invoice-form";
 import Link from "next/link";
+import { DialogTrigger } from "../ui/dialog";
+import { Dialog } from "@radix-ui/react-dialog";
 
 
 type UserWithProfile = Profile & {
@@ -60,25 +62,30 @@ export function CustomersTable({ customers, products }: { customers: UserWithPro
                                 {formatDate(customer.created_at)}
                             </TableCell>
                             <TableCell>
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button aria-haspopup="true" size="icon" variant="ghost">
-                                            <MoreHorizontal className="h-4 w-4" />
-                                            <span className="sr-only">Toggle menu</span>
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                        <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                                         <DropdownMenuItem>
-                                             <Link href={`/admin/customers/${customer.id}`} className="w-full">
-                                                Ver Detalles
-                                             </Link>
-                                         </DropdownMenuItem>
-                                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                            <CreateInvoiceForm customers={customers} products={products} selectedCustomerId={customer.id} triggerMode="menuitem" />
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
+                                 <Dialog>
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button aria-haspopup="true" size="icon" variant="ghost">
+                                                <MoreHorizontal className="h-4 w-4" />
+                                                <span className="sr-only">Toggle menu</span>
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end">
+                                            <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                                             <DropdownMenuItem asChild>
+                                                 <Link href={`/admin/customers/${customer.id}`} className="w-full">
+                                                    Ver Detalles
+                                                 </Link>
+                                             </DropdownMenuItem>
+                                             <DialogTrigger asChild>
+                                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                                    Crear Factura
+                                                </DropdownMenuItem>
+                                            </DialogTrigger>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                     <CreateInvoiceForm customers={customers} products={products} selectedCustomerId={customer.id} triggerMode="dialog" />
+                                 </Dialog>
                             </TableCell>
                         </TableRow>
                     ))

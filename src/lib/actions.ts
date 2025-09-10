@@ -1,3 +1,4 @@
+
 'use server';
 
 import { z } from 'zod';
@@ -895,7 +896,7 @@ export async function createInvoice(prevState: any, formData: FormData) {
         payment_method, 
         card_type,
         has_secondary_payment, 
-        secondary_payment_method, 
+        secondary_payment_method,
         secondary_card_type,
         notes, 
         products 
@@ -911,7 +912,6 @@ export async function createInvoice(prevState: any, formData: FormData) {
     }
 
     const totalAmount = products.reduce((acc: number, p: any) => acc + p.total, 0);
-    const finalCardType = secondary_card_type || card_type;
 
     const invoiceData = {
         invoice_number: `INV-${Date.now()}`,
@@ -921,7 +921,7 @@ export async function createInvoice(prevState: any, formData: FormData) {
         total_amount: totalAmount,
         invoice_type: invoiceType,
         payment_method: payment_method,
-        card_type: finalCardType,
+        card_type: card_type,
         has_secondary_payment: has_secondary_payment,
         secondary_payment_method: secondary_payment_method,
         notes: notes,
