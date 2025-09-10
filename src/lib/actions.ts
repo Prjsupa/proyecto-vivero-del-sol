@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import { z } from 'zod';
@@ -43,9 +44,13 @@ const baseProductSchema = z.object({
   category: z.string().optional(),
   new_category: z.string().optional(),
   subcategory: z.string().optional().nullable(),
-  price: z.preprocess(
+  precio_costo: z.preprocess(
     (val) => (typeof val === 'string' ? val.replace(',', '.') : val),
-    z.coerce.number().min(0, "El precio no puede ser negativo.")
+    z.coerce.number().min(0, "El precio de costo no puede ser negativo.")
+  ),
+  precio_venta: z.preprocess(
+    (val) => (typeof val === 'string' ? val.replace(',', '.') : val),
+    z.coerce.number().min(0, "El precio de venta no puede ser negativo.")
   ),
   stock: z.coerce.number().int().min(0, "El stock no puede ser negativo."),
   available: z.coerce.boolean(),
@@ -68,7 +73,7 @@ export async function addProduct(prevState: any, formData: FormData) {
     }
     
     const supabase = createClient();
-    const { name, sku, price, stock, available, description, subcategory } = validatedFields.data;
+    const { name, sku, precio_costo, precio_venta, stock, available, description, subcategory } = validatedFields.data;
     const category = validatedFields.data.new_category || validatedFields.data.category;
 
 
@@ -77,7 +82,8 @@ export async function addProduct(prevState: any, formData: FormData) {
         sku,
         category,
         subcategory,
-        price,
+        precio_costo,
+        precio_venta,
         stock,
         available,
         description,
@@ -122,13 +128,13 @@ export async function updateProduct(prevState: any, formData: FormData) {
     }
 
     const supabase = createClient();
-    const { id, name, sku, price, stock, available, description, subcategory } = validatedFields.data;
+    const { id, name, sku, precio_costo, precio_venta, stock, available, description, subcategory } = validatedFields.data;
     const category = validatedFields.data.new_category || validatedFields.data.category;
 
 
     const { error: updateError } = await supabase
         .from('products')
-        .update({ name, sku, category, price, stock, available, description, subcategory })
+        .update({ name, sku, category, precio_costo, precio_venta, stock, available, description, subcategory })
         .eq('id', id);
 
     if (updateError) {
@@ -401,7 +407,8 @@ const csvProductSchema = z.object({
   sku: z.string().optional().nullable(),
   category: z.string(),
   subcategory: z.string().optional().nullable(),
-  price: z.coerce.number().min(0),
+  precio_costo: z.coerce.number().min(0),
+  precio_venta: z.coerce.number().min(0),
   stock: z.coerce.number().int().min(0),
   available: z.preprocess((val) => {
     if (typeof val === 'string') return val.toUpperCase() === 'TRUE';

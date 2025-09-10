@@ -89,7 +89,7 @@ export function CategoryProductManager({ allProducts, allCategories }: { allProd
                             <DeleteCategoryAlert 
                                 categoryName={selectedCategory}
                                 productCount={productsInCategory.length}
-                                onCategoryDeleted={onCategoryActionCompleted}
+                                onCategoryDeleted={onActionCompleted}
                             />
                         </div>
                     )}
@@ -123,7 +123,7 @@ export function CategoryProductManager({ allProducts, allCategories }: { allProd
                             </TableHead>
                             <TableHead>Nombre</TableHead>
                             <TableHead>Estado</TableHead>
-                            <TableHead className="hidden md:table-cell">Precio</TableHead>
+                            <TableHead className="hidden md:table-cell">Precio Venta</TableHead>
                             <TableHead className="hidden md:table-cell">Stock</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -145,7 +145,7 @@ export function CategoryProductManager({ allProducts, allCategories }: { allProd
                                         </Badge>
                                     </TableCell>
                                     <TableCell className="hidden md:table-cell">
-                                        {formatPrice(product.price)}
+                                        {formatPrice(product.precio_venta)}
                                     </TableCell>
                                     <TableCell className="hidden md:table-cell">{product.stock}</TableCell>
                                 </TableRow>

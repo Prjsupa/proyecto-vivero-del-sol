@@ -61,9 +61,9 @@ export function ProductList({ products, categories }: { products: Product[], cat
         } else if (sortFilter.startsWith('price')) {
              filtered.sort((a, b) => {
                 if (sortFilter === 'price_asc') {
-                    return a.price - b.price;
+                    return a.precio_venta - b.precio_venta;
                 } else {
-                    return b.price - a.price;
+                    return b.precio_venta - a.precio_venta;
                 }
             });
         } else if (sortFilter.startsWith('name')) {
@@ -133,8 +133,8 @@ export function ProductList({ products, categories }: { products: Product[], cat
                             <SelectItem value="name_desc">Nombre: Z-A</SelectItem>
                             <SelectItem value="stock_asc">Stock: Menor a mayor</SelectItem>
                             <SelectItem value="stock_desc">Stock: Mayor a menor</SelectItem>
-                            <SelectItem value="price_asc">Precio: Menor a mayor</SelectItem>
-                            <SelectItem value="price_desc">Precio: Mayor a menor</SelectItem>
+                            <SelectItem value="price_asc">Precio Venta: Menor a mayor</SelectItem>
+                            <SelectItem value="price_desc">Precio Venta: Mayor a menor</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
@@ -143,7 +143,8 @@ export function ProductList({ products, categories }: { products: Product[], cat
                         <TableRow>
                             <TableHead>Nombre</TableHead>
                             <TableHead>Estado</TableHead>
-                            <TableHead className="hidden md:table-cell">Precio</TableHead>
+                            <TableHead className="hidden md:table-cell">Precio Costo</TableHead>
+                            <TableHead className="hidden md:table-cell">Precio Venta</TableHead>
                             <TableHead className="hidden md:table-cell">Stock</TableHead>
                             <TableHead>
                                 <span className="sr-only">Acciones</span>
@@ -164,8 +165,11 @@ export function ProductList({ products, categories }: { products: Product[], cat
                                             {product.available ? 'Disponible' : 'No disponible'}
                                         </Badge>
                                     </TableCell>
+                                     <TableCell className="hidden md:table-cell">
+                                        {formatPrice(product.precio_costo)}
+                                    </TableCell>
                                     <TableCell className="hidden md:table-cell">
-                                        {formatPrice(product.price)}
+                                        {formatPrice(product.precio_venta)}
                                     </TableCell>
                                     <TableCell className="hidden md:table-cell">{product.stock}</TableCell>
                                     <TableCell>
@@ -175,7 +179,7 @@ export function ProductList({ products, categories }: { products: Product[], cat
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={5} className="h-48 text-center">
+                                <TableCell colSpan={6} className="h-48 text-center">
                                     <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
                                         <Package className="h-12 w-12" />
                                         <p className="font-semibold">No se encontraron productos.</p>

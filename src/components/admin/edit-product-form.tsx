@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import type { Product } from '@/lib/definitions';
 import { Textarea } from '../ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 
 function SubmitButton() {
     const { pending } = useFormStatus();
@@ -41,6 +42,12 @@ export function EditProductForm({ product, categories }: { product: Product, cat
     const [selectedCategory, setSelectedCategory] = useState<string>(product.category);
     const [isAddingNew, setIsAddingNew] = useState(false);
 
+    // State for pricing logic
+    const [precioCosto, setPrecioCosto] = useState(product.precio_costo);
+    const [precioVenta, setPrecioVenta] = useState(product.precio_venta);
+    const [porcentaje, setPorcentaje] = useState(0);
+    const [pricingMethod, setPricingMethod] = useState('manual');
+
 
     useEffect(() => {
         if (state?.message === 'success') {
@@ -64,6 +71,10 @@ export function EditProductForm({ product, categories }: { product: Product, cat
             formRef.current?.reset();
             setSelectedCategory(product.category);
             setIsAddingNew(false);
+            setPrecioCosto(product.precio_costo);
+            setPrecioVenta(product.precio_venta);
+            setPorcentaje(0);
+            setPricingMethod('manual');
         }
         setIsDialogOpen(open);
     }
@@ -77,6 +88,15 @@ export function EditProductForm({ product, categories }: { product: Product, cat
             setSelectedCategory(value);
         }
     };
+    
+    useEffect(() => {
+        if (pricingMethod === 'porcentaje') {
+            const cost = Number(precioCosto) || 0;
+            const percentage = Number(porcentaje) || 0;
+            const calculatedSalePrice = cost * (1 + percentage / 100);
+            setPrecioVenta(Number(calculatedSalePrice.toFixed(2)));
+        }
+    }, [precioCosto, porcentaje, pricingMethod]);
 
 
     return (
@@ -143,17 +163,64 @@ export function EditProductForm({ product, categories }: { product: Product, cat
                             <FieldError errors={state.errors?.subcategory} />
                         </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    
+                    <div className="space-y-4 rounded-md border p-4">
                         <div className="space-y-2">
-                            <Label htmlFor="price">Precio</Label>
-                            <Input id="price" name="price" type="text" defaultValue={product.price} />
-                            <FieldError errors={state.errors?.price} />
+                            <Label htmlFor="precio_costo">Precio de Costo</Label>
+                            <Input 
+                                id="precio_costo" 
+                                name="precio_costo" 
+                                type="text" 
+                                defaultValue={product.precio_costo} 
+                                onChange={(e) => setPrecioCosto(Number(e.target.value.replace(',', '.')))} 
+                            />
+                            <FieldError errors={state.errors?.precio_costo} />
                         </div>
+
+                        <div className="space-y-3">
+                            <Label>Definir Precio de Venta</Label>
+                            <RadioGroup value={pricingMethod} onValueChange={setPricingMethod}>
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="manual" id="edit-manual" />
+                                    <Label htmlFor="edit-manual">Manual</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="porcentaje" id="edit-porcentaje" />
+                                    <Label htmlFor="edit-porcentaje">Por Porcentaje de Ganancia</Label>
+                                </div>
+                            </RadioGroup>
+                        </div>
+                        
+                        {pricingMethod === 'porcentaje' && (
+                            <div className="space-y-2">
+                                <Label htmlFor="porcentaje_ganancia">Porcentaje de Ganancia (%)</Label>
+                                <Input 
+                                    id="porcentaje_ganancia"
+                                    type="number"
+                                    placeholder="Ej: 50"
+                                    onChange={(e) => setPorcentaje(Number(e.target.value))}
+                                />
+                            </div>
+                        )}
+                        
                         <div className="space-y-2">
-                            <Label htmlFor="stock">Stock</Label>
-                            <Input id="stock" name="stock" type="number" defaultValue={product.stock}/>
-                             <FieldError errors={state.errors?.stock} />
+                            <Label htmlFor="precio_venta">Precio de Venta</Label>
+                            <Input 
+                                id="precio_venta" 
+                                name="precio_venta" 
+                                type="text" 
+                                value={precioVenta} 
+                                onChange={(e) => setPrecioVenta(Number(e.target.value.replace(',', '.')))} 
+                                readOnly={pricingMethod === 'porcentaje'}
+                            />
+                            <FieldError errors={state.errors?.precio_venta} />
                         </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                        <Label htmlFor="stock">Stock</Label>
+                        <Input id="stock" name="stock" type="number" defaultValue={product.stock}/>
+                         <FieldError errors={state.errors?.stock} />
                     </div>
                      <div className="flex items-center space-x-2">
                         <Switch id="available" name="available" defaultChecked={product.available} />

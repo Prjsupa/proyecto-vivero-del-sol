@@ -22,10 +22,12 @@ export type Product = {
   description?: string | null;
   category: string;
   subcategory?: string | null;
-  price: number;
+  precio_costo: number;
+  precio_venta: number;
   stock: number;
   available: boolean;
   sku?: string | null;
+  img_url?: string | null;
 };
 
 export type Order = {

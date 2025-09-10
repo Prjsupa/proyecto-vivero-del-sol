@@ -31,7 +31,7 @@ function ProductCard({ product }: { product: Product }) {
           {product.description && <p className="font-body text-sm text-foreground/80 line-clamp-3">{product.description}</p>}
         </CardContent>
         <CardFooter className="p-4 pt-0 flex justify-between items-center">
-          <span className='font-bold text-lg text-primary'>{formatPrice(product.price)}</span>
+          <span className='font-bold text-lg text-primary'>{formatPrice(product.precio_venta)}</span>
         </CardFooter>
       </Card>
   );
@@ -80,9 +80,9 @@ export function ProductCatalog({ products }: { products: Product[] }) {
     if (priceSort !== 'none') {
         filtered.sort((a, b) => {
             if (priceSort === 'asc') {
-                return a.price - b.price;
+                return a.precio_venta - b.precio_venta;
             } else {
-                return b.price - a.price;
+                return b.precio_venta - a.precio_venta;
             }
         });
     }
