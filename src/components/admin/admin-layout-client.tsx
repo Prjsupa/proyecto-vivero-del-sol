@@ -3,7 +3,7 @@
 
 import { Header } from "@/components/vivero/header";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider } from "@/components/ui/sidebar";
-import { Briefcase, Package, Users, LayoutGrid, Receipt, BookUser, Building2, ShoppingBag, BarChart3, Settings, ChevronRight } from "lucide-react";
+import { Briefcase, Package, Users, LayoutGrid, Receipt, BookUser, Wrench, ShoppingBag, BarChart3, Settings, ChevronRight } from "lucide-react";
 import Link from 'next/link';
 import Image from "next/image";
 import { BranchSwitcher } from "@/components/admin/branch-switcher";
@@ -144,8 +144,8 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                                 </SidebarMenuItem>
                                  <SidebarMenuItem>
                                     <SidebarMenuButton disabled>
-                                        <Building2 />
-                                        Sucursales
+                                        <Wrench />
+                                        Mantenimiento
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
                                 <SidebarMenuItem>
