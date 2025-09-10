@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format, subDays } from "date-fns";
 import { cn } from "@/lib/utils";
 import type { Product } from "@/lib/definitions";
+import type { DateRange } from "react-day-picker";
 
 type SortConfig = {
     key: string;
@@ -96,6 +97,10 @@ type DashboardData = {
 export function DashboardClient({ data }: { data: DashboardData }) {
     const { clientsCount, activeProducts, totalProducts, lowStockAlerts, lowStockProducts } = data;
     const [lowStockSort, setLowStockSort] = useState<SortConfig | null>(null);
+    const [date, setDate] = useState<DateRange | undefined>({
+        from: subDays(new Date(), 29),
+        to: new Date(),
+    });
 
     const sortedLowStockProducts = useMemo(() => {
         let sortableItems = [...lowStockProducts];
@@ -124,6 +129,14 @@ export function DashboardClient({ data }: { data: DashboardData }) {
         setLowStockSort({ key, direction });
     };
 
+     useEffect(() => {
+        // Here you would typically re-fetch data based on the new date range.
+        // For now, it just logs the change.
+        if (date?.from && date?.to) {
+             console.log(`Date range changed: ${format(date.from, "PPP")} to ${format(date.to, "PPP")}`);
+        }
+     }, [date]);
+
     return (
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
@@ -136,19 +149,31 @@ export function DashboardClient({ data }: { data: DashboardData }) {
                                 variant={"outline"}
                                 className={cn(
                                     "w-[300px] justify-start text-left font-normal",
-                                    "text-muted-foreground"
+                                    !date && "text-muted-foreground"
                                 )}
                             >
                                 <CalendarIcon className="mr-2 h-4 w-4" />
-                                <span>{format(subDays(new Date(), 30), "LLL dd, y")} - {format(new Date(), "LLL dd, y")}</span>
+                                {date?.from ? (
+                                    date.to ? (
+                                        <>
+                                            {format(date.from, "LLL dd, y")} -{" "}
+                                            {format(date.to, "LLL dd, y")}
+                                        </>
+                                    ) : (
+                                        format(date.from, "LLL dd, y")
+                                    )
+                                ) : (
+                                    <span>Selecciona un rango de fechas</span>
+                                )}
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0" align="end">
                             <Calendar
                                 initialFocus
                                 mode="range"
-                                defaultMonth={subDays(new Date(), 30)}
-                                selected={{ from: subDays(new Date(), 30), to: new Date() }}
+                                defaultMonth={date?.from}
+                                selected={date}
+                                onSelect={setDate}
                                 numberOfMonths={2}
                             />
                         </PopoverContent>
