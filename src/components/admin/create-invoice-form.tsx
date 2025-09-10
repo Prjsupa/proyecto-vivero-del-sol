@@ -1,4 +1,3 @@
-
 'use client';
 import { useActionState, useEffect, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
@@ -119,7 +118,7 @@ export function CreateInvoiceForm({ customers, selectedCustomerId, triggerMode =
                             </div>
                             <div className="flex items-center space-x-2">
                                 <RadioGroupItem value="B" id="type-b" />
-                                <Label htmlFor="type-b">Factura B (Consumidor Final)</Label>
+                                <Label htmlFor="type-b">Factura B</Label>
                             </div>
                         </RadioGroup>
                          <FieldError errors={state.errors?.invoiceType} />
@@ -141,4 +140,3 @@ export function CreateInvoiceForm({ customers, selectedCustomerId, triggerMode =
         </Dialog>
     );
 }
-
