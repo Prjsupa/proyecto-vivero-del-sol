@@ -16,6 +16,7 @@ import { useState, useEffect } from "react";
 export function AdminLayoutContainer({ children }: { children: React.ReactNode }) {
     const { activeBranch } = useBranchStore();
     const [inventarioOpen, setInventarioOpen] = useState(false);
+    const [serviciosOpen, setServiciosOpen] = useState(false);
     const [ventasOpen, setVentasOpen] = useState(false);
     const [isClient, setIsClient] = useState(false);
 
@@ -79,16 +80,40 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                                 </SidebarMenuButton>
                                             </Link>
                                         </SidebarMenuItem>
+                                        <SidebarMenuItem>
+                                            <Link href="/admin/categories" className="pl-6">
+                                                <SidebarMenuButton variant="ghost" size="sm">
+                                                    <LayoutGrid />
+                                                    Categorías
+                                                </SidebarMenuButton>
+                                            </Link>
+                                        </SidebarMenuItem>
+                                    </CollapsibleContent>
+                                </SidebarGroup>
+                            </Collapsible>
+                            
+                            <Collapsible open={serviciosOpen} onOpenChange={setServiciosOpen}>
+                                <SidebarGroup>
+                                    <CollapsibleTrigger asChild>
+                                        <SidebarMenuButton className="justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <ConciergeBell />
+                                                <span>Servicios</span>
+                                            </div>
+                                            <ChevronRight className={cn("transform transition-transform duration-200", serviciosOpen && "rotate-90")} />
+                                        </SidebarMenuButton>
+                                    </CollapsibleTrigger>
+                                     <CollapsibleContent className="data-[state=open]:py-1">
                                          <SidebarMenuItem>
                                             <Link href="/admin/services" className="pl-6">
                                                 <SidebarMenuButton variant="ghost" size="sm">
                                                     <ConciergeBell />
-                                                    Servicios
+                                                    Listado Servicios
                                                 </SidebarMenuButton>
                                             </Link>
                                         </SidebarMenuItem>
                                         <SidebarMenuItem>
-                                            <Link href="/admin/categories" className="pl-6">
+                                            <Link href="/admin/service-categories" className="pl-6">
                                                 <SidebarMenuButton variant="ghost" size="sm">
                                                     <LayoutGrid />
                                                     Categorías

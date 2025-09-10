@@ -206,6 +206,7 @@ export async function addService(prevState: any, formData: FormData) {
     }
 
     revalidatePath('/admin/services');
+    revalidatePath('/admin/service-categories');
 
     return {
         message: 'success',
@@ -248,6 +249,7 @@ export async function updateService(prevState: any, formData: FormData) {
     }
 
     revalidatePath('/admin/services');
+    revalidatePath('/admin/service-categories');
 
     return {
         message: 'success',
@@ -275,6 +277,7 @@ export async function deleteService(serviceId: string) {
     }
     
     revalidatePath('/admin/services');
+    revalidatePath('/admin/service-categories');
     
     return { message: 'success', data: '¡Servicio eliminado exitosamente!' };
 }
@@ -707,6 +710,32 @@ export async function deleteSelectedProducts(productIds: string[]) {
     return { message: 'success', data: `¡${productIds.length} producto(s) eliminado(s) exitosamente!` };
 }
 
+export async function deleteSelectedServices(serviceIds: string[]) {
+    if (!serviceIds || serviceIds.length === 0) {
+        return { message: "No se seleccionaron servicios." };
+    }
+
+    const supabase = createClient();
+    
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { message: 'No autenticado' };
+    
+    const { data: profile } = await supabase.from('profiles').select('rol').eq('id', user.id).single();
+    if (profile?.rol !== 1) return { message: 'No autorizado' };
+
+    const { error } = await supabase.from('services').delete().in('id', serviceIds);
+
+    if (error) {
+        return { message: `Error al eliminar los servicios: ${error.message}` };
+    }
+    
+    revalidatePath('/admin/services');
+    revalidatePath('/admin/service-categories');
+    
+    return { message: 'success', data: `¡${serviceIds.length} servicio(s) eliminado(s) exitosamente!` };
+}
+
+
 const updateCategorySchema = z.object({
   oldCategoryName: z.string().min(1, "El nombre de la categoría actual es requerido."),
   newCategoryName: z.string().min(1, "El nuevo nombre de la categoría es requerido."),
@@ -1069,4 +1098,155 @@ export async function createInvoice(prevState: any, formData: FormData) {
         message: 'success',
         data: data.id // Devuelve el ID de la factura creada
     };
+}
+
+const updateServiceCategorySchema = z.object({
+  oldCategoryName: z.string().min(1, "El nombre de la categoría actual es requerido."),
+  newCategoryName: z.string().min(1, "El nuevo nombre de la categoría es requerido."),
+});
+
+
+export async function updateServiceCategoryName(prevState: any, formData: FormData) {
+    const supabase = createClient();
+    const validatedFields = updateServiceCategorySchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return { message: 'Datos inválidos.', errors: validatedFields.error.flatten().fieldErrors };
+    }
+
+    const { oldCategoryName, newCategoryName } = validatedFields.data;
+
+    if (oldCategoryName === newCategoryName) {
+        return { message: 'El nuevo nombre de la categoría es el mismo que el actual.' };
+    }
+    
+    const { count, error: checkError } = await supabase
+        .from('services')
+        .select('*', { count: 'exact', head: true })
+        .eq('category', newCategoryName);
+
+    if (checkError) {
+        return { message: `Error al verificar la categoría: ${checkError.message}` };
+    }
+    if (count && count > 0) {
+        return { message: `La categoría '${newCategoryName}' ya existe.` };
+    }
+
+    const { error } = await supabase
+        .from('services')
+        .update({ category: newCategoryName })
+        .eq('category', oldCategoryName);
+
+    if (error) {
+        return { message: `Error al actualizar la categoría: ${error.message}` };
+    }
+
+    revalidatePath('/admin/service-categories');
+    revalidatePath('/admin/services');
+    return { message: 'success', data: '¡Categoría de servicio actualizada exitosamente!' };
+}
+
+export async function deleteServiceCategory(categoryName: string) {
+    const supabase = createClient();
+
+    const { count, error: checkError } = await supabase
+        .from('services')
+        .select('*', { count: 'exact', head: true })
+        .eq('category', categoryName);
+
+    if (checkError) {
+        return { message: `Error al verificar servicios en la categoría: ${checkError.message}` };
+    }
+    
+    if (count && count > 0) {
+        return { message: `No se puede eliminar la categoría porque contiene ${count} servicio(s).` };
+    }
+    
+    revalidatePath('/admin/service-categories');
+    revalidatePath('/admin/services');
+    return { message: 'success', data: `La categoría '${categoryName}' ya no está en uso y ha sido eliminada efectivamente.` };
+}
+
+const updateServicesCategorySchema = z.object({
+  serviceIds: z.string().transform(val => val.split(',')),
+  category: z.string().min(1, "La categoría es requerida."),
+});
+
+export async function updateServicesCategory(prevState: any, formData: FormData) {
+    const supabase = createClient();
+    const validatedFields = updateServicesCategorySchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return { message: 'Datos inválidos.', errors: validatedFields.error.flatten().fieldErrors };
+    }
+    
+    const { serviceIds, category } = validatedFields.data;
+    
+    if (!serviceIds || serviceIds.length === 0) {
+        return { message: 'No se seleccionaron servicios.' };
+    }
+
+    const { error } = await supabase
+        .from('services')
+        .update({ category: category })
+        .in('id', serviceIds);
+
+    if (error) {
+        return { message: `Error al actualizar los servicios: ${error.message}` };
+    }
+
+    revalidatePath('/admin/service-categories');
+    revalidatePath('/admin/services');
+
+    return { 
+        message: 'success', 
+        data: `Se movieron ${serviceIds.length} servicio(s) a la categoría '${category}' exitosamente.` 
+    };
+}
+
+const createServiceCategoryAndAssignServicesSchema = z.object({
+    newCategoryName: z.string().min(1, "El nombre de la categoría es requerido."),
+    serviceIds: z.string().transform(val => val ? val.split(',') : []),
+});
+
+export async function createServiceCategoryAndAssignServices(prevState: any, formData: FormData) {
+    const supabase = createClient();
+    const validatedFields = createServiceCategoryAndAssignServicesSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return { message: "Datos de formulario inválidos.", errors: validatedFields.error.flatten().fieldErrors };
+    }
+
+    const { newCategoryName, serviceIds } = validatedFields.data;
+
+    const { count, error: checkError } = await supabase
+        .from('services')
+        .select('*', { count: 'exact', head: true })
+        .eq('category', newCategoryName);
+
+    if (checkError) {
+        return { message: `Error al verificar la categoría: ${checkError.message}` };
+    }
+    if (count && count > 0) {
+        return { message: `La categoría '${newCategoryName}' ya existe. Usa la opción de edición en su lugar.` };
+    }
+
+    if (serviceIds.length > 0) {
+        const { error } = await supabase
+            .from('services')
+            .update({ category: newCategoryName })
+            .in('id', serviceIds);
+
+        if (error) {
+            return { message: `Error al mover los servicios a la nueva categoría: ${error.message}` };
+        }
+    }
+    
+    revalidatePath('/admin/service-categories');
+    revalidatePath('/admin/services');
+
+    return {
+        message: 'success',
+        data: `¡Categoría '${newCategoryName}' creada! Se movieron ${serviceIds.length} servicio(s).`
+    }
 }
