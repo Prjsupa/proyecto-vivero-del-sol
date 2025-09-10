@@ -870,7 +870,9 @@ export async function createSubcategoryAndAssignProducts(prevState: any, formDat
 const createInvoiceSchema = z.object({
     clientId: z.string().uuid("Debes seleccionar un cliente."),
     invoiceType: z.enum(['A', 'B'], { required_error: "Debes seleccionar un tipo de factura." }),
-    // Add other fields as they become part of the form
+    payment_method: z.string().optional(),
+    has_secondary_payment: z.preprocess((val) => val === 'on' || val === true, z.boolean()),
+    notes: z.string().optional(),
 });
 
 export async function createInvoice(prevState: any, formData: FormData) {
@@ -884,29 +886,28 @@ export async function createInvoice(prevState: any, formData: FormData) {
         };
     }
     
-    const { clientId, invoiceType } = validatedFields.data;
+    const { clientId, invoiceType, payment_method, has_secondary_payment, notes } = validatedFields.data;
 
-    // TODO: This is a placeholder logic.
-    // In a real scenario, you would:
-    // 1. Get client details from the profiles table.
-    // 2. Get the products for the invoice (from cart, etc.).
-    // 3. Calculate total amount.
-    // 4. Generate a unique invoice number.
-    
     const clientData = await supabase.from('profiles').select('name, last_name').eq('id', clientId).single();
     if (!clientData.data) {
         return { message: "Cliente no encontrado." };
     }
 
+    // Placeholder data for products and total, as we don't have the POS UI yet
+    const placeholderProducts = []; 
+    const placeholderTotal = 0;
+
     const invoiceData = {
-        invoice_number: `INV-${Date.now()}`, // Placeholder
+        invoice_number: `INV-${Date.now()}`,
         client_id: clientId,
         client_name: `${clientData.data.name} ${clientData.data.last_name}`,
-        products: [], // Placeholder
-        total_amount: 0, // Placeholder
+        products: placeholderProducts,
+        total_amount: placeholderTotal,
         invoice_type: invoiceType,
-        payment_method: 'Efectivo', // Placeholder
-        status: 'completed' // Placeholder
+        payment_method: payment_method,
+        has_secondary_payment: has_secondary_payment,
+        status: 'pending', // Pending until products are added and paid
+        notes: notes,
     };
 
     const { error } = await supabase.from('invoices').insert(invoiceData);

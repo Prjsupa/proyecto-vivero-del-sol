@@ -40,6 +40,21 @@ export type Order = {
   order_details: Json;
 };
 
+export type Invoice = {
+  id: string;
+  created_at: string;
+  invoice_number: string;
+  client_id: string;
+  client_name: string;
+  products: Json;
+  total_amount: number;
+  invoice_type: 'A' | 'B';
+  payment_method?: string | null;
+  has_secondary_payment?: boolean;
+  notes?: string | null;
+  status: 'pending' | 'completed' | 'cancelled';
+}
+
 export type Json =
   | string
   | number

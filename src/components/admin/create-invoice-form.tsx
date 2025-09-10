@@ -3,7 +3,6 @@ import { useActionState, useEffect, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AlertCircle, PlusCircle, Loader2, Receipt } from 'lucide-react';
 import { createInvoice } from '@/lib/actions';
@@ -11,6 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import type { Profile } from '@/lib/definitions';
+import { Textarea } from '../ui/textarea';
+import { Checkbox } from '../ui/checkbox';
 
 type UserWithProfile = Profile & {
     email?: string;
@@ -123,10 +124,44 @@ export function CreateInvoiceForm({ customers, selectedCustomerId, triggerMode =
                         </RadioGroup>
                          <FieldError errors={state.errors?.invoiceType} />
                     </div>
+                    
+                     <div className="space-y-4 rounded-md border p-4">
+                        <h4 className="font-semibold text-sm">Detalles del Pago</h4>
+                         <div className="space-y-2">
+                            <Label>Método de Pago Principal</Label>
+                             <RadioGroup name="payment_method" defaultValue="Efectivo">
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="Efectivo" id="pay-efectivo" />
+                                    <Label htmlFor="pay-efectivo">Efectivo</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="Transferencia" id="pay-transfer" />
+                                    <Label htmlFor="pay-transfer">Transferencia</Label>
+                                </div>
+                                 <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="Tarjeta" id="pay-tarjeta" />
+                                    <Label htmlFor="pay-tarjeta">Tarjeta</Label>
+                                </div>
+                            </RadioGroup>
+                        </div>
+
+                         <div className="flex items-center space-x-2">
+                            <Checkbox id="has_secondary_payment" name="has_secondary_payment" />
+                            <Label htmlFor="has_secondary_payment" className="text-sm font-normal">
+                                Se abonó con un método de pago secundario
+                            </Label>
+                        </div>
+
+                        <div className="space-y-2">
+                             <Label htmlFor="notes">Notas Adicionales</Label>
+                             <Textarea id="notes" name="notes" placeholder="Ej: Últimos 4 dígitos de la tarjeta, ID de transferencia, etc." />
+                        </div>
+                    </div>
+
 
                     {/* Placeholder for future fields */}
                     <div className="space-y-4 rounded-md border p-4 mt-4">
-                        <p className="text-sm text-muted-foreground text-center">Más campos (productos, método de pago, etc.) aparecerán aquí.</p>
+                        <p className="text-sm text-muted-foreground text-center">La selección de productos y el cálculo del total se añadirán aquí.</p>
                     </div>
 
                      <DialogFooter>
