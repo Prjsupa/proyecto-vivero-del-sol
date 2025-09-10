@@ -36,6 +36,18 @@ export type Product = {
   img_url?: string | null;
 };
 
+export type Service = {
+  id: string;
+  created_at: string;
+  name: string;
+  description?: string | null;
+  category: string;
+  precio_venta: number;
+  available: boolean;
+  sku?: string | null;
+};
+
+
 export type Order = {
   id: string;
   created_at: string;

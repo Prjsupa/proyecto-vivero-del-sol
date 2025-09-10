@@ -154,6 +154,133 @@ export async function updateProduct(prevState: any, formData: FormData) {
     };
 }
 
+const baseServiceSchema = z.object({
+  name: z.string().min(3, "El nombre debe tener al menos 3 caracteres."),
+  sku: z.string().optional().nullable(),
+  category: z.string().optional(),
+  new_category: z.string().optional(),
+  precio_venta: z.preprocess(
+    (val) => (typeof val === 'string' ? val.replace(',', '.') : val),
+    z.coerce.number().min(0, "El precio de venta no puede ser negativo.")
+  ),
+  available: z.coerce.boolean(),
+  description: z.string().optional(),
+});
+
+const serviceSchema = baseServiceSchema.refine(data => data.category || data.new_category, {
+    message: "La categoría es requerida.",
+    path: ["category"],
+});
+
+export async function addService(prevState: any, formData: FormData) {
+    const validatedFields = serviceSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return {
+            message: "Datos de formulario inválidos.",
+            errors: validatedFields.error.flatten().fieldErrors,
+        };
+    }
+    
+    const supabase = createClient();
+    const { name, sku, precio_venta, available, description } = validatedFields.data;
+    const category = validatedFields.data.new_category || validatedFields.data.category;
+
+
+    const { error: insertError } = await supabase.from('services').insert({
+        name,
+        sku,
+        category,
+        precio_venta,
+        available,
+        description,
+    });
+
+    if (insertError) {
+        if (insertError.code === '23505') { // Unique constraint violation
+             return { message: `Error al crear el servicio: El SKU '${sku}' ya existe.` };
+        }
+        return {
+            message: `Error al crear el servicio: ${insertError.message}`,
+        };
+    }
+
+    revalidatePath('/admin/services');
+
+    return {
+        message: 'success',
+        data: '¡Servicio añadido exitosamente!',
+    };
+}
+
+const updateServiceSchema = baseServiceSchema.extend({
+    id: z.string().uuid(),
+}).refine(data => data.category || data.new_category, {
+    message: "La categoría es requerida.",
+    path: ["category"],
+});
+
+export async function updateService(prevState: any, formData: FormData) {
+    const validatedFields = updateServiceSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return {
+            message: "Datos de formulario inválidos.",
+            errors: validatedFields.error.flatten().fieldErrors,
+        };
+    }
+
+    const supabase = createClient();
+    const { id, name, sku, precio_venta, available, description } = validatedFields.data;
+    const category = validatedFields.data.new_category || validatedFields.data.category;
+
+
+    const { error: updateError } = await supabase
+        .from('services')
+        .update({ name, sku, category, precio_venta, available, description })
+        .eq('id', id);
+
+    if (updateError) {
+         if (updateError.code === '23505') { // Unique constraint violation
+             return { message: `Error al actualizar el servicio: El SKU '${sku}' ya existe.` };
+        }
+        return { message: `Error al actualizar el servicio: ${updateError.message}` };
+    }
+
+    revalidatePath('/admin/services');
+
+    return {
+        message: 'success',
+        data: '¡Servicio actualizado exitosamente!',
+    };
+}
+
+export async function deleteService(serviceId: string) {
+    if (!serviceId) {
+        return { message: "ID de servicio inválido." };
+    }
+
+    const supabase = createClient();
+    
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { message: 'No autenticado' };
+    
+    const { data: profile } = await supabase.from('profiles').select('rol').eq('id', user.id).single();
+    if (profile?.rol !== 1) return { message: 'No autorizado' };
+
+    const { error } = await supabase.from('services').delete().eq('id', serviceId);
+
+    if (error) {
+        return { message: `Error al eliminar el servicio: ${error.message}` };
+    }
+    
+    revalidatePath('/admin/services');
+    
+    return { message: 'success', data: '¡Servicio eliminado exitosamente!' };
+}
+
+
+
 const profileSchema = z.object({
   name: z.string().min(1, 'Name is required.'),
   last_name: z.string().min(1, 'Last name is required.'),
@@ -924,6 +1051,7 @@ export async function createInvoice(prevState: any, formData: FormData) {
         card_type: card_type,
         has_secondary_payment: has_secondary_payment,
         secondary_payment_method: secondary_payment_method,
+        secondary_card_type: secondary_card_type,
         notes: notes,
     };
 
