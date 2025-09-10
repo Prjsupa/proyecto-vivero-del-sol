@@ -14,7 +14,7 @@ type ProductLine = {
     total: number;
 }
 
-export function InvoiceView({ invoice, clientProfile }: { invoice: Invoice, clientProfile: Profile | null }) {
+function InvoiceViewComponent({ invoice, clientProfile }: { invoice: Invoice, clientProfile: Profile | null }) {
     
     const productLines: ProductLine[] = Array.isArray(invoice.products) ? invoice.products : [];
 
@@ -130,7 +130,7 @@ export function InvoiceView({ invoice, clientProfile }: { invoice: Invoice, clie
     );
 }
 
-InvoiceView.PrintButton = function PrintButton() {
+function PrintButton() {
     const handlePrint = () => {
         window.print();
     };
@@ -141,3 +141,7 @@ InvoiceView.PrintButton = function PrintButton() {
         </Button>
     )
 }
+
+export const InvoiceView = Object.assign(InvoiceViewComponent, {
+  PrintButton,
+});
