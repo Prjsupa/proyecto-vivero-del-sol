@@ -1,8 +1,10 @@
+
 import { AddProductForm } from "@/components/admin/add-product-form";
 import { ProductList } from "@/components/admin/product-list";
 import { UploadCsvForm } from "@/components/admin/upload-csv-form";
 import type { Product } from "@/lib/definitions";
 import { createClient } from "@/lib/supabase/server";
+import { ExportInventoryButton } from "@/components/admin/export-inventory-button";
 
 async function getProducts(): Promise<Product[]> {
     const supabase = createClient();
@@ -43,6 +45,7 @@ export default async function ProductsPage() {
                     <p className="text-muted-foreground">Añade, edita y gestiona todos los productos de tu vivero.</p>
                 </div>
                  <div className="flex items-center gap-2">
+                    <ExportInventoryButton />
                     <UploadCsvForm />
                     <AddProductForm categories={categories}/>
                 </div>
@@ -51,3 +54,4 @@ export default async function ProductsPage() {
         </div>
     );
 }
+
