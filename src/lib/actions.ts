@@ -873,7 +873,7 @@ const createInvoiceSchema = z.object({
     has_secondary_payment: z.preprocess((val) => val === 'on' || val === true, z.boolean()),
     secondary_payment_method: z.string().optional(),
     notes: z.string().optional(),
-    products: z.string().transform((val) => val ? JSON.parse(val) : [])
+    products: z.string().min(1, "Debes añadir al menos un producto.").transform((val) => val ? JSON.parse(val) : [])
 });
 
 export async function createInvoice(prevState: any, formData: FormData) {
@@ -893,8 +893,8 @@ export async function createInvoice(prevState: any, formData: FormData) {
         return { message: "No se puede crear una factura sin productos." };
     }
 
-    const clientData = await supabase.from('profiles').select('name, last_name').eq('id', clientId).single();
-    if (!clientData.data) {
+    const { data: clientData, error: clientError } = await supabase.from('profiles').select('name, last_name').eq('id', clientId).single();
+    if (clientError || !clientData) {
         return { message: "Cliente no encontrado." };
     }
 
@@ -903,7 +903,7 @@ export async function createInvoice(prevState: any, formData: FormData) {
     const invoiceData = {
         invoice_number: `INV-${Date.now()}`,
         client_id: clientId,
-        client_name: `${clientData.data.name} ${clientData.data.last_name}`,
+        client_name: `${clientData.name} ${clientData.last_name}`,
         products: products,
         total_amount: totalAmount,
         invoice_type: invoiceType,
@@ -914,11 +914,15 @@ export async function createInvoice(prevState: any, formData: FormData) {
         notes: notes,
     };
 
-    const { error } = await supabase.from('invoices').insert(invoiceData);
+    const { error } = await supabase.from('invoices').insert([invoiceData]);
 
     if (error) {
+        console.error('Error creating invoice:', error);
         return { message: `Error al crear la factura: ${error.message}` };
     }
+
+    // Here you would also update the stock of the products
+    // For simplicity, this is omitted for now, but it's a crucial next step.
     
     revalidatePath('/admin/invoicing');
     revalidatePath('/admin/customers');

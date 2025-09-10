@@ -145,6 +145,9 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, tri
             formRef.current?.reset();
             setShowSecondaryPayment(false);
             setSelectedProducts([]);
+            // Reset action state on close
+             const emptyState = { message: '' };
+             (formAction as (prevState: any, formData: FormData) => void)(emptyState, new FormData());
         }
         setIsDialogOpen(open);
     }
@@ -200,7 +203,7 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, tri
                  <form id="invoice-form" action={formAction} ref={formRef} className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-8 overflow-hidden">
                     {/* Columna Izquierda - Productos */}
                     <div className="flex flex-col gap-4 overflow-y-hidden pr-2">
-                        <input type="hidden" name="products" value={JSON.stringify(selectedProducts.map(p => ({ productId: p.product.id, quantity: p.quantity, unitPrice: p.product.precio_venta, total: p.total })))} />
+                        <input type="hidden" name="products" value={JSON.stringify(selectedProducts.map(p => ({ productId: p.product.id, name: p.product.name, quantity: p.quantity, unitPrice: p.product.precio_venta, total: p.total })))} />
 
                         {/* Búsqueda de Productos */}
                         <div className="space-y-4 rounded-md border p-4">
