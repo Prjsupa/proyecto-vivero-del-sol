@@ -3,7 +3,7 @@
 
 import { Header } from "@/components/vivero/header";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider } from "@/components/ui/sidebar";
-import { Briefcase, Package, DollarSign, Users, Settings, BarChart, Wrench, LayoutGrid, Receipt, BookUser } from "lucide-react";
+import { Briefcase, Package, Users, LayoutGrid, Receipt, BookUser, Building2, ShoppingBag } from "lucide-react";
 import Link from 'next/link';
 import Image from "next/image";
 import { BranchSwitcher } from "@/components/admin/branch-switcher";
@@ -35,8 +35,7 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                                 <BranchSwitcher />
                             </SidebarGroup>
                             <SidebarGroup>
-                                <SidebarGroupLabel>Menu</SidebarGroupLabel>
-                                <SidebarMenuItem>
+                                 <SidebarMenuItem>
                                     <Link href="/admin">
                                         <SidebarMenuButton>
                                             <Briefcase />
@@ -44,6 +43,10 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                                         </SidebarMenuButton>
                                     </Link>
                                 </SidebarMenuItem>
+                            </SidebarGroup>
+                            
+                            <SidebarGroup>
+                                <SidebarGroupLabel>Inventario</SidebarGroupLabel>
                                 <SidebarMenuItem>
                                         <Link href="/admin/products">
                                         <SidebarMenuButton>
@@ -60,6 +63,10 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                                         </SidebarMenuButton>
                                     </Link>
                                 </SidebarMenuItem>
+                            </SidebarGroup>
+
+                            <SidebarGroup>
+                                <SidebarGroupLabel>Ventas</SidebarGroupLabel>
                                 <SidebarMenuItem>
                                         <Link href="/admin/customers">
                                         <SidebarMenuButton>
@@ -84,50 +91,15 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                                         </SidebarMenuButton>
                                     </Link>
                                 </SidebarMenuItem>
+                            </SidebarGroup>
+
+                             <SidebarGroup>
+                                <SidebarGroupLabel>Gestión</SidebarGroupLabel>
                                 <SidebarMenuItem>
                                         <Link href="/admin/users">
                                         <SidebarMenuButton>
                                             <Users />
                                             Usuarios
-                                        </SidebarMenuButton>
-                                    </Link>
-                                </SidebarMenuItem>
-                            </SidebarGroup>
-
-                            <SidebarGroup>
-                                <SidebarGroupLabel>Análisis</SidebarGroupLabel>
-                                <SidebarMenuItem>
-                                        <Link href="/admin/finance">
-                                        <SidebarMenuButton>
-                                            <DollarSign />
-                                            Finanzas
-                                        </SidebarMenuButton>
-                                    </Link>
-                                </SidebarMenuItem>
-                                <SidebarMenuItem>
-                                        <Link href="/admin/reports">
-                                        <SidebarMenuButton>
-                                            <BarChart />
-                                            Reportes
-                                        </SidebarMenuButton>
-                                    </Link>
-                                </SidebarMenuItem>
-                            </SidebarGroup>
-                            <SidebarGroup>
-                                <SidebarGroupLabel>Sistema</SidebarGroupLabel>
-                                <SidebarMenuItem>
-                                        <Link href="/admin/system-config">
-                                        <SidebarMenuButton>
-                                            <Settings />
-                                            Configuración
-                                        </SidebarMenuButton>
-                                    </Link>
-                                </SidebarMenuItem>
-                                <SidebarMenuItem>
-                                        <Link href="/admin/maintenance">
-                                        <SidebarMenuButton>
-                                            <Wrench />
-                                            Mantenimiento
                                         </SidebarMenuButton>
                                     </Link>
                                 </SidebarMenuItem>
