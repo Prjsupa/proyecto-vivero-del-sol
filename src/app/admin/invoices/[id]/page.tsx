@@ -2,7 +2,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import type { Invoice, Profile } from "@/lib/definitions";
-import { InvoiceView } from "./_components/invoice-view";
+import { InvoiceView } from "../_components/invoice-view";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowLeft, Printer } from "lucide-react";
