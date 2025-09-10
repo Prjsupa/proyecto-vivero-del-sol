@@ -139,11 +139,11 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
                                         <SidebarMenuButton>
                                             <Users />
                                             Usuarios
-                                        </SidebarMenuButton>
+                                        </SiderbarMenuButton>
                                     </Link>
                                 </SidebarMenuItem>
                                  <SidebarMenuItem>
-                                    <SidebarMenuButton disabled>
+                                    <SidebarMenuButton>
                                         <Wrench />
                                         Mantenimiento
                                     </SidebarMenuButton>
@@ -170,3 +170,4 @@ export function AdminLayoutClient({ children }: { children: React.ReactNode }) {
         </SidebarProvider>
     );
 }
+
