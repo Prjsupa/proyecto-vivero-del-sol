@@ -70,6 +70,7 @@ export type Invoice = {
   card_type?: string | null;
   has_secondary_payment?: boolean;
   secondary_payment_method?: string | null;
+  secondary_card_type?: string | null;
   notes?: string | null;
 }
 

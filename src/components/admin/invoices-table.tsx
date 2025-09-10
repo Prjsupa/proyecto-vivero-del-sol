@@ -120,7 +120,7 @@ export function InvoicesTable({ invoices, customers }: { invoices: Invoice[], cu
                                     <div className="flex flex-col gap-1">
                                         {invoice.payment_method && <Badge variant="secondary">{invoice.payment_method} {invoice.card_type && `(${invoice.card_type})`}</Badge>}
                                         {invoice.has_secondary_payment && invoice.secondary_payment_method && (
-                                            <Badge variant="outline">Abono: {invoice.secondary_payment_method}</Badge>
+                                            <Badge variant="outline">Abono: {invoice.secondary_payment_method} {invoice.secondary_card_type && `(${invoice.secondary_card_type})`}</Badge>
                                         )}
                                     </div>
                                 </TableCell>
