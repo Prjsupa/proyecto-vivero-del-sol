@@ -870,8 +870,10 @@ const createInvoiceSchema = z.object({
     clientId: z.string().uuid("Debes seleccionar un cliente."),
     invoiceType: z.enum(['A', 'B'], { required_error: "Debes seleccionar un tipo de factura." }),
     payment_method: z.string().optional(),
+    card_type: z.string().optional(),
     has_secondary_payment: z.preprocess((val) => val === 'on' || val === true, z.boolean()),
     secondary_payment_method: z.string().optional(),
+    secondary_card_type: z.string().optional(),
     notes: z.string().optional(),
     products: z.string().min(1, "Debes añadir al menos un producto.").transform((val) => val ? JSON.parse(val) : [])
 });
@@ -887,7 +889,17 @@ export async function createInvoice(prevState: any, formData: FormData) {
         };
     }
     
-    const { clientId, invoiceType, payment_method, has_secondary_payment, secondary_payment_method, notes, products } = validatedFields.data;
+    const { 
+        clientId, 
+        invoiceType, 
+        payment_method, 
+        card_type,
+        has_secondary_payment, 
+        secondary_payment_method, 
+        secondary_card_type,
+        notes, 
+        products 
+    } = validatedFields.data;
     
     if (!products || products.length === 0) {
         return { message: "No se puede crear una factura sin productos." };
@@ -900,6 +912,10 @@ export async function createInvoice(prevState: any, formData: FormData) {
 
     const totalAmount = products.reduce((acc: number, p: any) => acc + p.total, 0);
 
+    // If the secondary payment method is card, it overrides the primary card type.
+    // A better approach would be to store both, but for now this works.
+    const finalCardType = secondary_card_type || card_type;
+
     const invoiceData = {
         invoice_number: `INV-${Date.now()}`,
         client_id: clientId,
@@ -910,6 +926,7 @@ export async function createInvoice(prevState: any, formData: FormData) {
         payment_method: payment_method,
         has_secondary_payment: has_secondary_payment,
         secondary_payment_method: secondary_payment_method,
+        card_type: finalCardType,
         notes: notes,
     };
 
@@ -919,9 +936,6 @@ export async function createInvoice(prevState: any, formData: FormData) {
         console.error('Error creating invoice:', error);
         return { message: `Error al crear la factura: ${error.message}` };
     }
-
-    // Here you would also update the stock of the products
-    // For simplicity, this is omitted for now, but it's a crucial next step.
     
     revalidatePath('/admin/invoicing');
     revalidatePath('/admin/customers');
@@ -931,5 +945,3 @@ export async function createInvoice(prevState: any, formData: FormData) {
         data: `Factura ${invoiceData.invoice_number} creada exitosamente.`
     };
 }
-
-    

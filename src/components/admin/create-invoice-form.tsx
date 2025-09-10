@@ -29,6 +29,9 @@ type SelectedProduct = {
     total: number;
 }
 
+const cardTypes = ["Visa", "MasterCard", "American Express", "Cabal", "Naranja", "Otra"];
+
+
 function SubmitButton({ disabled }: { disabled: boolean }) {
     const { pending } = useFormStatus();
     return (
@@ -62,6 +65,10 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, tri
     const formRef = useRef<HTMLFormElement>(null);
     const { toast } = useToast();
     const [showSecondaryPayment, setShowSecondaryPayment] = useState(false);
+
+    // State to manage payment method selection
+    const [primaryPaymentMethod, setPrimaryPaymentMethod] = useState<string | undefined>();
+    const [secondaryPaymentMethod, setSecondaryPaymentMethod] = useState<string | undefined>();
 
     // POS State
     const [searchTerm, setSearchTerm] = useState('');
@@ -97,10 +104,6 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, tri
         });
         setSearchTerm('');
     }
-
-    const removeProductFromInvoice = (productId: string) => {
-        setSelectedProducts(currentProducts => currentProducts.filter(p => p.product.id !== productId));
-    };
     
     const updateProductQuantity = (productId: string, newQuantity: number) => {
         setSelectedProducts(currentProducts => {
@@ -128,9 +131,6 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, tri
                 description: state.data,
             });
             setIsDialogOpen(false);
-            formRef.current?.reset();
-            setShowSecondaryPayment(false);
-            setSelectedProducts([]);
         } else if (state?.message && state.message !== 'success' && state.message !== '') {
              toast({
                 title: 'Error',
@@ -145,9 +145,10 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, tri
             formRef.current?.reset();
             setShowSecondaryPayment(false);
             setSelectedProducts([]);
-            // Reset action state on close
-             const emptyState = { message: '' };
-             (formAction as (prevState: any, formData: FormData) => void)(emptyState, new FormData());
+            setPrimaryPaymentMethod(undefined);
+            setSecondaryPaymentMethod(undefined);
+            const emptyState = { message: '' };
+            (formAction as (prevState: any, formData: FormData) => void)(emptyState, new FormData());
         }
         setIsDialogOpen(open);
     }
@@ -201,11 +202,9 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, tri
                     </DialogDescription>
                 </DialogHeader>
                  <form id="invoice-form" action={formAction} ref={formRef} className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-8 overflow-hidden">
-                    {/* Columna Izquierda - Productos */}
                     <div className="flex flex-col gap-4 overflow-y-hidden pr-2">
                         <input type="hidden" name="products" value={JSON.stringify(selectedProducts.map(p => ({ productId: p.product.id, name: p.product.name, quantity: p.quantity, unitPrice: p.product.precio_venta, total: p.total })))} />
 
-                        {/* Búsqueda de Productos */}
                         <div className="space-y-4 rounded-md border p-4">
                              <Label>Añadir Productos</Label>
                              <div className="relative">
@@ -234,7 +233,6 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, tri
                              </div>
                         </div>
 
-                         {/* Lista de Productos Seleccionados */}
                         <div className="space-y-4 rounded-md border p-4 flex-grow flex flex-col">
                              <Label>Productos en la Factura</Label>
                              <ScrollArea className="flex-grow">
@@ -263,7 +261,7 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, tri
                              </ScrollArea>
                         </div>
                     </div>
-                    {/* Columna Derecha - Detalles de Factura */}
+                    
                     <div className="flex flex-col gap-4 overflow-y-auto pr-2">
                         <div className="space-y-2">
                             <Label htmlFor="clientId">Cliente</Label>
@@ -298,12 +296,27 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, tri
                             <h4 className="font-semibold text-sm">Detalles del Pago</h4>
                             <div className="space-y-2">
                                 <Label>Método de Pago Principal</Label>
-                                <RadioGroup name="payment_method" defaultValue="Efectivo">
+                                <RadioGroup name="payment_method" defaultValue="Efectivo" onValueChange={setPrimaryPaymentMethod}>
                                     <div className="flex items-center space-x-2"><RadioGroupItem value="Efectivo" id="pay-efectivo" /><Label htmlFor="pay-efectivo">Efectivo</Label></div>
                                     <div className="flex items-center space-x-2"><RadioGroupItem value="Transferencia" id="pay-transfer" /><Label htmlFor="pay-transfer">Transferencia</Label></div>
                                     <div className="flex items-center space-x-2"><RadioGroupItem value="Tarjeta" id="pay-tarjeta" /><Label htmlFor="pay-tarjeta">Tarjeta</Label></div>
                                 </RadioGroup>
                             </div>
+                            
+                            {primaryPaymentMethod === 'Tarjeta' && (
+                                <div className="space-y-2">
+                                    <Label htmlFor="card_type">Tipo de Tarjeta</Label>
+                                    <Select name="card_type">
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Selecciona tipo de tarjeta" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {cardTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            )}
+
 
                             <div className="flex items-center space-x-2">
                                 <Checkbox id="has_secondary_payment" name="has_secondary_payment" onCheckedChange={(checked) => setShowSecondaryPayment(!!checked)} />
@@ -313,11 +326,24 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, tri
                             {showSecondaryPayment && (
                                 <div className="space-y-2 pt-2 border-t">
                                     <Label>Método de Pago Secundario</Label>
-                                    <RadioGroup name="secondary_payment_method">
+                                    <RadioGroup name="secondary_payment_method" onValueChange={setSecondaryPaymentMethod}>
                                         <div className="flex items-center space-x-2"><RadioGroupItem value="Efectivo" id="sec-pay-efectivo" /><Label htmlFor="sec-pay-efectivo">Efectivo</Label></div>
                                         <div className="flex items-center space-x-2"><RadioGroupItem value="Transferencia" id="sec-pay-transfer" /><Label htmlFor="sec-pay-transfer">Transferencia</Label></div>
                                         <div className="flex items-center space-x-2"><RadioGroupItem value="Tarjeta" id="sec-pay-tarjeta" /><Label htmlFor="sec-pay-tarjeta">Tarjeta</Label></div>
                                     </RadioGroup>
+                                    {secondaryPaymentMethod === 'Tarjeta' && (
+                                        <div className="space-y-2 pt-2">
+                                            <Label htmlFor="secondary_card_type">Tipo de Tarjeta (Secundaria)</Label>
+                                            <Select name="secondary_card_type">
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Selecciona tipo de tarjeta" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {cardTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
@@ -345,5 +371,3 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, tri
         </Dialog>
     );
 }
-
-    

@@ -1,9 +1,44 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { FileDown } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import type { Invoice, Profile } from "@/lib/definitions";
+import { InvoicesTable } from "@/components/admin/invoices-table";
+import { ExportInvoicesButton } from "@/components/admin/export-invoices-button";
 
-export default function InvoicingPage() {
+async function getInvoices(): Promise<Invoice[]> {
+    const supabase = createClient();
+    const { data, error } = await supabase
+        .from('invoices')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        console.error('Error fetching invoices:', error);
+        return [];
+    }
+    return data;
+}
+
+async function getCustomers(): Promise<Profile[]> {
+    const supabase = createClient();
+    const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('rol', 3)
+        .order('last_name', { ascending: true });
+    
+    if (error) {
+        console.error('Error fetching customers:', error);
+        return [];
+    }
+    return data;
+}
+
+
+export default async function InvoicingPage() {
+    const invoices = await getInvoices();
+    const customers = await getCustomers();
+
     return (
         <div className="space-y-8">
              <div className="flex items-center justify-between">
@@ -12,10 +47,7 @@ export default function InvoicingPage() {
                     <p className="text-muted-foreground">Visualiza, filtra y exporta todas las facturas emitidas.</p>
                 </div>
                  <div className="flex items-center gap-2">
-                     <Button variant="outline">
-                        <FileDown className="mr-2 h-4 w-4"/>
-                        Exportar
-                    </Button>
+                     <ExportInvoicesButton invoices={invoices} />
                 </div>
             </div>
              <Card>
@@ -24,9 +56,7 @@ export default function InvoicingPage() {
                     <CardDescription>Aquí aparecerá la lista de facturas con sus filtros correspondientes.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                     <div className="h-96 flex items-center justify-center border-2 border-dashed rounded-lg">
-                        <p className="text-muted-foreground">Próximamente: Interfaz de visualización de facturas...</p>
-                    </div>
+                    <InvoicesTable invoices={invoices} customers={customers} />
                 </CardContent>
             </Card>
         </div>

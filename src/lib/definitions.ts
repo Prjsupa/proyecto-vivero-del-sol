@@ -1,5 +1,4 @@
 
-
 export type Profile = {
   id: string;
   created_at: string;
@@ -50,6 +49,7 @@ export type Invoice = {
   total_amount: number;
   invoice_type: 'A' | 'B';
   payment_method?: string | null;
+  card_type?: string | null;
   has_secondary_payment?: boolean;
   secondary_payment_method?: string | null;
   notes?: string | null;
@@ -62,9 +62,3 @@ export type Json =
   | null
   | { [key: string]: Json | undefined }
   | Json[]
-
-
-
-
-
-    
