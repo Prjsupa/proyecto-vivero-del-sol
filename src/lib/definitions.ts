@@ -2,11 +2,12 @@
 
 export type Profile = {
   id: string;
+  created_at: string;
   updated_at: string;
   name: string;
   last_name: string;
   rol: number;
-  avatar_url?: string;
+  avatar_url?: string | null;
 };
 
 export type User = {
@@ -46,4 +47,5 @@ export type Json =
   | null
   | { [key: string]: Json | undefined }
   | Json[]
+
 
