@@ -116,11 +116,24 @@ export function InvoiceView({ invoice, clientProfile }: { invoice: Invoice, clie
                     body {
                         -webkit-print-color-adjust: exact;
                         print-color-adjust: exact;
+                        background-color: #fff !important;
+                    }
+                    .print-container, .print-container > div {
+                        padding: 0 !important;
+                        margin: 0 !important;
                     }
                     #invoice-content {
-                        box-shadow: none;
-                        border: none;
+                        box-shadow: none !important;
+                        border: none !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        border-radius: 0 !important;
+                        max-width: 100% !important;
                     }
+                }
+                @page {
+                    size: auto;
+                    margin: 0mm;
                 }
             `}</style>
         </div>

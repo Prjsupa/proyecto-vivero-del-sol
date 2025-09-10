@@ -43,7 +43,7 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
     const { invoice, profile } = await getInvoiceAndProfile(params.id);
 
     return (
-        <div className="bg-background min-h-screen">
+        <div className="bg-muted/40 min-h-screen">
             <div className="container mx-auto p-4 sm:p-8">
                 <div className="flex justify-between items-center mb-6 print:hidden">
                     <Button asChild variant="outline">
