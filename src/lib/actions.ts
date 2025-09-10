@@ -910,7 +910,6 @@ export async function createInvoice(prevState: any, formData: FormData) {
         payment_method: payment_method,
         has_secondary_payment: has_secondary_payment,
         secondary_payment_method: secondary_payment_method,
-        status: 'completed',
         notes: notes,
     };
 

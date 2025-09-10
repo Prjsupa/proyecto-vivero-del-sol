@@ -53,7 +53,6 @@ export type Invoice = {
   has_secondary_payment?: boolean;
   secondary_payment_method?: string | null;
   notes?: string | null;
-  status: 'pending' | 'completed' | 'cancelled';
 }
 
 export type Json =
