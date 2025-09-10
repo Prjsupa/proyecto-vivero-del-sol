@@ -11,6 +11,9 @@ import { Input } from "../ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Checkbox } from "../ui/checkbox";
 import { Button } from "../ui/button";
+import Link from 'next/link';
+import { useRouter } from "next/navigation";
+
 
 export function InvoicesTable({ invoices, customers }: { invoices: Invoice[], customers: Profile[] }) {
     const [filters, setFilters] = useState({
@@ -20,6 +23,8 @@ export function InvoicesTable({ invoices, customers }: { invoices: Invoice[], cu
         cardType: 'todos',
         hasSecondaryPayment: false,
     });
+    const router = useRouter();
+
 
     const handleFilterChange = (key: keyof typeof filters, value: string | boolean) => {
         setFilters(prev => ({ ...prev, [key]: value }));
@@ -50,6 +55,10 @@ export function InvoicesTable({ invoices, customers }: { invoices: Invoice[], cu
         const types = new Set(invoices.map(i => i.card_type).filter(Boolean) as string[]);
         return ['todos', ...Array.from(types)];
     }, [invoices]);
+
+    const handleRowClick = (invoiceId: string) => {
+        router.push(`/admin/invoices/${invoiceId}`);
+    }
 
     return (
         <div className="space-y-4">
@@ -101,7 +110,7 @@ export function InvoicesTable({ invoices, customers }: { invoices: Invoice[], cu
                 <TableBody>
                     {filteredInvoices.length > 0 ? (
                         filteredInvoices.map((invoice) => (
-                            <TableRow key={invoice.id}>
+                            <TableRow key={invoice.id} onClick={() => handleRowClick(invoice.id)} className="cursor-pointer">
                                 <TableCell>
                                     <div className="font-medium">{invoice.invoice_number}</div>
                                     <div className="text-sm text-muted-foreground">{format(parseISO(invoice.created_at), 'dd MMM, yyyy')}</div>

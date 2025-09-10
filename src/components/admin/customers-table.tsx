@@ -9,6 +9,7 @@ import { MoreHorizontal, User } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
 import { CreateInvoiceForm } from "./create-invoice-form";
+import Link from "next/link";
 
 
 type UserWithProfile = Profile & {
@@ -68,7 +69,11 @@ export function CustomersTable({ customers, products }: { customers: UserWithPro
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
                                         <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                                        <DropdownMenuItem>Ver Detalles</DropdownMenuItem>
+                                         <DropdownMenuItem>
+                                             <Link href={`/admin/customers/${customer.id}`} className="w-full">
+                                                Ver Detalles
+                                             </Link>
+                                         </DropdownMenuItem>
                                         <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                                             <CreateInvoiceForm customers={customers} products={products} selectedCustomerId={customer.id} triggerMode="menuitem" />
                                         </DropdownMenuItem>

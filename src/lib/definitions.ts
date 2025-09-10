@@ -7,6 +7,12 @@ export type Profile = {
   last_name: string;
   rol: number;
   avatar_url?: string | null;
+  cuit?: string | null; // CUIT/DNI del cliente
+  address?: string | null;
+  city?: string | null;
+  province?: string | null;
+  phone?: string | null;
+  iva_condition?: string | null; // Condición ante el IVA
 };
 
 export type User = {

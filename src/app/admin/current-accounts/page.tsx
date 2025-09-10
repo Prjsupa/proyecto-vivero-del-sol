@@ -6,6 +6,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { format } from "date-fns";
 import { formatPrice } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
+import { ExportInvoicesButton } from "@/components/admin/export-invoices-button";
 
 async function getInvoices(): Promise<Invoice[]> {
     const supabase = createClient();
@@ -27,9 +29,14 @@ export default async function CurrentAccountsPage() {
 
     return (
         <div className="space-y-8">
-            <div>
-                <h1 className="text-2xl font-semibold">Cuentas Corrientes</h1>
-                <p className="text-muted-foreground">Gestiona los saldos y movimientos de las cuentas corrientes de tus clientes.</p>
+            <div className="flex items-center justify-between">
+                 <div>
+                    <h1 className="text-2xl font-semibold">Cuentas Corrientes</h1>
+                    <p className="text-muted-foreground">Gestiona los saldos y movimientos de las cuentas corrientes de tus clientes.</p>
+                </div>
+                 <div className="flex items-center gap-2">
+                     <ExportInvoicesButton invoices={invoices} />
+                </div>
             </div>
              <Card>
                 <CardHeader>
@@ -49,13 +56,27 @@ export default async function CurrentAccountsPage() {
                         <TableBody>
                             {invoices.length > 0 ? (
                                 invoices.map((invoice) => (
-                                    <TableRow key={invoice.id}>
-                                        <TableCell>{format(new Date(invoice.created_at), 'dd/MM/yyyy')}</TableCell>
-                                        <TableCell className="font-medium">{invoice.client_name}</TableCell>
-                                        <TableCell>
-                                            <Badge variant="outline">{invoice.invoice_number}</Badge>
+                                    <TableRow key={invoice.id} className="cursor-pointer hover:bg-muted/50">
+                                         <TableCell>
+                                             <Link href={`/admin/invoices/${invoice.id}`} className="block w-full h-full">
+                                                {format(new Date(invoice.created_at), 'dd/MM/yyyy')}
+                                            </Link>
                                         </TableCell>
-                                        <TableCell className="text-right font-mono">{formatPrice(invoice.total_amount)}</TableCell>
+                                        <TableCell>
+                                             <Link href={`/admin/invoices/${invoice.id}`} className="block w-full h-full font-medium">
+                                                {invoice.client_name}
+                                            </Link>
+                                        </TableCell>
+                                        <TableCell>
+                                             <Link href={`/admin/invoices/${invoice.id}`} className="block w-full h-full">
+                                                <Badge variant="outline">{invoice.invoice_number}</Badge>
+                                            </Link>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                             <Link href={`/admin/invoices/${invoice.id}`} className="block w-full h-full font-mono">
+                                                {formatPrice(invoice.total_amount)}
+                                            </Link>
+                                        </TableCell>
                                     </TableRow>
                                 ))
                             ) : (

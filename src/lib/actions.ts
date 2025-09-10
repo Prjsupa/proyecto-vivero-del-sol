@@ -1,4 +1,3 @@
-
 'use server';
 
 import { z } from 'zod';
@@ -7,6 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
 import ExcelJS from 'exceljs';
+import { redirect } from 'next/navigation';
 
 const contactSchema = z.object({
   name: z.string().min(2, 'Name is required.'),
@@ -911,9 +911,6 @@ export async function createInvoice(prevState: any, formData: FormData) {
     }
 
     const totalAmount = products.reduce((acc: number, p: any) => acc + p.total, 0);
-
-    // If the secondary payment method is card, it overrides the primary card type.
-    // A better approach would be to store both, but for now this works.
     const finalCardType = secondary_card_type || card_type;
 
     const invoiceData = {
@@ -924,13 +921,13 @@ export async function createInvoice(prevState: any, formData: FormData) {
         total_amount: totalAmount,
         invoice_type: invoiceType,
         payment_method: payment_method,
+        card_type: finalCardType,
         has_secondary_payment: has_secondary_payment,
         secondary_payment_method: secondary_payment_method,
-        card_type: finalCardType,
         notes: notes,
     };
 
-    const { error } = await supabase.from('invoices').insert([invoiceData]);
+    const { data, error } = await supabase.from('invoices').insert([invoiceData]).select('id').single();
 
     if (error) {
         console.error('Error creating invoice:', error);
@@ -942,6 +939,6 @@ export async function createInvoice(prevState: any, formData: FormData) {
     
     return {
         message: 'success',
-        data: `Factura ${invoiceData.invoice_number} creada exitosamente.`
+        data: data.id // Devuelve el ID de la factura creada
     };
 }

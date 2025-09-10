@@ -17,6 +17,7 @@ import { Input } from '../ui/input';
 import { ScrollArea } from '../ui/scroll-area';
 import { formatPrice } from '@/lib/utils';
 import { Badge } from '../ui/badge';
+import { useRouter } from 'next/navigation';
 
 type UserWithProfile = Profile & {
     email?: string;
@@ -64,6 +65,7 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, tri
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const formRef = useRef<HTMLFormElement>(null);
     const { toast } = useToast();
+    const router = useRouter();
     const [showSecondaryPayment, setShowSecondaryPayment] = useState(false);
 
     // State to manage payment method selection
@@ -125,12 +127,13 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, tri
     }
 
     useEffect(() => {
-        if (state?.message === 'success') {
+        if (state?.message === 'success' && state.data) {
             toast({
-                title: '¡Éxito!',
-                description: state.data,
+                title: '¡Factura Creada!',
+                description: "La factura ha sido generada exitosamente.",
             });
             setIsDialogOpen(false);
+            router.push(`/admin/invoices/${state.data}`);
         } else if (state?.message && state.message !== 'success' && state.message !== '') {
              toast({
                 title: 'Error',
@@ -138,7 +141,7 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, tri
                 variant: 'destructive'
             });
         }
-    }, [state, toast]);
+    }, [state, toast, router]);
     
     const onDialogChange = (open: boolean) => {
         if (!open) {
