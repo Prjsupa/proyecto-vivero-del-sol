@@ -3,9 +3,9 @@
 import { useActionState, useEffect, useRef, useState, useMemo } from 'react';
 import { useFormStatus } from 'react-dom';
 import { Button } from "@/components/ui/button";
-import { DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
+import { DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Label } from '@/components/ui/label';
-import { AlertCircle, PlusCircle, Loader2, Receipt, Search, X, Trash2 } from 'lucide-react';
+import { AlertCircle, Loader2, Search, Trash2 } from 'lucide-react';
 import { createInvoice } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
@@ -16,9 +16,7 @@ import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
 import { ScrollArea } from '../ui/scroll-area';
 import { formatPrice } from '@/lib/utils';
-import { Badge } from '../ui/badge';
 import { useRouter } from 'next/navigation';
-import { Dialog } from '@radix-ui/react-dialog';
 
 
 type SelectedProduct = {

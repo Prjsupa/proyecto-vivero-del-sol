@@ -4,7 +4,9 @@ import type { Client, Product } from "@/lib/definitions";
 import { CustomersTable } from "@/components/admin/customers-table";
 import { AddClientForm } from "@/components/admin/add-client-form";
 import { createClient } from "@/lib/supabase/server";
-import { CreateInvoiceForm } from "@/components/admin/create-invoice-form";
+import { CreateInvoiceDialog } from "@/components/admin/create-invoice-dialog";
+import { Button } from "@/components/ui/button";
+import { PlusCircle } from "lucide-react";
 
 async function getClients(): Promise<Client[]> {
     const supabase = createClient();
@@ -43,7 +45,12 @@ export default async function CustomersPage() {
                     <p className="text-muted-foreground">Gestiona los clientes para la facturación.</p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <CreateInvoiceForm customers={clients} products={products} />
+                    <CreateInvoiceDialog customers={clients} products={products}>
+                        <Button>
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Nueva Factura
+                        </Button>
+                    </CreateInvoiceDialog>
                     <AddClientForm />
                 </div>
             </div>
