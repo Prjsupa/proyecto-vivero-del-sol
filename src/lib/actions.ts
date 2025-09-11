@@ -1,4 +1,3 @@
-
 'use server';
 
 import { z } from 'zod';
@@ -439,7 +438,7 @@ export async function addClient(prevState: any, formData: FormData) {
     
     const { error } = await supabase
         .from('clients')
-        .insert({ name, last_name, email });
+        .insert({ name, last_name, email, updated_at: new Date().toISOString() });
     
 
     if (error) {
@@ -450,6 +449,46 @@ export async function addClient(prevState: any, formData: FormData) {
     return {
         message: 'success',
         data: `Cliente ${name} ${last_name} creado exitosamente.`,
+    };
+}
+
+
+const updateClientSchema = addClientSchema.extend({
+    id: z.coerce.number(),
+});
+
+export async function updateClient(prevState: any, formData: FormData) {
+    const validatedFields = updateClientSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return {
+            message: "Datos de formulario inválidos.",
+            errors: validatedFields.error.flatten().fieldErrors,
+        };
+    }
+    
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        return { message: "No autorizado. Debes ser un administrador." }
+    }
+
+    const { id, name, last_name, email } = validatedFields.data;
+    
+    const { error } = await supabase
+        .from('clients')
+        .update({ name, last_name, email, updated_at: new Date().toISOString() })
+        .eq('id', id);
+
+    if (error) {
+        return { message: `Error al actualizar el cliente: ${error.message}` };
+    }
+
+    revalidatePath('/admin/customers');
+    revalidatePath(`/admin/customers/${id}`);
+    return {
+        message: 'success',
+        data: `Cliente ${name} ${last_name} actualizado exitosamente.`,
     };
 }
 
