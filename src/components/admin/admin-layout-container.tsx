@@ -176,12 +176,6 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
 
                              <SidebarGroup>
                                 <SidebarGroupLabel>Sistema</SidebarGroupLabel>
-                                 <SidebarMenuItem>
-                                    <SidebarMenuButton>
-                                        <Building2 />
-                                        Sucursales
-                                    </SidebarMenuButton>
-                                </SidebarMenuItem>
                                 <SidebarMenuItem>
                                         <Link href="/admin/users">
                                         <SidebarMenuButton>

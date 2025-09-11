@@ -16,40 +16,41 @@ export function ClientActions({ client, allClients, allProducts }: { client: Cli
     const [isEditOpen, setIsEditOpen] = useState(false);
     
     return (
-        <Dialog open={isCreateInvoiceOpen} onOpenChange={setIsCreateInvoiceOpen}>
-             <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button aria-haspopup="true" size="icon" variant="ghost">
-                            <MoreHorizontal className="h-4 w-4" />
-                            <span className="sr-only">Toggle menu</span>
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                         <DropdownMenuItem asChild>
-                            <Link href={`/admin/customers/${client.id}`}>
-                                Ver Detalles
-                            </Link>
-                         </DropdownMenuItem>
-                        <DialogTrigger asChild>
-                            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsEditOpen(true); }}>
-                               Editar
+        <>
+            <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+                <Dialog open={isCreateInvoiceOpen} onOpenChange={setIsCreateInvoiceOpen}>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button aria-haspopup="true" size="icon" variant="ghost">
+                                <MoreHorizontal className="h-4 w-4" />
+                                <span className="sr-only">Toggle menu</span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                            <DropdownMenuItem asChild>
+                                <Link href={`/admin/customers/${client.id}`}>
+                                    Ver Detalles
+                                </Link>
                             </DropdownMenuItem>
-                        </DialogTrigger>
-                        <DropdownMenuSeparator />
-                        <DialogTrigger asChild>
-                            <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsCreateInvoiceOpen(true);}}>
-                                Crear Factura
-                            </DropdownMenuItem>
-                        </DialogTrigger>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-                
-                {/* Dialog Content is rendered outside the trigger */}
-                {isCreateInvoiceOpen && <CreateInvoiceForm customers={allClients} products={allProducts} selectedCustomerId={String(client.id)} />}
-                {isEditOpen && <EditClientForm client={client} setDialogOpen={setIsEditOpen} />}
-             </Dialog>
-        </Dialog>
+                            <DialogTrigger asChild>
+                                <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsEditOpen(true); }}>
+                                    Editar
+                                </DropdownMenuItem>
+                            </DialogTrigger>
+                            <DropdownMenuSeparator />
+                            <DialogTrigger asChild>
+                                <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsCreateInvoiceOpen(true); }}>
+                                    Crear Factura
+                                </DropdownMenuItem>
+                            </DialogTrigger>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    {isCreateInvoiceOpen && <CreateInvoiceForm customers={allClients} products={allProducts} selectedCustomerId={String(client.id)} triggerMode="dialog" />}
+                    {isEditOpen && <EditClientForm client={client} setDialogOpen={setIsEditOpen} />}
+                </Dialog>
+            </Dialog>
+        </>
     );
 }
