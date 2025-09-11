@@ -5,52 +5,44 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 import type { Client, Product } from "@/lib/definitions";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import { useState } from "react";
 import Link from "next/link";
-import { CreateInvoiceForm } from "./create-invoice-form";
-import { EditClientForm } from "./edit-client-form";
+import { CreateInvoiceDialog } from "./create-invoice-dialog";
+import { EditClientDialog } from "./edit-client-dialog";
+
 
 export function ClientActions({ client, allClients, allProducts }: { client: Client, allClients: Client[], allProducts: Product[] }) {
-    const [isCreateInvoiceOpen, setIsCreateInvoiceOpen] = useState(false);
-    const [isEditOpen, setIsEditOpen] = useState(false);
     
     return (
-        <>
-            <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-                <Dialog open={isCreateInvoiceOpen} onOpenChange={setIsCreateInvoiceOpen}>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button aria-haspopup="true" size="icon" variant="ghost">
-                                <MoreHorizontal className="h-4 w-4" />
-                                <span className="sr-only">Toggle menu</span>
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                            <DropdownMenuItem asChild>
-                                <Link href={`/admin/customers/${client.id}`}>
-                                    Ver Detalles
-                                </Link>
-                            </DropdownMenuItem>
-                            <DialogTrigger asChild>
-                                <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsEditOpen(true); }}>
-                                    Editar
-                                </DropdownMenuItem>
-                            </DialogTrigger>
-                            <DropdownMenuSeparator />
-                            <DialogTrigger asChild>
-                                <DropdownMenuItem onSelect={(e) => { e.preventDefault(); setIsCreateInvoiceOpen(true); }}>
-                                    Crear Factura
-                                </DropdownMenuItem>
-                            </DialogTrigger>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button aria-haspopup="true" size="icon" variant="ghost">
+                    <MoreHorizontal className="h-4 w-4" />
+                    <span className="sr-only">Toggle menu</span>
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                <DropdownMenuItem asChild>
+                    <Link href={`/admin/customers/${client.id}`}>
+                        Ver Detalles
+                    </Link>
+                </DropdownMenuItem>
+                
+                <EditClientDialog client={client}>
+                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                        Editar
+                    </DropdownMenuItem>
+                </EditClientDialog>
 
-                    {isCreateInvoiceOpen && <CreateInvoiceForm customers={allClients} products={allProducts} selectedCustomerId={String(client.id)} triggerMode="dialog" />}
-                    {isEditOpen && <EditClientForm client={client} setDialogOpen={setIsEditOpen} />}
-                </Dialog>
-            </Dialog>
-        </>
+                <DropdownMenuSeparator />
+                
+                <CreateInvoiceDialog customers={allClients} products={allProducts} selectedCustomerId={String(client.id)}>
+                     <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                        Crear Factura
+                    </DropdownMenuItem>
+                </CreateInvoiceDialog>
+
+            </DropdownMenuContent>
+        </DropdownMenu>
     );
 }

@@ -30,7 +30,7 @@ function FieldError({ errors }: { errors?: string[] }) {
     )
 }
 
-export function EditClientForm({ client, setDialogOpen }: { client: Client, setDialogOpen: (open: boolean) => void }) {
+export function EditClientForm({ client, setOpen }: { client: Client, setOpen: (open: boolean) => void }) {
     const [state, formAction] = useActionState(updateClient, { message: '' });
     const formRef = useRef<HTMLFormElement>(null);
     const { toast } = useToast();
@@ -41,7 +41,7 @@ export function EditClientForm({ client, setDialogOpen }: { client: Client, setD
                 title: '¡Éxito!',
                 description: state.data,
             });
-            setDialogOpen(false);
+            setOpen(false);
         } else if (state?.message && state.message !== 'success') {
              toast({
                 title: 'Error',
@@ -49,7 +49,7 @@ export function EditClientForm({ client, setDialogOpen }: { client: Client, setD
                 variant: 'destructive'
             });
         }
-    }, [state, toast, setDialogOpen]);
+    }, [state, toast, setOpen]);
 
     return (
         <DialogContent className="sm:max-w-md">
@@ -82,7 +82,7 @@ export function EditClientForm({ client, setDialogOpen }: { client: Client, setD
 
                 <DialogFooter className="mt-4">
                     <DialogClose asChild>
-                        <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
+                        <Button variant="outline">Cancelar</Button>
                     </DialogClose>
                     <SubmitButton />
                 </DialogFooter>
