@@ -65,7 +65,7 @@ export type Invoice = {
   id: string;
   created_at: string;
   invoice_number: string;
-  client_id: string;
+  client_id: number;
   client_name: string;
   products: Json;
   total_amount: number;

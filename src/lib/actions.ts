@@ -1029,7 +1029,7 @@ export async function createSubcategoryAndAssignProducts(prevState: any, formDat
 }
 
 const createInvoiceSchema = z.object({
-    clientId: z.string().min(1, "Debes seleccionar un cliente."),
+    clientId: z.coerce.number().min(1, "Debes seleccionar un cliente."),
     invoiceType: z.enum(['A', 'B'], { required_error: "Debes seleccionar un tipo de factura." }),
     payment_method: z.string().optional(),
     card_type: z.string().optional(),

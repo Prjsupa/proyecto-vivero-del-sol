@@ -13,17 +13,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { ExportInvoicesButton } from "./export-invoices-button";
 
 export function CurrentAccountsView({ invoices, customers }: { invoices: Invoice[], customers: Client[] }) {
-    const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
+    const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
 
     const handleClientChange = (clientId: string) => {
-        setSelectedClientId(clientId);
+        setSelectedClientId(Number(clientId));
     }
 
     const filteredInvoices = useMemo(() => {
         if (!selectedClientId) {
             return [];
         }
-        return invoices.filter(invoice => String(invoice.client_id) === selectedClientId);
+        return invoices.filter(invoice => invoice.client_id === selectedClientId);
     }, [invoices, selectedClientId]);
 
     const clientBalance = useMemo(() => {
@@ -32,7 +32,7 @@ export function CurrentAccountsView({ invoices, customers }: { invoices: Invoice
 
     const selectedCustomerName = useMemo(() => {
         if (!selectedClientId) return '';
-        const customer = customers.find(c => String(c.id) === selectedClientId);
+        const customer = customers.find(c => c.id === selectedClientId);
         return customer ? `${customer.name} ${customer.last_name}` : '';
     }, [customers, selectedClientId]);
 
@@ -43,7 +43,7 @@ export function CurrentAccountsView({ invoices, customers }: { invoices: Invoice
                 <CardDescription>Selecciona un cliente para ver el detalle de sus facturas y su saldo total.</CardDescription>
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pt-4">
                      <div className="flex flex-col gap-2 w-full md:w-72">
-                        <Select onValueChange={handleClientChange} value={selectedClientId || ''}>
+                        <Select onValueChange={handleClientChange} value={selectedClientId ? String(selectedClientId) : ''}>
                             <SelectTrigger>
                                 <SelectValue placeholder="Selecciona un cliente..." />
                             </SelectTrigger>
