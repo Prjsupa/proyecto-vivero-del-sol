@@ -2,7 +2,7 @@
 'use client';
 import { useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import type { Invoice, Profile } from "@/lib/definitions";
+import type { Invoice, Client } from "@/lib/definitions";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
 import { formatPrice } from "@/lib/utils";
@@ -12,7 +12,7 @@ import { BookUser, User } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { ExportInvoicesButton } from "./export-invoices-button";
 
-export function CurrentAccountsView({ invoices, customers }: { invoices: Invoice[], customers: Profile[] }) {
+export function CurrentAccountsView({ invoices, customers }: { invoices: Invoice[], customers: Client[] }) {
     const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
 
     const handleClientChange = (clientId: string) => {
@@ -23,7 +23,7 @@ export function CurrentAccountsView({ invoices, customers }: { invoices: Invoice
         if (!selectedClientId) {
             return [];
         }
-        return invoices.filter(invoice => invoice.client_id === selectedClientId);
+        return invoices.filter(invoice => String(invoice.client_id) === selectedClientId);
     }, [invoices, selectedClientId]);
 
     const clientBalance = useMemo(() => {
@@ -32,7 +32,7 @@ export function CurrentAccountsView({ invoices, customers }: { invoices: Invoice
 
     const selectedCustomerName = useMemo(() => {
         if (!selectedClientId) return '';
-        const customer = customers.find(c => c.id === selectedClientId);
+        const customer = customers.find(c => String(c.id) === selectedClientId);
         return customer ? `${customer.name} ${customer.last_name}` : '';
     }, [customers, selectedClientId]);
 
@@ -49,7 +49,7 @@ export function CurrentAccountsView({ invoices, customers }: { invoices: Invoice
                             </SelectTrigger>
                             <SelectContent>
                                 {customers.map(customer => (
-                                    <SelectItem key={customer.id} value={customer.id}>
+                                    <SelectItem key={customer.id} value={String(customer.id)}>
                                         {customer.name} {customer.last_name}
                                     </SelectItem>
                                 ))}

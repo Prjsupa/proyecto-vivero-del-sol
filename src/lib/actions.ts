@@ -267,9 +267,6 @@ export async function deleteService(serviceId: string) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { message: 'No autenticado' };
     
-    const { data: profile } = await supabase.from('profiles').select('rol').eq('id', user.id).single();
-    if (profile?.rol !== 1) return { message: 'No autorizado' };
-
     const { error } = await supabase.from('services').delete().eq('id', serviceId);
 
     if (error) {
@@ -355,49 +352,6 @@ export async function updateProfile(prevState: any, formData: FormData) {
     };
 }
 
-const updateUserRoleSchema = z.object({
-  userId: z.string().uuid(),
-  rol: z.coerce.number().int().min(1).max(3),
-});
-
-export async function updateUserRole(prevState: any, formData: FormData) {
-  const validatedFields = updateUserRoleSchema.safeParse(Object.fromEntries(formData.entries()));
-
-  if (!validatedFields.success) {
-    return {
-      message: "Datos de formulario inválidos.",
-      errors: validatedFields.error.flatten().fieldErrors,
-    };
-  }
-
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user) {
-    return { message: "No has iniciado sesión." };
-  }
-  
-  // Check if the current user is an admin
-  const { data: adminProfile } = await supabase.from('profiles').select('rol').eq('id', user.id).single();
-  if (adminProfile?.rol !== 1) {
-    return { message: "No tienes permiso para realizar esta acción." };
-  }
-
-  const { userId, rol } = validatedFields.data;
-
-  const { error } = await supabase.from('profiles').update({ rol }).eq('id', userId);
-
-  if (error) {
-    return { message: `Error al actualizar el rol: ${error.message}` };
-  }
-
-  revalidatePath('/admin/users');
-
-  return {
-    message: 'success',
-    data: '¡Rol de usuario actualizado exitosamente!',
-  };
-}
 
 const addUserSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido.'),
@@ -434,10 +388,6 @@ export async function addUser(prevState: any, formData: FormData) {
         return { message: "No autorizado. Debes ser un administrador." }
     }
 
-    const { data: adminProfile } = await supabaseAdmin.from('profiles').select('rol').eq('id', adminUser.id).single();
-    if (adminProfile?.rol !== 1) {
-       return { message: "No tienes permiso para realizar esta acción." };
-    }
 
     const { name, last_name, email, password } = validatedFields.data;
     
@@ -454,28 +404,55 @@ export async function addUser(prevState: any, formData: FormData) {
     if (error) {
         return { message: `Error creando el usuario: ${error.message}` };
     }
-    
-    // The profile is created by a trigger, so we don't need to insert it manually.
-    // We just need to make sure the role is set to 3.
-    if (newUser.user) {
-        const { error: profileError } = await supabaseAdmin
-            .from('profiles')
-            .update({ rol: 3 })
-            .eq('id', newUser.user.id);
-        
-        if (profileError) {
-             return { message: `Error asignando el rol al usuario: ${profileError.message}` };
-        }
-    }
-
 
     revalidatePath('/admin/users');
+    return {
+        message: 'success',
+        data: `Admin ${email} creado exitosamente.`,
+    };
+}
+
+
+const addClientSchema = z.object({
+  name: z.string().min(1, 'El nombre es requerido.'),
+  last_name: z.string().min(1, 'El apellido es requerido.'),
+  email: z.string().email('El email no es válido.').optional().nullable(),
+});
+
+export async function addClient(prevState: any, formData: FormData) {
+    const validatedFields = addClientSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return {
+            message: "Datos de formulario inválidos.",
+            errors: validatedFields.error.flatten().fieldErrors,
+        };
+    }
+    
+    const supabase = createClient();
+     const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        return { message: "No autorizado. Debes ser un administrador." }
+    }
+
+    const { name, last_name, email } = validatedFields.data;
+    
+    const { error } = await supabase
+        .from('clients')
+        .insert({ name, last_name, email });
+    
+
+    if (error) {
+        return { message: `Error creando el cliente: ${error.message}` };
+    }
+
     revalidatePath('/admin/customers');
     return {
         message: 'success',
-        data: `Usuario ${email} creado exitosamente.`,
+        data: `Cliente ${name} ${last_name} creado exitosamente.`,
     };
 }
+
 
 const updatePasswordSchema = z.object({
     currentPassword: z.string().min(1, 'Current password is required.'),
@@ -601,8 +578,6 @@ export async function uploadProductsFromCsv(prevState: any, formData: FormData) 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { message: 'Not authenticated' };
 
-    const { data: profile } = await supabase.from('profiles').select('rol').eq('id', user.id).single();
-    if (profile?.rol !== 1) return { message: 'Not authorized' };
     
     const file = formData.get('file-upload') as File;
     if (!file || file.size === 0) {
@@ -668,9 +643,6 @@ export async function deleteProduct(productId: string) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { message: 'No autenticado' };
     
-    const { data: profile } = await supabase.from('profiles').select('rol').eq('id', user.id).single();
-    if (profile?.rol !== 1) return { message: 'No autorizado' };
-
     const { error } = await supabase.from('products').delete().eq('id', productId);
 
     if (error) {
@@ -694,9 +666,6 @@ export async function deleteSelectedProducts(productIds: string[]) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { message: 'No autenticado' };
     
-    const { data: profile } = await supabase.from('profiles').select('rol').eq('id', user.id).single();
-    if (profile?.rol !== 1) return { message: 'No autorizado' };
-
     const { error } = await supabase.from('products').delete().in('id', productIds);
 
     if (error) {
@@ -720,9 +689,6 @@ export async function deleteSelectedServices(serviceIds: string[]) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { message: 'No autenticado' };
     
-    const { data: profile } = await supabase.from('profiles').select('rol').eq('id', user.id).single();
-    if (profile?.rol !== 1) return { message: 'No autorizado' };
-
     const { error } = await supabase.from('services').delete().in('id', serviceIds);
 
     if (error) {
@@ -1024,7 +990,7 @@ export async function createSubcategoryAndAssignProducts(prevState: any, formDat
 }
 
 const createInvoiceSchema = z.object({
-    clientId: z.string().uuid("Debes seleccionar un cliente."),
+    clientId: z.string().min(1, "Debes seleccionar un cliente."),
     invoiceType: z.enum(['A', 'B'], { required_error: "Debes seleccionar un tipo de factura." }),
     payment_method: z.string().optional(),
     card_type: z.string().optional(),
@@ -1062,7 +1028,7 @@ export async function createInvoice(prevState: any, formData: FormData) {
         return { message: "No se puede crear una factura sin productos." };
     }
 
-    const { data: clientData, error: clientError } = await supabase.from('profiles').select('name, last_name').eq('id', clientId).single();
+    const { data: clientData, error: clientError } = await supabase.from('clients').select('name, last_name').eq('id', clientId).single();
     if (clientError || !clientData) {
         return { message: "Cliente no encontrado." };
     }

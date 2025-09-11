@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { Invoice, Profile } from "@/lib/definitions";
+import type { Invoice, Client } from "@/lib/definitions";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format, parseISO, isValid } from 'date-fns';
 import { Badge } from "../ui/badge";
@@ -10,12 +10,10 @@ import { useState, useMemo } from "react";
 import { Input } from "../ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Checkbox } from "../ui/checkbox";
-import { Button } from "../ui/button";
-import Link from 'next/link';
 import { useRouter } from "next/navigation";
 
 
-export function InvoicesTable({ invoices, customers }: { invoices: Invoice[], customers: Profile[] }) {
+export function InvoicesTable({ invoices, customers }: { invoices: Invoice[], customers: Client[] }) {
     const [filters, setFilters] = useState({
         invoiceNumber: '',
         client: 'todos',
@@ -35,7 +33,7 @@ export function InvoicesTable({ invoices, customers }: { invoices: Invoice[], cu
             if (filters.invoiceNumber && !invoice.invoice_number.toLowerCase().includes(filters.invoiceNumber.toLowerCase())) {
                 return false;
             }
-            if (filters.client !== 'todos' && invoice.client_id !== filters.client) {
+            if (filters.client !== 'todos' && String(invoice.client_id) !== filters.client) {
                 return false;
             }
             if (filters.paymentMethod !== 'todos' && invoice.payment_method !== filters.paymentMethod && invoice.secondary_payment_method !== filters.paymentMethod) {
@@ -72,7 +70,7 @@ export function InvoicesTable({ invoices, customers }: { invoices: Invoice[], cu
                     <SelectTrigger><SelectValue placeholder="Cliente" /></SelectTrigger>
                     <SelectContent>
                         <SelectItem value="todos">Todos los Clientes</SelectItem>
-                        {customers.map(c => <SelectItem key={c.id} value={c.id}>{c.name} {c.last_name}</SelectItem>)}
+                        {customers.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.name} {c.last_name}</SelectItem>)}
                     </SelectContent>
                 </Select>
                  <Select value={filters.paymentMethod} onValueChange={(val) => handleFilterChange('paymentMethod', val)}>

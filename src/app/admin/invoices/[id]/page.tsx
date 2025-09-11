@@ -1,13 +1,13 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
-import type { Invoice, Profile } from "@/lib/definitions";
+import type { Invoice, Client } from "@/lib/definitions";
 import { InvoiceView, PrintButton } from "../_components/invoice-view";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
-async function getInvoiceAndProfile(invoiceId: string): Promise<{ invoice: Invoice, profile: Profile | null }> {
+async function getInvoiceAndClient(invoiceId: string): Promise<{ invoice: Invoice, client: Client | null }> {
     const supabase = createClient();
     
     const { data: invoice, error: invoiceError } = await supabase
@@ -20,17 +20,17 @@ async function getInvoiceAndProfile(invoiceId: string): Promise<{ invoice: Invoi
         notFound();
     }
     
-    const { data: profile, error: profileError } = await supabase
-        .from('profiles')
+    const { data: client, error: clientError } = await supabase
+        .from('clients')
         .select('*')
         .eq('id', invoice.client_id)
         .single();
 
-    if (profileError) {
-        console.error('Error fetching client profile for invoice:', profileError);
+    if (clientError) {
+        console.error('Error fetching client for invoice:', clientError);
     }
     
-    return { invoice, profile: profile || null };
+    return { invoice, client: client || null };
 }
 
 export default async function InvoiceDetailPage({ params }: { params: { id: string } }) {
@@ -40,7 +40,7 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
         redirect('/auth/login');
     }
 
-    const { invoice, profile } = await getInvoiceAndProfile(params.id);
+    const { invoice, client } = await getInvoiceAndClient(params.id);
 
     return (
         <div className="bg-muted/40 min-h-screen print:bg-white" id="invoice-page">
@@ -55,7 +55,7 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
                      <PrintButton />
                 </div>
 
-                <InvoiceView invoice={invoice} clientProfile={profile} />
+                <InvoiceView invoice={invoice} client={client} />
             </div>
         </div>
     );

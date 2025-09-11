@@ -5,21 +5,25 @@ export type Profile = {
   updated_at: string;
   name: string;
   last_name: string;
-  rol: number;
   avatar_url?: string | null;
-  cuit?: string | null; // CUIT/DNI del cliente
+  // rol has been removed
+};
+
+export type Client = {
+  id: number;
+  created_at: string;
+  updated_at: string;
+  name: string;
+  last_name: string;
+  email?: string | null;
+  cuit?: string | null;
   address?: string | null;
   city?: string | null;
   province?: string | null;
   phone?: string | null;
-  iva_condition?: string | null; // Condición ante el IVA
-};
+  iva_condition?: string | null;
+}
 
-export type User = {
-  id: string;
-  email?: string;
-  // Add any other user properties you need
-};
 
 export type Product = {
   id: string;

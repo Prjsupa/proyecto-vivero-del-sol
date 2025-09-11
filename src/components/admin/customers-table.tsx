@@ -1,9 +1,9 @@
 
 'use client';
 
-import type { Profile, Product } from "@/lib/definitions";
+import type { Client, Product } from "@/lib/definitions";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { format, parseISO, isValid } from 'date-fns';
 import { MoreHorizontal, User } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "../ui/dropdown-menu";
@@ -14,16 +14,11 @@ import { DialogTrigger } from "../ui/dialog";
 import { Dialog } from "@radix-ui/react-dialog";
 
 
-type UserWithProfile = Profile & {
-    email?: string;
-    created_at: string;
-}
-
 function getInitials(name: string, lastName: string) {
     return `${name?.charAt(0) ?? ''}${lastName?.charAt(0) ?? ''}`.toUpperCase();
 }
 
-export function CustomersTable({ customers, products }: { customers: UserWithProfile[], products: Product[] }) {
+export function CustomersTable({ customers, products }: { customers: Client[], products: Product[] }) {
 
     const formatDate = (dateString?: string) => {
         if (!dateString) return '-';
@@ -49,7 +44,6 @@ export function CustomersTable({ customers, products }: { customers: UserWithPro
                             <TableCell>
                                 <div className="flex items-center gap-3">
                                     <Avatar>
-                                        <AvatarImage src={customer.avatar_url || ''} />
                                         <AvatarFallback>{getInitials(customer.name, customer.last_name)}</AvatarFallback>
                                     </Avatar>
                                     <div>
@@ -84,7 +78,7 @@ export function CustomersTable({ customers, products }: { customers: UserWithPro
                                             </DialogTrigger>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
-                                     <CreateInvoiceForm customers={customers} products={products} selectedCustomerId={customer.id} triggerMode="dialog" />
+                                     <CreateInvoiceForm customers={customers} products={products} selectedCustomerId={String(customer.id)} triggerMode="dialog" />
                                  </Dialog>
                             </TableCell>
                         </TableRow>

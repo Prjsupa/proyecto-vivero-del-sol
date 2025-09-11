@@ -186,7 +186,7 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                         <Link href="/admin/users">
                                         <SidebarMenuButton>
                                             <Users />
-                                            Usuarios
+                                            Admins
                                         </SidebarMenuButton>
                                     </Link>
                                 </SidebarMenuItem>

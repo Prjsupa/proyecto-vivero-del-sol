@@ -1,6 +1,6 @@
 
 import { createClient } from "@/lib/supabase/server";
-import type { Product, Profile } from "@/lib/definitions";
+import type { Product } from "@/lib/definitions";
 import { DashboardClient } from "@/components/admin/dashboard-client";
 
 async function getDashboardData() {
@@ -9,7 +9,7 @@ async function getDashboardData() {
     // Fetch all data in parallel
     const [productsData, clientsData] = await Promise.all([
         supabase.from('products').select('*'),
-        supabase.from('profiles').select('id', { count: 'exact' }).eq('rol', 3)
+        supabase.from('clients').select('id', { count: 'exact' })
     ]);
     
     const { data: products, error: productsError } = productsData;

@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AlertCircle, PlusCircle, Loader2 } from 'lucide-react';
-import { addUser } from '@/lib/actions';
+import { addClient } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
 
 function SubmitButton() {
@@ -31,7 +31,7 @@ function FieldError({ errors }: { errors?: string[] }) {
 }
 
 export function AddClientForm() {
-    const [state, formAction] = useActionState(addUser, { message: '' });
+    const [state, formAction] = useActionState(addClient, { message: '' });
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const formRef = useRef<HTMLFormElement>(null);
     const { toast } = useToast();
@@ -72,7 +72,7 @@ export function AddClientForm() {
                 <DialogHeader>
                     <DialogTitle>Añadir Nuevo Cliente</DialogTitle>
                     <DialogDescription>
-                        Rellena los detalles para crear una nueva cuenta de cliente.
+                        Rellena los detalles para crear un nuevo cliente para facturación.
                     </DialogDescription>
                 </DialogHeader>
                 <form action={formAction} ref={formRef} className="grid gap-4 py-4">
@@ -89,14 +89,9 @@ export function AddClientForm() {
                         </div>
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="email">Email</Label>
+                        <Label htmlFor="email">Email (Opcional)</Label>
                         <Input id="email" name="email" type="email" />
                         <FieldError errors={state.errors?.email} />
-                    </div>
-                     <div className="space-y-2">
-                        <Label htmlFor="password">Contraseña</Label>
-                        <Input id="password" name="password" type="password" />
-                         <FieldError errors={state.errors?.password} />
                     </div>
                      <DialogFooter>
                         <DialogClose asChild>

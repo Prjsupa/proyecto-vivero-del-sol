@@ -11,15 +11,5 @@ export default async function HomePage() {
     redirect('/auth/login');
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('rol')
-    .eq('id', user.id)
-    .single();
-
-  if (profile?.rol === 1) {
-    redirect('/admin');
-  } else {
-    redirect('/store');
-  }
+  redirect('/admin');
 }

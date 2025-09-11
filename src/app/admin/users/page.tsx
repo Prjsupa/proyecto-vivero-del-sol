@@ -56,7 +56,6 @@ async function getAllUsers(): Promise<UserWithProfile[]> {
             id: user.id,
             name: profile?.name || 'N/A',
             last_name: profile?.last_name || 'N/A',
-            rol: profile?.rol || 3,
             avatar_url: profile?.avatar_url,
             updated_at: profile?.updated_at || new Date().toISOString(),
             email: user.email,
@@ -76,28 +75,23 @@ export default async function UsersPage() {
         redirect('/auth/login');
     }
 
-    const { data: profile } = await supabase.from('profiles').select('rol').eq('id', user.id).single();
-    if (profile?.rol !== 1) {
-        redirect('/');
-    }
-    
     const allUsers = await getAllUsers();
     
     return (
         <div className="p-4 md:p-8 space-y-8">
              <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold font-headline">Gestión de Usuarios</h1>
-                    <p className="text-muted-foreground">Visualiza y gestiona los roles de todos los usuarios.</p>
+                    <h1 className="text-3xl font-bold font-headline">Gestión de Admins</h1>
+                    <p className="text-muted-foreground">Visualiza y gestiona los administradores del sistema.</p>
                 </div>
                  <AddUserForm />
             </div>
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Usuarios</CardTitle>
+                    <CardTitle>Administradores</CardTitle>
                     <CardDescription>
-                        Una lista de todos los usuarios del sistema.
+                        Una lista de todos los administradores del sistema.
                     </CardDescription>
                 </CardHeader>
                 <CardContent>

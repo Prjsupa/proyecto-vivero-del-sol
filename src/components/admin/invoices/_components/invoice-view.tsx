@@ -1,6 +1,6 @@
 
 'use client';
-import type { Invoice, Profile } from "@/lib/definitions";
+import type { Invoice, Client } from "@/lib/definitions";
 import { format, parseISO } from 'date-fns';
 import { formatPrice } from '@/lib/utils';
 import Image from 'next/image';
@@ -15,7 +15,7 @@ type ProductLine = {
     total: number;
 }
 
-export function InvoiceView({ invoice, clientProfile }: { invoice: Invoice, clientProfile: Profile | null }) {
+export function InvoiceView({ invoice, client }: { invoice: Invoice, client: Client | null }) {
     
     const productLines: ProductLine[] = Array.isArray(invoice.products) ? invoice.products : [];
 
@@ -63,12 +63,12 @@ export function InvoiceView({ invoice, clientProfile }: { invoice: Invoice, clie
                     <div>
                         <h2 className="text-xs font-semibold uppercase text-gray-500 mb-2">Cliente</h2>
                         <p className="font-bold">{invoice.client_name}</p>
-                        {clientProfile && (
+                        {client && (
                             <>
-                                <p>{clientProfile.address || 'Dirección no especificada'}</p>
-                                <p>{clientProfile.city || ''} {clientProfile.province || ''}</p>
-                                <p>CUIT/DNI: {clientProfile.cuit || 'No especificado'}</p>
-                                <p>Cond. IVA: {clientProfile.iva_condition || 'Consumidor Final'}</p>
+                                <p>{client.address || 'Dirección no especificada'}</p>
+                                <p>{client.city || ''} {client.province || ''}</p>
+                                <p>CUIT/DNI: {client.cuit || 'No especificado'}</p>
+                                <p>Cond. IVA: {client.iva_condition || 'Consumidor Final'}</p>
                             </>
                         )}
                     </div>

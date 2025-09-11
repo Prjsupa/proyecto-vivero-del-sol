@@ -10,7 +10,7 @@ import { createInvoice } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
-import type { Profile, Product } from '@/lib/definitions';
+import type { Client, Product } from '@/lib/definitions';
 import { Textarea } from '../ui/textarea';
 import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
@@ -20,10 +20,6 @@ import { Badge } from '../ui/badge';
 import { useRouter } from 'next/navigation';
 import { Dialog } from '@radix-ui/react-dialog';
 
-type UserWithProfile = Profile & {
-    email?: string;
-    created_at: string;
-}
 
 type SelectedProduct = {
     product: Product;
@@ -54,7 +50,7 @@ function FieldError({ errors }: { errors?: string[] }) {
 }
 
 interface CreateInvoiceFormProps {
-    customers: UserWithProfile[];
+    customers: Client[];
     products: Product[];
     selectedCustomerId?: string;
     triggerMode?: 'button' | 'dialog';
@@ -233,7 +229,7 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, tri
                         </SelectTrigger>
                         <SelectContent>
                             {customers.map(customer => (
-                                <SelectItem key={customer.id} value={customer.id}>{customer.name} {customer.last_name}</SelectItem>
+                                <SelectItem key={customer.id} value={String(customer.id)}>{customer.name} {customer.last_name}</SelectItem>
                             ))}
                         </SelectContent>
                     </Select>

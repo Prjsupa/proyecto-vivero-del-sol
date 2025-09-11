@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Sprout, LogOut, LayoutDashboard, User as UserIcon, Menu, ShoppingCart } from 'lucide-react';
+import { Sprout, LogOut, LayoutDashboard, User as UserIcon, Menu } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -124,22 +124,12 @@ export function Header() {
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    {profile.rol === 1 && (
-                      <DropdownMenuItem asChild>
-                        <Link href="/admin">
-                          <LayoutDashboard className="mr-2 h-4 w-4" />
-                          <span>Dashboard</span>
-                        </Link>
-                      </DropdownMenuItem>
-                    )}
-                     {profile.rol === 3 && (
-                      <DropdownMenuItem asChild>
-                        <Link href="/store">
-                          <ShoppingCart className="mr-2 h-4 w-4" />
-                          <span>Tienda</span>
-                        </Link>
-                      </DropdownMenuItem>
-                    )}
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin">
+                        <LayoutDashboard className="mr-2 h-4 w-4" />
+                        <span>Dashboard</span>
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link href="/profile">
                         <UserIcon className="mr-2 h-4 w-4" />

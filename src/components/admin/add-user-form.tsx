@@ -15,7 +15,7 @@ function SubmitButton() {
     const { pending } = useFormStatus();
     return (
         <Button type="submit" disabled={pending}>
-            {pending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creando...</> : 'Crear Usuario'}
+            {pending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creando...</> : 'Crear Admin'}
         </Button>
     )
 }
@@ -65,14 +65,14 @@ export function AddUserForm() {
             <DialogTrigger asChild>
                  <Button>
                     <PlusCircle className="mr-2 h-4 w-4" />
-                    Añadir Usuario
+                    Añadir Admin
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Añadir Nuevo Usuario</DialogTitle>
+                    <DialogTitle>Añadir Nuevo Admin</DialogTitle>
                     <DialogDescription>
-                        Rellena los detalles para crear una nueva cuenta de cliente.
+                        Rellena los detalles para crear una nueva cuenta de administrador.
                     </DialogDescription>
                 </DialogHeader>
                 <form action={formAction} ref={formRef} className="grid gap-4 py-4">
