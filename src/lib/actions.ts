@@ -58,6 +58,7 @@ const baseProductSchema = z.object({
   color: z.string().optional().nullable(),
   tamaño: z.string().optional().nullable(),
   proveedor: z.string().optional().nullable(),
+  image: z.instanceof(File).optional().refine(file => !file || file.size < 4 * 1024 * 1024, "La imagen debe ser menor a 4MB.").optional(),
 });
 
 const productSchema = baseProductSchema.refine(data => data.category || data.new_category, {
@@ -76,8 +77,20 @@ export async function addProduct(prevState: any, formData: FormData) {
     }
     
     const supabase = createClient();
-    const { name, sku, precio_costo, precio_venta, stock, available, description, subcategory, color, tamaño, proveedor } = validatedFields.data;
+    const { name, sku, precio_costo, precio_venta, stock, available, description, subcategory, color, tamaño, proveedor, image } = validatedFields.data;
     const category = validatedFields.data.new_category || validatedFields.data.category;
+    
+    let imageUrl: string | undefined;
+    if (image && image.size > 0) {
+        const imageFileName = `${crypto.randomUUID()}`;
+        const { error: uploadError } = await supabase.storage
+            .from('product-images')
+            .upload(imageFileName, image);
+        if (uploadError) {
+            return { message: `Error al subir la imagen: ${uploadError.message}` };
+        }
+        imageUrl = supabase.storage.from('product-images').getPublicUrl(imageFileName).data.publicUrl;
+    }
 
 
     const { error: insertError } = await supabase.from('products').insert({
@@ -93,6 +106,7 @@ export async function addProduct(prevState: any, formData: FormData) {
         color,
         tamaño,
         proveedor,
+        img_url: imageUrl,
     });
 
     if (insertError) {
@@ -134,13 +148,51 @@ export async function updateProduct(prevState: any, formData: FormData) {
     }
 
     const supabase = createClient();
-    const { id, name, sku, precio_costo, precio_venta, stock, available, description, subcategory, color, tamaño, proveedor } = validatedFields.data;
+    const { id, name, sku, precio_costo, precio_venta, stock, available, description, subcategory, color, tamaño, proveedor, image } = validatedFields.data;
     const category = validatedFields.data.new_category || validatedFields.data.category;
+
+    let imageUrl: string | undefined;
+
+    if (image && image.size > 0) {
+        const { data: currentProduct } = await supabase.from('products').select('img_url').eq('id', id).single();
+        
+        const imageFileName = `${crypto.randomUUID()}`;
+
+        const { error: uploadError } = await supabase.storage
+            .from('product-images')
+            .upload(imageFileName, image);
+        
+        if (uploadError) {
+            return { message: `Error al subir la nueva imagen: ${uploadError.message}` };
+        }
+
+        if (currentProduct?.img_url) {
+            const oldImageName = currentProduct.img_url.split('/').pop();
+            if (oldImageName) {
+                await supabase.storage.from('product-images').remove([oldImageName]);
+            }
+        }
+        imageUrl = supabase.storage.from('product-images').getPublicUrl(imageFileName).data.publicUrl;
+    }
 
 
     const { error: updateError } = await supabase
         .from('products')
-        .update({ name, sku, category, precio_costo, precio_venta, stock, available, description, subcategory, color, tamaño, proveedor })
+        .update({ 
+            name, 
+            sku, 
+            category, 
+            precio_costo, 
+            precio_venta, 
+            stock, 
+            available, 
+            description, 
+            subcategory, 
+            color, 
+            tamaño, 
+            proveedor,
+            ...(imageUrl && { img_url: imageUrl })
+        })
         .eq('id', id);
 
     if (updateError) {
@@ -1268,3 +1320,5 @@ export async function createServiceCategoryAndAssignServices(prevState: any, for
         data: `¡Categoría '${newCategoryName}' creada! Se movieron ${serviceIds.length} servicio(s).`
     }
 }
+
+    

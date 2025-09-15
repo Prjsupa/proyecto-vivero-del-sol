@@ -7,7 +7,7 @@ import { DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTit
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { AlertCircle, Loader2, Image as ImageIcon } from 'lucide-react';
 import { updateProduct } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
 import type { Product } from '@/lib/definitions';
@@ -15,6 +15,9 @@ import { Textarea } from '../ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { formatInputValue } from '@/lib/utils';
+import Image from 'next/image';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+
 
 function SubmitButton() {
     const { pending } = useFormStatus();
@@ -41,6 +44,7 @@ export function EditProductForm({ product, categories, setDialogOpen }: { produc
     const { toast } = useToast();
     const [selectedCategory, setSelectedCategory] = useState<string>(product.category);
     const [isAddingNew, setIsAddingNew] = useState(false);
+    const [imagePreview, setImagePreview] = useState<string | null>(product.img_url || null);
 
     // State for pricing logic
     const [precioCosto, setPrecioCosto] = useState(formatInputValue(String(product.precio_costo).replace('.', ',')));
@@ -73,6 +77,17 @@ export function EditProductForm({ product, categories, setDialogOpen }: { produc
         } else {
             setIsAddingNew(false);
             setSelectedCategory(value);
+        }
+    };
+
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
         }
     };
     
@@ -142,6 +157,20 @@ export function EditProductForm({ product, categories, setDialogOpen }: { produc
                 <input type="hidden" name="precio_costo" value={precioCosto.replace(/\./g, '').replace(',', '.')} />
                 <input type="hidden" name="precio_venta" value={precioVenta.replace(/\./g, '').replace(',', '.')} />
 
+                <div className="flex items-center gap-4">
+                    <Avatar className="h-24 w-24 rounded-md">
+                        <AvatarImage src={imagePreview || undefined} alt="Product image preview" className="rounded-md object-cover" />
+                        <AvatarFallback className="rounded-md bg-muted">
+                            <ImageIcon className="h-10 w-10 text-muted-foreground" />
+                        </AvatarFallback>
+                    </Avatar>
+                    <div className="space-y-2 flex-1">
+                        <Label htmlFor="image">Imagen del Producto (Opcional)</Label>
+                        <Input id="image" name="image" type="file" accept="image/*" onChange={handleImageChange} />
+                        <p className="text-xs text-muted-foreground">Sube una nueva imagen para reemplazar la actual. 4MB máx.</p>
+                            <FieldError errors={state.errors?.image} />
+                    </div>
+                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -280,3 +309,5 @@ export function EditProductForm({ product, categories, setDialogOpen }: { produc
         </DialogContent>
     );
 }
+
+    

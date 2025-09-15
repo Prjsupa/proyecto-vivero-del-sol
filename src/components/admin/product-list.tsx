@@ -11,6 +11,7 @@ import { ProductActions } from "@/components/admin/product-actions";
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useSearchParams } from 'next/navigation';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 
 function ProductListComponent({ products, categories }: { products: Product[], categories: string[] }) {
     const searchParams = useSearchParams();
@@ -160,9 +161,19 @@ function ProductListComponent({ products, categories }: { products: Product[], c
                             filteredAndSortedProducts.map((product) => (
                                 <TableRow key={product.id}>
                                     <TableCell className="font-medium">
-                                        <div className="font-medium">{product.name}</div>
-                                        <div className="text-xs text-muted-foreground">{product.sku}</div>
-                                        <div className="text-sm text-muted-foreground">{product.category}{product.subcategory && ` / ${product.subcategory}`}</div>
+                                        <div className="flex items-center gap-3">
+                                            <Avatar className="hidden h-12 w-12 sm:flex rounded-md">
+                                                <AvatarImage src={product.img_url || undefined} alt={product.name} className="object-cover rounded-md" />
+                                                <AvatarFallback className="rounded-md bg-muted">
+                                                    <Package className="h-6 w-6 text-muted-foreground" />
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <div>
+                                                <div className="font-medium">{product.name}</div>
+                                                <div className="text-xs text-muted-foreground">{product.sku}</div>
+                                                <div className="text-sm text-muted-foreground">{product.category}{product.subcategory && ` / ${product.subcategory}`}</div>
+                                            </div>
+                                        </div>
                                     </TableCell>
                                     <TableCell>
                                         <Badge variant={product.available ? 'default' : 'outline'} className={cn(product.available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800')}>
@@ -175,8 +186,8 @@ function ProductListComponent({ products, categories }: { products: Product[], c
                                     <TableCell className="hidden md:table-cell">
                                         <div>{formatPrice(product.precio_venta)}</div>
                                         {product.precio_costo > 0 && (
-                                            <span className="text-xs text-green-600 font-medium">
-                                                (+{(((product.precio_venta - product.precio_costo) / product.precio_costo) * 100).toFixed(0)}%)
+                                            <span className={cn("text-xs font-medium", product.precio_venta >= product.precio_costo ? 'text-green-600' : 'text-red-600')}>
+                                                ({product.precio_venta >= product.precio_costo ? '+' : ''}{(((product.precio_venta - product.precio_costo) / product.precio_costo) * 100).toFixed(0)}%)
                                             </span>
                                         )}
                                     </TableCell>
@@ -211,3 +222,5 @@ export function ProductList(props: { products: Product[], categories: string[] }
         </Suspense>
     )
 }
+
+    

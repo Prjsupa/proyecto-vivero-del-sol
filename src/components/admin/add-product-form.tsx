@@ -7,13 +7,15 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { AlertCircle, PlusCircle, Loader2 } from 'lucide-react';
+import { AlertCircle, PlusCircle, Loader2, Image as ImageIcon } from 'lucide-react';
 import { addProduct } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '../ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { formatInputValue } from '@/lib/utils';
+import Image from 'next/image';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 
 function SubmitButton() {
     const { pending } = useFormStatus();
@@ -42,6 +44,7 @@ export function AddProductForm({ categories }: { categories: string[] }) {
     const { toast } = useToast();
     const [selectedCategory, setSelectedCategory] = useState<string>('');
     const [isAddingNew, setIsAddingNew] = useState(false);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
     
     // State for pricing logic
     const [precioCosto, setPrecioCosto] = useState("");
@@ -75,6 +78,7 @@ export function AddProductForm({ categories }: { categories: string[] }) {
         setPrecioVenta("");
         setPorcentaje("");
         setPricingMethod('manual');
+        setImagePreview(null);
     };
 
     const onDialogChange = (open: boolean) => {
@@ -91,6 +95,17 @@ export function AddProductForm({ categories }: { categories: string[] }) {
         } else {
             setIsAddingNew(false);
             setSelectedCategory(value);
+        }
+    };
+
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImagePreview(reader.result as string);
+            };
+            reader.readAsDataURL(file);
         }
     };
     
@@ -152,6 +167,21 @@ export function AddProductForm({ categories }: { categories: string[] }) {
                 <form action={formAction} ref={formRef} className="grid gap-4 py-4 max-h-[80vh] overflow-y-auto pr-4">
                     <input type="hidden" name="precio_costo" value={precioCosto.replace(/\./g, '').replace(',', '.')} />
                     <input type="hidden" name="precio_venta" value={precioVenta.replace(/\./g, '').replace(',', '.')} />
+
+                    <div className="flex items-center gap-4">
+                        <Avatar className="h-24 w-24 rounded-md">
+                            <AvatarImage src={imagePreview || undefined} alt="Product image preview" className="rounded-md object-cover" />
+                            <AvatarFallback className="rounded-md bg-muted">
+                                <ImageIcon className="h-10 w-10 text-muted-foreground" />
+                            </AvatarFallback>
+                        </Avatar>
+                        <div className="space-y-2 flex-1">
+                            <Label htmlFor="image">Imagen del Producto (Opcional)</Label>
+                            <Input id="image" name="image" type="file" accept="image/*" onChange={handleImageChange} />
+                            <p className="text-xs text-muted-foreground">PNG, JPG, GIF hasta 4MB.</p>
+                             <FieldError errors={state.errors?.image} />
+                        </div>
+                    </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
@@ -289,3 +319,5 @@ export function AddProductForm({ categories }: { categories: string[] }) {
         </Dialog>
     );
 }
+
+    
