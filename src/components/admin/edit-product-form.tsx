@@ -81,7 +81,7 @@ export function EditProductForm({ product, categories, setDialogOpen }: { produc
         if (pricingMethod === 'porcentaje') {
             const cost = parseFloat(precioCosto.replace(/\./g, '').replace(',', '.')) || 0;
             const percentageValue = Number(porcentaje) || 0;
-             if (cost > 0 && percentageValue > 0) {
+             if (cost > 0 && percentageValue > -100) {
               const calculatedSalePrice = cost * (1 + percentageValue / 100);
               setPrecioVenta(formatInputValue(calculatedSalePrice.toFixed(2).replace('.', ',')));
             } else {
@@ -94,7 +94,7 @@ export function EditProductForm({ product, categories, setDialogOpen }: { produc
     useEffect(() => {
         const cost = parseFloat(precioCosto.replace(/\./g, '').replace(',', '.')) || 0;
         const sale = parseFloat(precioVenta.replace(/\./g, '').replace(',', '.')) || 0;
-        if (cost > 0 && sale > cost) {
+        if (cost > 0 && sale > 0) {
             const calculatedPercentage = ((sale - cost) / cost) * 100;
             setPorcentaje(calculatedPercentage.toFixed(2));
         } else {
@@ -106,7 +106,7 @@ export function EditProductForm({ product, categories, setDialogOpen }: { produc
         if (pricingMethod === 'manual') {
             const cost = parseFloat(precioCosto.replace(/\./g, '').replace(',', '.')) || 0;
             const sale = parseFloat(precioVenta.replace(/\./g, '').replace(',', '.')) || 0;
-            if (cost > 0 && sale > cost) {
+            if (cost > 0 && sale > 0) {
                 const calculatedPercentage = ((sale - cost) / cost) * 100;
                 setPorcentaje(calculatedPercentage.toFixed(2));
             } else {
