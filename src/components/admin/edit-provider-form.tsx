@@ -10,7 +10,6 @@ import { AlertCircle, Loader2 } from 'lucide-react';
 import { updateProvider } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
 import type { Provider, ProviderType } from '@/lib/definitions';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 function SubmitButton() {
     const { pending } = useFormStatus();
@@ -73,20 +72,8 @@ export function EditProviderForm({ provider, providerTypes, setDialogOpen }: { p
                     )}
                 </div>
                  <div className="space-y-2">
-                    <Label htmlFor="provider_type_code">Tipo de Proveedor</Label>
-                    <Select name="provider_type_code" defaultValue={provider.provider_type_code || ''}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Selecciona un tipo" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="">Ninguno</SelectItem>
-                            {providerTypes.map(type => (
-                                <SelectItem key={type.code} value={type.code}>
-                                    {type.description} ({type.code})
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <Label htmlFor="provider_type_code">Tipo de Proveedor (Opcional)</Label>
+                    <Input id="provider_type_code" name="provider_type_code" defaultValue={provider.provider_type_code || ''} placeholder="Ej: NAC (Nacional)"/>
                     <FieldError errors={state.errors?.provider_type_code} />
                 </div>
                 <DialogFooter className="mt-4">

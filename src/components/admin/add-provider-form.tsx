@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useActionState, useEffect, useRef, useState } from 'react';
@@ -10,7 +11,6 @@ import { Label } from '@/components/ui/label';
 import { AlertCircle, PlusCircle, Loader2 } from 'lucide-react';
 import { addProvider } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import type { ProviderType } from '@/lib/definitions';
 
 function SubmitButton() {
@@ -89,19 +89,8 @@ export function AddProviderForm({ providerTypes }: { providerTypes: ProviderType
                          )}
                     </div>
                      <div className="space-y-2">
-                        <Label htmlFor="provider_type_code">Tipo de Proveedor</Label>
-                        <Select name="provider_type_code">
-                            <SelectTrigger>
-                                <SelectValue placeholder="Selecciona un tipo" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {providerTypes.map(type => (
-                                    <SelectItem key={type.code} value={type.code}>
-                                        {type.description} ({type.code})
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        <Label htmlFor="provider_type_code">Tipo de Proveedor (Opcional)</Label>
+                        <Input id="provider_type_code" name="provider_type_code" placeholder="Ej: NAC (Nacional)"/>
                         <FieldError errors={state.errors?.provider_type_code} />
                     </div>
                      <DialogFooter>
