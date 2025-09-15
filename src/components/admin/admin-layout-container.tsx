@@ -193,27 +193,11 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                             </SidebarMenuButton>
                                         </CollapsibleTrigger>
                                         <CollapsibleContent className="data-[state=open]:py-1">
-                                            <SidebarMenuItem>
-                                                <Link href="/admin/categories" className="pl-6">
+                                             <SidebarMenuItem>
+                                                <Link href="/admin/aux-tables" className="pl-6">
                                                     <SidebarMenuButton variant="ghost" size="sm">
-                                                        <LayoutGrid />
-                                                        Categorías de Productos
-                                                    </SidebarMenuButton>
-                                                </Link>
-                                            </SidebarMenuItem>
-                                            <SidebarMenuItem>
-                                                <Link href="/admin/subcategories" className="pl-6">
-                                                    <SidebarMenuButton variant="ghost" size="sm">
-                                                        <LayoutGrid />
-                                                        Subcategorías de Productos
-                                                    </SidebarMenuButton>
-                                                </Link>
-                                            </SidebarMenuItem>
-                                            <SidebarMenuItem>
-                                                <Link href="/admin/service-categories" className="pl-6">
-                                                    <SidebarMenuButton variant="ghost" size="sm">
-                                                        <LayoutGrid />
-                                                        Categorías de Servicios
+                                                        <Database />
+                                                        Tablas Auxiliares
                                                     </SidebarMenuButton>
                                                 </Link>
                                             </SidebarMenuItem>
