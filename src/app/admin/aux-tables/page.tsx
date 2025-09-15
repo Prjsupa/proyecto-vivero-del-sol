@@ -22,13 +22,23 @@ async function getData() {
     const productCategories = Array.from(new Set((products || []).map(item => item.category))).sort();
     const productSubcategories = Array.from(new Set((products || []).map(item => item.subcategory).filter(Boolean) as string[])).sort();
     const serviceCategories = Array.from(new Set((services || []).map(item => item.category))).sort();
+    
+    const productColors = Array.from(new Set((products || []).map(item => item.color).filter(Boolean) as string[])).sort();
+    const productSizes = Array.from(new Set((products || []).map(item => item.tamaño).filter(Boolean) as string[])).sort();
+    const productDescriptions = Array.from(new Set((products || []).map(item => item.description).filter(Boolean) as string[])).sort();
+    const serviceDescriptions = Array.from(new Set((services || []).map(item => item.description).filter(Boolean) as string[])).sort();
+
 
     return { 
         products: products || [], 
         services: services || [],
         productCategories, 
         productSubcategories,
-        serviceCategories 
+        serviceCategories,
+        productColors,
+        productSizes,
+        productDescriptions,
+        serviceDescriptions
     };
 }
 
@@ -41,7 +51,7 @@ export default async function AuxTablesPage() {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-semibold">Gestión de Tablas Auxiliares</h1>
-                    <p className="text-muted-foreground">Administra las categorías y subcategorías para tus productos y servicios.</p>
+                    <p className="text-muted-foreground">Administra las categorías y otros atributos para tus productos y servicios.</p>
                 </div>
             </div>
             <AuxTablesManager 
@@ -50,6 +60,10 @@ export default async function AuxTablesPage() {
                 productCategories={data.productCategories}
                 productSubcategories={data.productSubcategories}
                 serviceCategories={data.serviceCategories}
+                productColors={data.productColors}
+                productSizes={data.productSizes}
+                productDescriptions={data.productDescriptions}
+                serviceDescriptions={data.serviceDescriptions}
             />
         </div>
     )

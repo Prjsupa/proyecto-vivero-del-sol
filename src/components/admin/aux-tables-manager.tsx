@@ -10,8 +10,19 @@ import { ServiceCategoryManager } from './service-category-manager';
 import { CreateCategoryForm } from './create-category-form';
 import { CreateSubcategoryForm } from './create-subcategory-form';
 import { CreateServiceCategoryForm } from './create-service-category-form';
+import { ColorManager } from './color-manager';
+import { SizeManager } from './size-manager';
+import { ProductDescriptionManager } from './product-description-manager';
+import { ServiceDescriptionManager } from './service-description-manager';
 
-type AuxTableType = 'product_categories' | 'product_subcategories' | 'service_categories';
+type AuxTableType = 
+    | 'product_categories' 
+    | 'product_subcategories' 
+    | 'service_categories'
+    | 'product_colors'
+    | 'product_sizes'
+    | 'product_descriptions'
+    | 'service_descriptions';
 
 interface AuxTablesManagerProps {
     products: Product[];
@@ -19,6 +30,10 @@ interface AuxTablesManagerProps {
     productCategories: string[];
     productSubcategories: string[];
     serviceCategories: string[];
+    productColors: string[];
+    productSizes: string[];
+    productDescriptions: string[];
+    serviceDescriptions: string[];
 }
 
 
@@ -27,7 +42,11 @@ export function AuxTablesManager({
     services,
     productCategories, 
     productSubcategories, 
-    serviceCategories 
+    serviceCategories,
+    productColors,
+    productSizes,
+    productDescriptions,
+    serviceDescriptions,
 }: AuxTablesManagerProps) {
     const [selectedTable, setSelectedTable] = useState<AuxTableType>('product_categories');
 
@@ -39,6 +58,14 @@ export function AuxTablesManager({
                 return <SubcategoryProductManager allProducts={products} allSubcategories={productSubcategories} />;
             case 'service_categories':
                 return <ServiceCategoryManager allServices={services} allCategories={serviceCategories} />;
+            case 'product_colors':
+                return <ColorManager allProducts={products} allColors={productColors} />;
+            case 'product_sizes':
+                return <SizeManager allProducts={products} allSizes={productSizes} />;
+            case 'product_descriptions':
+                return <ProductDescriptionManager allProducts={products} allDescriptions={productDescriptions} />;
+            case 'service_descriptions':
+                return <ServiceDescriptionManager allServices={services} allDescriptions={serviceDescriptions} />;
             default:
                 return null;
         }
@@ -52,6 +79,7 @@ export function AuxTablesManager({
                 return <CreateSubcategoryForm allProducts={products} allSubcategories={productSubcategories} />;
             case 'service_categories':
                 return <CreateServiceCategoryForm allServices={services} allCategories={serviceCategories} />;
+            // TODO: Add create forms for new managers if needed
             default:
                 return null;
         }
@@ -71,6 +99,10 @@ export function AuxTablesManager({
                                     <SelectItem value="product_categories">Categorías de Productos</SelectItem>
                                     <SelectItem value="product_subcategories">Subcategorías de Productos</SelectItem>
                                     <SelectItem value="service_categories">Categorías de Servicios</SelectItem>
+                                    <SelectItem value="product_colors">Colores (Productos)</SelectItem>
+                                    <SelectItem value="product_sizes">Tamaños (Productos)</SelectItem>
+                                    <SelectItem value="product_descriptions">Descripciones (Productos)</SelectItem>
+                                    <SelectItem value="service_descriptions">Descripciones (Servicios)</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
