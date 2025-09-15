@@ -15,5 +15,20 @@ export function formatPrice(price: number) {
   };
 
   const formatted = new Intl.NumberFormat('es-AR', options).format(price);
-  return `ARS ${formatted}`;
+  // ARS is not a standard currency symbol, so we add it manually. The space is correct for AR locale.
+  return `ARS ${formatted.replace('ARS', '').trim()}`;
+}
+
+export function formatInputValue(value: string) {
+  // Clean the value: remove anything that is not a digit or a comma
+  const cleanedValue = value.replace(/[^0-9,]/g, '');
+
+  const parts = cleanedValue.split(',');
+  const integerPart = parts[0];
+  const decimalPart = parts.length > 1 ? `,${parts[1]}` : '';
+
+  // Add thousand separators to the integer part
+  const formattedIntegerPart = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+  return formattedIntegerPart + decimalPart;
 }

@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import type { Service } from '@/lib/definitions';
 import { Textarea } from '../ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { formatInputValue } from '@/lib/utils';
 
 function SubmitButton() {
     const { pending } = useFormStatus();
@@ -39,6 +40,7 @@ export function EditServiceForm({ service, categories, setDialogOpen }: { servic
     const { toast } = useToast();
     const [selectedCategory, setSelectedCategory] = useState<string>(service.category);
     const [isAddingNew, setIsAddingNew] = useState(false);
+    const [precioVenta, setPrecioVenta] = useState(formatInputValue(String(service.precio_venta).replace('.', ',')));
 
 
     useEffect(() => {
@@ -68,6 +70,10 @@ export function EditServiceForm({ service, categories, setDialogOpen }: { servic
         }
     };
     
+    const handlePrecioVentaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setPrecioVenta(formatInputValue(e.target.value));
+    };
+    
 
     return (
         <DialogContent className="sm:max-w-lg">
@@ -79,6 +85,7 @@ export function EditServiceForm({ service, categories, setDialogOpen }: { servic
             </DialogHeader>
             <form action={formAction} ref={formRef} className="grid gap-4 py-4 max-h-[80vh] overflow-y-auto pr-4">
                 <input type="hidden" name="id" value={service.id} />
+                <input type="hidden" name="precio_venta" value={precioVenta.replace(/\./g, '').replace(',', '.')} />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -124,12 +131,13 @@ export function EditServiceForm({ service, categories, setDialogOpen }: { servic
                 </div>
                 
                 <div className="space-y-2">
-                    <Label htmlFor="precio_venta">Precio de Venta</Label>
+                    <Label htmlFor="precio_venta_display">Precio de Venta</Label>
                     <Input 
-                        id="precio_venta" 
-                        name="precio_venta" 
+                        id="precio_venta_display"
                         type="text"
-                        defaultValue={service.precio_venta}
+                        inputMode="decimal"
+                        value={precioVenta}
+                        onChange={handlePrecioVentaChange}
                     />
                     <FieldError errors={state.errors?.precio_venta} />
                 </div>

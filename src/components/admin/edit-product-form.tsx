@@ -14,6 +14,7 @@ import type { Product } from '@/lib/definitions';
 import { Textarea } from '../ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import { formatInputValue } from '@/lib/utils';
 
 function SubmitButton() {
     const { pending } = useFormStatus();
@@ -42,8 +43,8 @@ export function EditProductForm({ product, categories, setDialogOpen }: { produc
     const [isAddingNew, setIsAddingNew] = useState(false);
 
     // State for pricing logic
-    const [precioCosto, setPrecioCosto] = useState(product.precio_costo);
-    const [precioVenta, setPrecioVenta] = useState(product.precio_venta);
+    const [precioCosto, setPrecioCosto] = useState(formatInputValue(String(product.precio_costo).replace('.', ',')));
+    const [precioVenta, setPrecioVenta] = useState(formatInputValue(String(product.precio_venta).replace('.', ',')));
     const [porcentaje, setPorcentaje] = useState(0);
     const [pricingMethod, setPricingMethod] = useState('manual');
 
@@ -77,12 +78,26 @@ export function EditProductForm({ product, categories, setDialogOpen }: { produc
     
     useEffect(() => {
         if (pricingMethod === 'porcentaje') {
-            const cost = Number(precioCosto) || 0;
+            const cost = parseFloat(precioCosto.replace(/\./g, '').replace(',', '.')) || 0;
             const percentage = Number(porcentaje) || 0;
-            const calculatedSalePrice = cost * (1 + percentage / 100);
-            setPrecioVenta(Number(calculatedSalePrice.toFixed(2)));
+             if (cost > 0 && percentage > 0) {
+              const calculatedSalePrice = cost * (1 + percentage / 100);
+              setPrecioVenta(formatInputValue(calculatedSalePrice.toFixed(2).replace('.', ',')));
+            } else {
+                setPrecioVenta(formatInputValue(String(product.precio_venta).replace('.', ',')));
+            }
         }
-    }, [precioCosto, porcentaje, pricingMethod]);
+    }, [precioCosto, porcentaje, pricingMethod, product.precio_venta]);
+
+    const handlePrecioCostoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setPrecioCosto(formatInputValue(e.target.value));
+    };
+
+    const handlePrecioVentaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (pricingMethod === 'manual') {
+            setPrecioVenta(formatInputValue(e.target.value));
+        }
+    };
 
 
     return (
@@ -95,6 +110,9 @@ export function EditProductForm({ product, categories, setDialogOpen }: { produc
             </DialogHeader>
             <form action={formAction} ref={formRef} className="grid gap-4 py-4 max-h-[80vh] overflow-y-auto pr-4">
                 <input type="hidden" name="id" value={product.id} />
+                <input type="hidden" name="precio_costo" value={precioCosto.replace(/\./g, '').replace(',', '.')} />
+                <input type="hidden" name="precio_venta" value={precioVenta.replace(/\./g, '').replace(',', '.')} />
+
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -148,13 +166,13 @@ export function EditProductForm({ product, categories, setDialogOpen }: { produc
                 
                 <div className="space-y-4 rounded-md border p-4">
                     <div className="space-y-2">
-                        <Label htmlFor="precio_costo">Precio de Costo</Label>
+                        <Label htmlFor="precio_costo_display">Precio de Costo</Label>
                         <Input 
-                            id="precio_costo" 
-                            name="precio_costo" 
+                            id="precio_costo_display" 
                             type="text" 
-                            defaultValue={product.precio_costo} 
-                            onChange={(e) => setPrecioCosto(Number(e.target.value.replace(',', '.')))} 
+                            inputMode="decimal"
+                            value={precioCosto} 
+                            onChange={handlePrecioCostoChange}
                         />
                         <FieldError errors={state.errors?.precio_costo} />
                     </div>
@@ -186,13 +204,13 @@ export function EditProductForm({ product, categories, setDialogOpen }: { produc
                     )}
                     
                     <div className="space-y-2">
-                        <Label htmlFor="precio_venta">Precio de Venta</Label>
+                        <Label htmlFor="precio_venta_display">Precio de Venta</Label>
                         <Input 
-                            id="precio_venta" 
-                            name="precio_venta" 
+                            id="precio_venta_display" 
                             type="text" 
+                            inputMode="decimal"
                             value={precioVenta} 
-                            onChange={(e) => setPrecioVenta(Number(e.target.value.replace(',', '.')))} 
+                            onChange={handlePrecioVentaChange}
                             readOnly={pricingMethod === 'porcentaje'}
                         />
                         <FieldError errors={state.errors?.precio_venta} />

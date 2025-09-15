@@ -12,6 +12,7 @@ import { addService } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '../ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { formatInputValue } from '@/lib/utils';
 
 function SubmitButton() {
     const { pending } = useFormStatus();
@@ -40,6 +41,7 @@ export function AddServiceForm({ categories }: { categories: string[] }) {
     const { toast } = useToast();
     const [selectedCategory, setSelectedCategory] = useState<string>('');
     const [isAddingNew, setIsAddingNew] = useState(false);
+    const [precioVenta, setPrecioVenta] = useState("");
     
 
     useEffect(() => {
@@ -63,6 +65,7 @@ export function AddServiceForm({ categories }: { categories: string[] }) {
         formRef.current?.reset();
         setSelectedCategory('');
         setIsAddingNew(false);
+        setPrecioVenta("");
     };
 
     const onDialogChange = (open: boolean) => {
@@ -80,6 +83,10 @@ export function AddServiceForm({ categories }: { categories: string[] }) {
             setIsAddingNew(false);
             setSelectedCategory(value);
         }
+    };
+    
+    const handlePrecioVentaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setPrecioVenta(formatInputValue(e.target.value));
     };
 
 
@@ -99,6 +106,7 @@ export function AddServiceForm({ categories }: { categories: string[] }) {
                     </DialogDescription>
                 </DialogHeader>
                 <form action={formAction} ref={formRef} className="grid gap-4 py-4 max-h-[80vh] overflow-y-auto pr-4">
+                    <input type="hidden" name="precio_venta" value={precioVenta.replace(/\./g, '').replace(',', '.')} />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="name">Nombre del Servicio</Label>
@@ -140,12 +148,14 @@ export function AddServiceForm({ categories }: { categories: string[] }) {
                     </div>
                     
                     <div className="space-y-2">
-                        <Label htmlFor="precio_venta">Precio de Venta</Label>
+                        <Label htmlFor="precio_venta_display">Precio de Venta</Label>
                         <Input 
-                            id="precio_venta" 
-                            name="precio_venta" 
+                            id="precio_venta_display"
                             type="text" 
-                            placeholder="25000,00" 
+                            inputMode="decimal"
+                            placeholder="25.000,00" 
+                            value={precioVenta}
+                            onChange={handlePrecioVentaChange}
                         />
                         <FieldError errors={state.errors?.precio_venta} />
                     </div>
