@@ -1,4 +1,3 @@
-
 'use client';
 import { useActionState, useEffect, useRef } from 'react';
 import { useFormStatus } from 'react-dom';
@@ -126,5 +125,5 @@ export function UploadCsvForm() {
                 </form>
             </DialogContent>
         </Dialog>
-    )
+    );
 }
