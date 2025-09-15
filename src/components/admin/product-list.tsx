@@ -17,18 +17,18 @@ function ProductListComponent({ products, categories }: { products: Product[], c
     const initialSort = searchParams.get('sort') || 'none';
     
     const [searchTerm, setSearchTerm] = useState('');
-    const [categoryFilter, setCategoryFilter] = useState('Todas');
-    const [subcategoryFilter, setSubcategoryFilter] = useState('Todas');
-    const [availabilityFilter, setAvailabilityFilter] = useState('all');
+    const [categoryFilter, setCategoryFilter] = useState('Categorías');
+    const [subcategoryFilter, setSubcategoryFilter] = useState('Subcategorías');
+    const [availabilityFilter, setAvailabilityFilter] = useState('Estado');
     const [sortFilter, setSortFilter] = useState(initialSort);
 
     const productCategories = useMemo(() => {
-        return ['Todas', ...categories];
+        return ['Categorías', ...categories];
     }, [categories]);
     
     const productSubcategories = useMemo(() => {
         const subcategories = new Set(products.map(p => p.subcategory).filter(Boolean) as string[]);
-        return ['Todas', ...Array.from(subcategories).sort()];
+        return ['Subcategorías', ...Array.from(subcategories).sort()];
     }, [products]);
 
     const filteredAndSortedProducts = useMemo(() => {
@@ -41,15 +41,15 @@ function ProductListComponent({ products, categories }: { products: Product[], c
             );
         }
 
-        if (categoryFilter !== 'Todas') {
+        if (categoryFilter !== 'Categorías') {
             filtered = filtered.filter(p => p.category === categoryFilter);
         }
 
-        if (subcategoryFilter !== 'Todas') {
+        if (subcategoryFilter !== 'Subcategorías') {
             filtered = filtered.filter(p => p.subcategory === subcategoryFilter);
         }
 
-        if (availabilityFilter !== 'all') {
+        if (availabilityFilter !== 'Estado') {
             const isAvailable = availabilityFilter === 'available';
             filtered = filtered.filter(p => p.available === isAvailable);
         }
@@ -99,7 +99,7 @@ function ProductListComponent({ products, categories }: { products: Product[], c
                     </div>
                     <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                         <SelectTrigger className="md:w-[180px]">
-                            <SelectValue placeholder="Categoría" />
+                            <SelectValue placeholder="Categorías" />
                         </SelectTrigger>
                         <SelectContent>
                             {productCategories.map(cat => (
@@ -109,7 +109,7 @@ function ProductListComponent({ products, categories }: { products: Product[], c
                     </Select>
                      <Select value={subcategoryFilter} onValueChange={setSubcategoryFilter}>
                         <SelectTrigger className="md:w-[180px]">
-                            <SelectValue placeholder="Subcategoría" />
+                            <SelectValue placeholder="Subcategorías" />
                         </SelectTrigger>
                         <SelectContent>
                             {productSubcategories.map(sub => (
@@ -119,10 +119,10 @@ function ProductListComponent({ products, categories }: { products: Product[], c
                     </Select>
                      <Select value={availabilityFilter} onValueChange={setAvailabilityFilter}>
                         <SelectTrigger className="md:w-[180px]">
-                            <SelectValue placeholder="Disponibilidad" />
+                            <SelectValue placeholder="Estado" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">Todos</SelectItem>
+                            <SelectItem value="Estado">Estado</SelectItem>
                             <SelectItem value="available">Disponible</SelectItem>
                             <SelectItem value="unavailable">No disponible</SelectItem>
                         </SelectContent>
