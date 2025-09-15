@@ -1835,17 +1835,25 @@ export async function createServiceDescriptionAndAssign(prevState: any, formData
 
 // ============== PROVIDERS =================
 
-const providerSchema = z.object({
+const baseProviderSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido.'),
   provider_type_code: z.string().optional().nullable(),
   new_provider_type_code: z.string().optional(),
   new_provider_type_description: z.string().optional(),
-}).refine(data => {
+});
+
+const providerRefinement = (data: z.infer<typeof baseProviderSchema>) => {
     if (data.provider_type_code === 'add_new') {
         return !!data.new_provider_type_code && !!data.new_provider_type_description;
     }
     return true;
-}, { message: "El código y la descripción son requeridos para un nuevo tipo." });
+};
+
+const providerSchema = baseProviderSchema.refine(providerRefinement, { 
+    message: "El código y la descripción son requeridos para un nuevo tipo.",
+    path: ['new_provider_type_code'] 
+});
+
 
 export async function addProvider(prevState: any, formData: FormData) {
     const validatedFields = providerSchema.safeParse(Object.fromEntries(formData.entries()));
@@ -1902,8 +1910,11 @@ export async function addProvider(prevState: any, formData: FormData) {
     };
 }
 
-const updateProviderSchema = providerSchema.extend({
+const updateProviderSchema = baseProviderSchema.extend({
     id: z.coerce.number(),
+}).refine(providerRefinement, { 
+    message: "El código y la descripción son requeridos para un nuevo tipo.",
+    path: ['new_provider_type_code'] 
 });
 
 export async function updateProvider(prevState: any, formData: FormData) {
