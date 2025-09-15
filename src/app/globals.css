@@ -85,6 +85,14 @@ body {
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 224 71% 10%;
   }
+
+  .sidebar-green-theme {
+    --sidebar-background: 140 70% 12%;
+    --sidebar-foreground: 140 25% 95%;
+    --sidebar-accent: 140 70% 18%;
+    --sidebar-accent-foreground: 140 25% 95%;
+    --sidebar-border: 140 70% 18%;
+  }
 }
 
 @layer base {

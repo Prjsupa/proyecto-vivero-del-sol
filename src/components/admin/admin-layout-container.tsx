@@ -3,7 +3,7 @@
 
 import { Header } from "@/components/vivero/header";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider } from "@/components/ui/sidebar";
-import { Briefcase, Package, Users, LayoutGrid, Receipt, BookUser, Wrench, ShoppingBag, BarChart3, Settings, ChevronRight, Building2, ConciergeBell } from "lucide-react";
+import { Briefcase, Package, Users, LayoutGrid, Receipt, BookUser, Wrench, ShoppingBag, BarChart3, Settings, ChevronRight, Building2, ConciergeBell, FileText } from "lucide-react";
 import Link from 'next/link';
 import Image from "next/image";
 import { BranchSwitcher } from "@/components/admin/branch-switcher";
@@ -31,7 +31,10 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
 
     return (
         <SidebarProvider>
-            <div className={cn(activeBranch === 'prueba' && 'sidebar-dark-theme')}>
+            <div className={cn(
+                activeBranch === 'prueba' && 'sidebar-dark-theme',
+                activeBranch === 'vivero-del-sol' && 'sidebar-green-theme'
+            )}>
                 <Sidebar>
                     <SidebarHeader>
                         <div className="flex flex-col items-center justify-center p-4">
@@ -177,7 +180,15 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                              <SidebarGroup>
                                 <SidebarGroupLabel>Sistema</SidebarGroupLabel>
                                 <SidebarMenuItem>
-                                        <Link href="/admin/users">
+                                    <Link href="/admin/docs">
+                                        <SidebarMenuButton>
+                                            <FileText />
+                                            Novedades
+                                        </SidebarMenuButton>
+                                    </Link>
+                                </SidebarMenuItem>
+                                <SidebarMenuItem>
+                                    <Link href="/admin/users">
                                         <SidebarMenuButton>
                                             <Users />
                                             Admins
