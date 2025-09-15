@@ -87,31 +87,35 @@ export function UploadCsvForm() {
                                     </ul>
                                 </AlertDescription>
                             </Alert>
-                             <div className="grid grid-cols-2 gap-x-4 gap-y-2 pt-2">
-                                <Button variant="link" asChild className="p-0 h-auto justify-start">
-                                    <Link href="/api/sample-csv">
-                                        <Download className="mr-2 h-4 w-4" />
-                                        Descargar ejemplo .csv
-                                    </Link>
-                                </Button>
-                                 <Button variant="link" asChild className="p-0 h-auto justify-start">
-                                    <Link href="/api/sample-xlsx">
-                                        <Download className="mr-2 h-4 w-4" />
-                                        Descargar ejemplo .xlsx
-                                    </Link>
-                                </Button>
-                                <Button variant="link" asChild className="p-0 h-auto justify-start">
-                                    <Link href="/api/template-csv">
-                                        <Download className="mr-2 h-4 w-4" />
-                                        Descargar plantilla .csv
-                                    </Link>
-                                </Button>
-                                 <Button variant="link" asChild className="p-0 h-auto justify-start">
-                                    <Link href="/api/template-xlsx">
-                                        <Download className="mr-2 h-4 w-4" />
-                                        Descargar plantilla .xlsx
-                                    </Link>
-                                </Button>
+                             <div className="flex flex-wrap gap-x-8 gap-y-2 pt-2">
+                                <div className="flex flex-col gap-2">
+                                    <Button variant="link" asChild className="p-0 h-auto justify-start">
+                                        <Link href="/api/sample-csv">
+                                            <Download className="mr-2 h-4 w-4" />
+                                            Descargar ejemplo .csv
+                                        </Link>
+                                    </Button>
+                                    <Button variant="link" asChild className="p-0 h-auto justify-start">
+                                        <Link href="/api/template-csv">
+                                            <Download className="mr-2 h-4 w-4" />
+                                            Descargar plantilla .csv
+                                        </Link>
+                                    </Button>
+                                </div>
+                                <div className="flex flex-col gap-2">
+                                    <Button variant="link" asChild className="p-0 h-auto justify-start">
+                                        <Link href="/api/sample-xlsx">
+                                            <Download className="mr-2 h-4 w-4" />
+                                            Descargar ejemplo .xlsx
+                                        </Link>
+                                    </Button>
+                                    <Button variant="link" asChild className="p-0 h-auto justify-start">
+                                        <Link href="/api/template-xlsx">
+                                            <Download className="mr-2 h-4 w-4" />
+                                            Descargar plantilla .xlsx
+                                        </Link>
+                                    </Button>
+                                </div>
                             </div>
                         </div>
                     </ScrollArea>
