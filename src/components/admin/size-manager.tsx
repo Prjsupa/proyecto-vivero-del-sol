@@ -8,10 +8,17 @@ import { Ruler } from "lucide-react";
 import { cn, formatPrice } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '../ui/badge';
+import { Checkbox } from '../ui/checkbox';
+import { SizeBatchActions } from './size-batch-actions';
+import { EditSizeForm } from './edit-size-form';
+import { DeleteSizeAlert } from './delete-size-alert';
+import { AddProductsToSizeForm } from './add-products-to-size-form';
+
 
 export function SizeManager({ allProducts, allSizes }: { allProducts: Product[], allSizes: string[] }) {
     const [selectedSize, setSelectedSize] = useState<string | null>(allSizes[0] || null);
-
+    const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
+    
     const productsWithSize = useMemo(() => {
         if (!selectedSize) return [];
         return allProducts.filter(p => p.tamaño === selectedSize);
@@ -19,7 +26,26 @@ export function SizeManager({ allProducts, allSizes }: { allProducts: Product[],
 
     const handleSizeChange = (size: string) => {
         setSelectedSize(size);
+        setSelectedProductIds([]);
     };
+
+    const handleSelectAll = (checked: boolean) => {
+        setSelectedProductIds(checked ? productsWithSize.map(p => p.id) : []);
+    };
+
+    const handleSelectRow = (productId: string, checked: boolean) => {
+        setSelectedProductIds(prev => checked ? [...prev, productId] : prev.filter(id => id !== productId));
+    };
+
+    const onActionCompleted = () => {
+        setSelectedProductIds([]);
+        window.location.reload(); 
+    }
+
+    const onSizeActionCompleted = () => {
+        setSelectedSize(null);
+        window.location.reload();
+    }
 
     return (
         <Card>
@@ -37,6 +63,24 @@ export function SizeManager({ allProducts, allSizes }: { allProducts: Product[],
                             </SelectContent>
                         </Select>
                     </div>
+                     {selectedSize && (
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <AddProductsToSizeForm
+                                sizeName={selectedSize}
+                                allProducts={allProducts}
+                                onActionCompleted={onActionCompleted}
+                            />
+                             <EditSizeForm
+                                sizeName={selectedSize}
+                                onSizeUpdated={onSizeActionCompleted}
+                            />
+                            <DeleteSizeAlert
+                                sizeName={selectedSize}
+                                productCount={productsWithSize.length}
+                                onSizeDeleted={onSizeActionCompleted}
+                            />
+                        </div>
+                    )}
                 </div>
                  {selectedSize && (
                     <div className="flex items-center text-sm text-muted-foreground pt-4">
@@ -45,9 +89,25 @@ export function SizeManager({ allProducts, allSizes }: { allProducts: Product[],
                 )}
             </CardHeader>
             <CardContent>
+                {selectedProductIds.length > 0 && (
+                    <div className="mb-4">
+                        <SizeBatchActions 
+                            selectedProductIds={selectedProductIds}
+                            onActionCompleted={onActionCompleted}
+                        />
+                    </div>
+                )}
                 <Table>
                     <TableHeader>
                         <TableRow>
+                            <TableHead className="w-[50px]">
+                                <Checkbox
+                                    onCheckedChange={handleSelectAll}
+                                    checked={productsWithSize.length > 0 && selectedProductIds.length === productsWithSize.length}
+                                    aria-label="Select all"
+                                    disabled={productsWithSize.length === 0}
+                                />
+                            </TableHead>
                             <TableHead>Nombre</TableHead>
                             <TableHead>Estado</TableHead>
                             <TableHead className="hidden md:table-cell">Precio Venta</TableHead>
@@ -57,7 +117,14 @@ export function SizeManager({ allProducts, allSizes }: { allProducts: Product[],
                     <TableBody>
                         {selectedSize && productsWithSize.length > 0 ? (
                             productsWithSize.map((product) => (
-                                <TableRow key={product.id}>
+                                <TableRow key={product.id} data-state={selectedProductIds.includes(product.id) && "selected"}>
+                                    <TableCell>
+                                         <Checkbox
+                                            onCheckedChange={(checked) => handleSelectRow(product.id, !!checked)}
+                                            checked={selectedProductIds.includes(product.id)}
+                                            aria-label={`Select product ${product.name}`}
+                                        />
+                                    </TableCell>
                                     <TableCell className="font-medium">{product.name}</TableCell>
                                     <TableCell>
                                         <Badge variant={product.available ? 'default' : 'outline'} className={cn(product.available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800')}>
@@ -72,7 +139,7 @@ export function SizeManager({ allProducts, allSizes }: { allProducts: Product[],
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={4} className="h-48 text-center">
+                                <TableCell colSpan={5} className="h-48 text-center">
                                     <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
                                         <Ruler className="h-12 w-12" />
                                         <p className="font-semibold">{selectedSize ? 'No se encontraron productos con este tamaño.' : 'Por favor, selecciona un tamaño para empezar.'}</p>

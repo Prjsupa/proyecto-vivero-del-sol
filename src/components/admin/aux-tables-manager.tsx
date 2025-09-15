@@ -14,6 +14,8 @@ import { ColorManager } from './color-manager';
 import { SizeManager } from './size-manager';
 import { ProductDescriptionManager } from './product-description-manager';
 import { ServiceDescriptionManager } from './service-description-manager';
+import { CreateColorForm } from './create-color-form';
+import { CreateSizeForm } from './create-size-form';
 
 type AuxTableType = 
     | 'product_categories' 
@@ -79,7 +81,10 @@ export function AuxTablesManager({
                 return <CreateSubcategoryForm allProducts={products} allSubcategories={productSubcategories} />;
             case 'service_categories':
                 return <CreateServiceCategoryForm allServices={services} allCategories={serviceCategories} />;
-            // TODO: Add create forms for new managers if needed
+            case 'product_colors':
+                return <CreateColorForm allProducts={products} />;
+            case 'product_sizes':
+                return <CreateSizeForm allProducts={products} />;
             default:
                 return null;
         }

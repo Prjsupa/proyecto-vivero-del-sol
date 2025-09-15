@@ -119,7 +119,7 @@ export async function addProduct(prevState: any, formData: FormData) {
     }
 
     revalidatePath('/admin/products');
-    revalidatePath('/admin/categories');
+    revalidatePath('/admin/aux-tables');
     revalidatePath('/');
 
     return {
@@ -203,7 +203,7 @@ export async function updateProduct(prevState: any, formData: FormData) {
     }
 
     revalidatePath('/admin/products');
-    revalidatePath('/admin/categories');
+    revalidatePath('/admin/aux-tables');
     revalidatePath('/');
 
     return {
@@ -264,7 +264,7 @@ export async function addService(prevState: any, formData: FormData) {
     }
 
     revalidatePath('/admin/services');
-    revalidatePath('/admin/service-categories');
+    revalidatePath('/admin/aux-tables');
 
     return {
         message: 'success',
@@ -307,7 +307,7 @@ export async function updateService(prevState: any, formData: FormData) {
     }
 
     revalidatePath('/admin/services');
-    revalidatePath('/admin/service-categories');
+    revalidatePath('/admin/aux-tables');
 
     return {
         message: 'success',
@@ -332,7 +332,7 @@ export async function deleteService(serviceId: string) {
     }
     
     revalidatePath('/admin/services');
-    revalidatePath('/admin/service-categories');
+    revalidatePath('/admin/aux-tables');
     
     return { message: 'success', data: '¡Servicio eliminado exitosamente!' };
 }
@@ -729,7 +729,7 @@ export async function uploadProductsFromCsv(prevState: any, formData: FormData) 
     }
     
     revalidatePath('/admin/products');
-    revalidatePath('/admin/categories');
+    revalidatePath('/admin/aux-tables');
 
     return { 
         message: 'success', 
@@ -754,7 +754,7 @@ export async function deleteProduct(productId: string) {
     }
     
     revalidatePath('/admin/products');
-    revalidatePath('/admin/categories');
+    revalidatePath('/admin/aux-tables');
     revalidatePath('/');
     
     return { message: 'success', data: '¡Producto eliminado exitosamente!' };
@@ -777,7 +777,7 @@ export async function deleteSelectedProducts(productIds: string[]) {
     }
     
     revalidatePath('/admin/products');
-    revalidatePath('/admin/categories');
+    revalidatePath('/admin/aux-tables');
     revalidatePath('/');
     
     return { message: 'success', data: `¡${productIds.length} producto(s) eliminado(s) exitosamente!` };
@@ -800,7 +800,7 @@ export async function deleteSelectedServices(serviceIds: string[]) {
     }
     
     revalidatePath('/admin/services');
-    revalidatePath('/admin/service-categories');
+    revalidatePath('/admin/aux-tables');
     
     return { message: 'success', data: `¡${serviceIds.length} servicio(s) eliminado(s) exitosamente!` };
 }
@@ -847,7 +847,7 @@ export async function updateCategoryName(prevState: any, formData: FormData) {
         return { message: `Error al actualizar la categoría: ${error.message}` };
     }
 
-    revalidatePath('/admin/categories');
+    revalidatePath('/admin/aux-tables');
     revalidatePath('/admin/products');
     return { message: 'success', data: '¡Categoría actualizada exitosamente!' };
 }
@@ -871,7 +871,7 @@ export async function deleteCategory(categoryName: string) {
     // As categories are just text fields on products, there's nothing to "delete"
     // if no products are using it. We just confirm it's not in use.
     
-    revalidatePath('/admin/categories');
+    revalidatePath('/admin/aux-tables');
     revalidatePath('/admin/products');
     return { message: 'success', data: `La categoría '${categoryName}' ya no está en uso y ha sido eliminada efectivamente.` };
 }
@@ -904,7 +904,7 @@ export async function updateProductsCategory(prevState: any, formData: FormData)
         return { message: `Error al actualizar los productos: ${error.message}` };
     }
 
-    revalidatePath('/admin/categories');
+    revalidatePath('/admin/aux-tables');
     revalidatePath('/admin/products');
 
     return { 
@@ -943,7 +943,7 @@ export async function updateProductsSubcategory(prevState: any, formData: FormDa
         return { message: `Error al actualizar la subcategoría de los productos: ${error.message}` };
     }
 
-    revalidatePath('/admin/categories');
+    revalidatePath('/admin/aux-tables');
     revalidatePath('/admin/products');
 
     const successMessage = finalSubcategory
@@ -985,7 +985,7 @@ export async function updateSubcategoryName(prevState: any, formData: FormData) 
         return { message: `Error al actualizar la subcategoría: ${error.message}` };
     }
 
-    revalidatePath('/admin/categories');
+    revalidatePath('/admin/aux-tables');
     revalidatePath('/admin/products');
     return { message: 'success', data: '¡Subcategoría actualizada exitosamente!' };
 }
@@ -1006,7 +1006,7 @@ export async function deleteSubcategory(subcategoryName: string) {
         return { message: `No se puede eliminar la subcategoría porque contiene ${count} producto(s).` };
     }
     
-    revalidatePath('/admin/categories');
+    revalidatePath('/admin/aux-tables');
     revalidatePath('/admin/products');
     return { message: 'success', data: `La subcategoría '${subcategoryName}' ya no está en uso y ha sido eliminada efectivamente.` };
 }
@@ -1049,7 +1049,7 @@ export async function createCategoryAndAssignProducts(prevState: any, formData: 
         }
     }
     
-    revalidatePath('/admin/categories');
+    revalidatePath('/admin/aux-tables');
     revalidatePath('/admin/products');
 
     return {
@@ -1084,7 +1084,7 @@ export async function createSubcategoryAndAssignProducts(prevState: any, formDat
         }
     }
     
-    revalidatePath('/admin/categories');
+    revalidatePath('/admin/aux-tables');
     revalidatePath('/admin/products');
 
     return {
@@ -1211,7 +1211,7 @@ export async function updateServiceCategoryName(prevState: any, formData: FormDa
         return { message: `Error al actualizar la categoría: ${error.message}` };
     }
 
-    revalidatePath('/admin/service-categories');
+    revalidatePath('/admin/aux-tables');
     revalidatePath('/admin/services');
     return { message: 'success', data: '¡Categoría de servicio actualizada exitosamente!' };
 }
@@ -1232,7 +1232,7 @@ export async function deleteServiceCategory(categoryName: string) {
         return { message: `No se puede eliminar la categoría porque contiene ${count} servicio(s).` };
     }
     
-    revalidatePath('/admin/service-categories');
+    revalidatePath('/admin/aux-tables');
     revalidatePath('/admin/services');
     return { message: 'success', data: `La categoría '${categoryName}' ya no está en uso y ha sido eliminada efectivamente.` };
 }
@@ -1265,7 +1265,7 @@ export async function updateServicesCategory(prevState: any, formData: FormData)
         return { message: `Error al actualizar los servicios: ${error.message}` };
     }
 
-    revalidatePath('/admin/service-categories');
+    revalidatePath('/admin/aux-tables');
     revalidatePath('/admin/services');
 
     return { 
@@ -1312,7 +1312,7 @@ export async function createServiceCategoryAndAssignServices(prevState: any, for
         }
     }
     
-    revalidatePath('/admin/service-categories');
+    revalidatePath('/admin/aux-tables');
     revalidatePath('/admin/services');
 
     return {
@@ -1321,4 +1321,258 @@ export async function createServiceCategoryAndAssignServices(prevState: any, for
     }
 }
 
+// ============== COLORS =================
+
+const updateProductsColorSchema = z.object({
+  productIds: z.string().transform(val => val.split(',')),
+  color: z.string().optional(),
+});
+
+export async function updateProductsColor(prevState: any, formData: FormData) {
+    const supabase = createClient();
+    const validatedFields = updateProductsColorSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return { message: 'Datos inválidos.', errors: validatedFields.error.flatten().fieldErrors };
+    }
+    
+    const { productIds, color } = validatedFields.data;
+    const finalColor = color || null;
+    
+    if (!productIds || productIds.length === 0) {
+        return { message: 'No se seleccionaron productos.' };
+    }
+
+    const { error } = await supabase
+        .from('products')
+        .update({ color: finalColor })
+        .in('id', productIds);
+
+    if (error) {
+        return { message: `Error al actualizar el color de los productos: ${error.message}` };
+    }
+
+    revalidatePath('/admin/aux-tables');
+    revalidatePath('/admin/products');
+    
+    const successMessage = finalColor
+     ? `Se movieron ${productIds.length} producto(s) al color '${finalColor}' exitosamente.`
+     : `Se eliminó el color de ${productIds.length} producto(s) exitosamente.`
+
+    return { message: 'success', data: successMessage };
+}
+
+const updateColorNameSchema = z.object({
+  oldColorName: z.string().min(1, "El nombre de color actual es requerido."),
+  newColorName: z.string().min(1, "El nuevo nombre de color es requerido."),
+});
+
+export async function updateColorName(prevState: any, formData: FormData) {
+    const supabase = createClient();
+    const validatedFields = updateColorNameSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return { message: 'Datos inválidos.', errors: validatedFields.error.flatten().fieldErrors };
+    }
+
+    const { oldColorName, newColorName } = validatedFields.data;
+
+    if (oldColorName === newColorName) {
+        return { message: 'El nuevo nombre de color es el mismo que el actual.' };
+    }
+    
+    const { error } = await supabase
+        .from('products')
+        .update({ color: newColorName })
+        .eq('color', oldColorName);
+
+    if (error) {
+        return { message: `Error al actualizar el color: ${error.message}` };
+    }
+
+    revalidatePath('/admin/aux-tables');
+    return { message: 'success', data: '¡Color actualizado exitosamente!' };
+}
+
+export async function deleteColor(colorName: string) {
+    const supabase = createClient();
+
+    const { count, error: checkError } = await supabase
+        .from('products')
+        .select('*', { count: 'exact', head: true })
+        .eq('color', colorName);
+
+    if (checkError) {
+        return { message: `Error al verificar productos con este color: ${checkError.message}` };
+    }
+    
+    if (count && count > 0) {
+        return { message: `No se puede eliminar el color porque está en uso en ${count} producto(s).` };
+    }
+    
+    revalidatePath('/admin/aux-tables');
+    return { message: 'success', data: `El color '${colorName}' ya no está en uso y ha sido eliminado efectivamente.` };
+}
+
+const createColorAndAssignProductsSchema = z.object({
+    newColorName: z.string().min(1, "El nombre del color es requerido."),
+    productIds: z.string().transform(val => val ? val.split(',') : []),
+});
+
+export async function createColorAndAssignProducts(prevState: any, formData: FormData) {
+    const supabase = createClient();
+    const validatedFields = createColorAndAssignProductsSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return { message: "Datos de formulario inválidos.", errors: validatedFields.error.flatten().fieldErrors };
+    }
+
+    const { newColorName, productIds } = validatedFields.data;
+
+    if (productIds.length > 0) {
+        const { error } = await supabase
+            .from('products')
+            .update({ color: newColorName })
+            .in('id', productIds);
+
+        if (error) {
+            return { message: `Error al asignar los productos al nuevo color: ${error.message}` };
+        }
+    }
+    
+    revalidatePath('/admin/aux-tables');
+
+    return {
+        message: 'success',
+        data: `¡Color '${newColorName}' creado! Se asignaron ${productIds.length} producto(s).`
+    }
+}
+
+// ============== SIZES =================
+
+const updateProductsSizeSchema = z.object({
+  productIds: z.string().transform(val => val.split(',')),
+  size: z.string().optional(),
+});
+
+export async function updateProductsSize(prevState: any, formData: FormData) {
+    const supabase = createClient();
+    const validatedFields = updateProductsSizeSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return { message: 'Datos inválidos.', errors: validatedFields.error.flatten().fieldErrors };
+    }
+    
+    const { productIds, size } = validatedFields.data;
+    const finalSize = size || null;
+    
+    if (!productIds || productIds.length === 0) {
+        return { message: 'No se seleccionaron productos.' };
+    }
+
+    const { error } = await supabase
+        .from('products')
+        .update({ tamaño: finalSize })
+        .in('id', productIds);
+
+    if (error) {
+        return { message: `Error al actualizar el tamaño de los productos: ${error.message}` };
+    }
+
+    revalidatePath('/admin/aux-tables');
+    revalidatePath('/admin/products');
+    
+    const successMessage = finalSize
+     ? `Se movieron ${productIds.length} producto(s) al tamaño '${finalSize}' exitosamente.`
+     : `Se eliminó el tamaño de ${productIds.length} producto(s) exitosamente.`
+
+    return { message: 'success', data: successMessage };
+}
+
+
+const updateSizeNameSchema = z.object({
+  oldSizeName: z.string().min(1, "El nombre de tamaño actual es requerido."),
+  newSizeName: z.string().min(1, "El nuevo nombre de tamaño es requerido."),
+});
+
+export async function updateSizeName(prevState: any, formData: FormData) {
+    const supabase = createClient();
+    const validatedFields = updateSizeNameSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return { message: 'Datos inválidos.', errors: validatedFields.error.flatten().fieldErrors };
+    }
+
+    const { oldSizeName, newSizeName } = validatedFields.data;
+
+    if (oldSizeName === newSizeName) {
+        return { message: 'El nuevo nombre de tamaño es el mismo que el actual.' };
+    }
+    
+    const { error } = await supabase
+        .from('products')
+        .update({ tamaño: newSizeName })
+        .eq('tamaño', oldSizeName);
+
+    if (error) {
+        return { message: `Error al actualizar el tamaño: ${error.message}` };
+    }
+
+    revalidatePath('/admin/aux-tables');
+    return { message: 'success', data: '¡Tamaño actualizado exitosamente!' };
+}
+
+export async function deleteSize(sizeName: string) {
+    const supabase = createClient();
+
+    const { count, error: checkError } = await supabase
+        .from('products')
+        .select('*', { count: 'exact', head: true })
+        .eq('tamaño', sizeName);
+
+    if (checkError) {
+        return { message: `Error al verificar productos con este tamaño: ${checkError.message}` };
+    }
+    
+    if (count && count > 0) {
+        return { message: `No se puede eliminar el tamaño porque está en uso en ${count} producto(s).` };
+    }
+    
+    revalidatePath('/admin/aux-tables');
+    return { message: 'success', data: `El tamaño '${sizeName}' ya no está en uso y ha sido eliminado efectivamente.` };
+}
+
+const createSizeAndAssignProductsSchema = z.object({
+    newSizeName: z.string().min(1, "El nombre del tamaño es requerido."),
+    productIds: z.string().transform(val => val ? val.split(',') : []),
+});
+
+export async function createSizeAndAssignProducts(prevState: any, formData: FormData) {
+    const supabase = createClient();
+    const validatedFields = createSizeAndAssignProductsSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return { message: "Datos de formulario inválidos.", errors: validatedFields.error.flatten().fieldErrors };
+    }
+
+    const { newSizeName, productIds } = validatedFields.data;
+
+    if (productIds.length > 0) {
+        const { error } = await supabase
+            .from('products')
+            .update({ tamaño: newSizeName })
+            .in('id', productIds);
+
+        if (error) {
+            return { message: `Error al asignar los productos al nuevo tamaño: ${error.message}` };
+        }
+    }
+    
+    revalidatePath('/admin/aux-tables');
+
+    return {
+        message: 'success',
+        data: `¡Tamaño '${newSizeName}' creado! Se asignaron ${productIds.length} producto(s).`
+    }
+}
     
