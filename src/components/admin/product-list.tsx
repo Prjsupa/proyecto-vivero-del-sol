@@ -1,6 +1,6 @@
 
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, Suspense } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Package, Search } from "lucide-react";
@@ -10,13 +10,17 @@ import { cn, formatPrice } from "@/lib/utils";
 import { ProductActions } from "@/components/admin/product-actions";
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useSearchParams } from 'next/navigation';
 
-export function ProductList({ products, categories }: { products: Product[], categories: string[] }) {
+function ProductListComponent({ products, categories }: { products: Product[], categories: string[] }) {
+    const searchParams = useSearchParams();
+    const initialSort = searchParams.get('sort') || 'none';
+    
     const [searchTerm, setSearchTerm] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('Todas');
     const [subcategoryFilter, setSubcategoryFilter] = useState('Todas');
     const [availabilityFilter, setAvailabilityFilter] = useState('all');
-    const [sortFilter, setSortFilter] = useState('none');
+    const [sortFilter, setSortFilter] = useState(initialSort);
 
     const productCategories = useMemo(() => {
         return ['Todas', ...categories];
@@ -198,4 +202,12 @@ export function ProductList({ products, categories }: { products: Product[], cat
             </CardContent>
         </Card>
     );
+}
+
+export function ProductList(props: { products: Product[], categories: string[] }) {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <ProductListComponent {...props} />
+        </Suspense>
+    )
 }

@@ -185,7 +185,7 @@ export function DashboardClient({ data }: { data: DashboardData }) {
                 <StatCard title="Ventas Totales" value="$0" description="+0% desde el último mes" icon={DollarSign} color="text-green-500" link="/admin/finance" />
                 <StatCard title="Total Clientes" value={clientsCount.toString()} description="+0 desde el último mes" icon={Users} color="text-blue-500" link="/admin/users" />
                 <StatCard title="Productos Activos" value={activeProducts.toString()} description={`${totalProducts} en total`} icon={Package} color="text-orange-500" link="/admin/products" />
-                <StatCard title="Alertas de Stock" value={lowStockAlerts.toString()} description="Productos con bajo stock" icon={AlertTriangle} color="text-red-500" link="/admin/products" />
+                <StatCard title="Alertas de Stock" value={lowStockAlerts.toString()} description="Productos con bajo stock" icon={AlertTriangle} color="text-red-500" link="/admin/products?sort=stock_asc" />
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -1,10 +1,12 @@
 
+
 import { AddProductForm } from "@/components/admin/add-product-form";
 import { ProductList } from "@/components/admin/product-list";
 import { UploadCsvForm } from "@/components/admin/upload-csv-form";
 import type { Product } from "@/lib/definitions";
 import { createClient } from "@/lib/supabase/server";
 import { ExportInventoryButton } from "@/components/admin/export-inventory-button";
+import { Suspense } from "react";
 
 async function getProducts(): Promise<Product[]> {
     const supabase = createClient();
@@ -50,7 +52,9 @@ export default async function ProductsPage() {
                     <AddProductForm categories={categories}/>
                 </div>
             </div>
-            <ProductList products={products} categories={categories} />
+            <Suspense>
+                <ProductList products={products} categories={categories} />
+            </Suspense>
         </div>
     );
 }
