@@ -4,7 +4,7 @@
 
 import { Header } from "@/components/vivero/header";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider } from "@/components/ui/sidebar";
-import { Briefcase, Package, Users, LayoutGrid, Receipt, BookUser, Wrench, ShoppingBag, BarChart3, Settings, ChevronRight, Building2, ConciergeBell, FileText, Database } from "lucide-react";
+import { Briefcase, Package, Users, LayoutGrid, Receipt, BookUser, Wrench, ShoppingBag, BarChart3, Settings, ChevronRight, Building2, ConciergeBell, FileText, Database, Search } from "lucide-react";
 import Link from 'next/link';
 import Image from "next/image";
 import { BranchSwitcher } from "@/components/admin/branch-switcher";
