@@ -1838,7 +1838,14 @@ export async function createServiceDescriptionAndAssign(prevState: any, formData
 const providerSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido.'),
   provider_type_code: z.string().optional().nullable(),
-});
+  new_provider_type_code: z.string().optional(),
+  new_provider_type_description: z.string().optional(),
+}).refine(data => {
+    if (data.provider_type_code === 'add_new') {
+        return !!data.new_provider_type_code && !!data.new_provider_type_description;
+    }
+    return true;
+}, { message: "El código y la descripción son requeridos para un nuevo tipo." });
 
 export async function addProvider(prevState: any, formData: FormData) {
     const validatedFields = providerSchema.safeParse(Object.fromEntries(formData.entries()));
@@ -1854,31 +1861,29 @@ export async function addProvider(prevState: any, formData: FormData) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { message: "No autorizado." };
 
-    const { name, provider_type_code } = validatedFields.data;
-    let provider_type_description: string | null = null;
+    const { name, provider_type_code, new_provider_type_code, new_provider_type_description } = validatedFields.data;
     
-    if (provider_type_code) {
-        const { data: existingType, error: typeError } = await supabase
+    const final_provider_type_code = provider_type_code === 'add_new' ? new_provider_type_code : provider_type_code;
+    let final_provider_type_description = provider_type_code === 'add_new' ? new_provider_type_description : null;
+
+    if (final_provider_type_code && provider_type_code !== 'add_new') {
+        const { data: existingType } = await supabase
             .from('providers')
             .select('provider_type_description')
-            .eq('provider_type_code', provider_type_code)
+            .eq('provider_type_code', final_provider_type_code)
             .not('provider_type_description', 'is', null)
             .limit(1)
             .single();
-
-        if (typeError && typeError.code !== 'PGRST116') { // Ignore "No rows found"
-            return { message: `Error al buscar descripción: ${typeError.message}` };
-        }
         if (existingType) {
-            provider_type_description = existingType.provider_type_description;
+            final_provider_type_description = existingType.provider_type_description;
         }
     }
 
 
     const { error } = await supabase.from('providers').insert({ 
         name, 
-        provider_type_code,
-        provider_type_description, 
+        provider_type_code: final_provider_type_code,
+        provider_type_description: final_provider_type_description,
         updated_at: new Date().toISOString() 
     });
     
@@ -1915,29 +1920,27 @@ export async function updateProvider(prevState: any, formData: FormData) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { message: "No autorizado." };
 
-    const { id, name, provider_type_code } = validatedFields.data;
+    const { id, name, provider_type_code, new_provider_type_code, new_provider_type_description } = validatedFields.data;
     
-    let provider_type_description: string | null = null;
+    const final_provider_type_code = provider_type_code === 'add_new' ? new_provider_type_code : provider_type_code;
+    let final_provider_type_description = provider_type_code === 'add_new' ? new_provider_type_description : null;
     
-    if (provider_type_code) {
-        const { data: existingType, error: typeError } = await supabase
+    if (final_provider_type_code && provider_type_code !== 'add_new') {
+        const { data: existingType } = await supabase
             .from('providers')
             .select('provider_type_description')
-            .eq('provider_type_code', provider_type_code)
+            .eq('provider_type_code', final_provider_type_code)
             .not('provider_type_description', 'is', null)
             .limit(1)
             .single();
-        if (typeError && typeError.code !== 'PGRST116') {
-             return { message: `Error al buscar descripción: ${typeError.message}` };
-        }
         if (existingType) {
-            provider_type_description = existingType.provider_type_description;
+            final_provider_type_description = existingType.provider_type_description;
         }
     }
 
     const { error } = await supabase
         .from('providers')
-        .update({ name, provider_type_code, provider_type_description, updated_at: new Date().toISOString() })
+        .update({ name, provider_type_code: final_provider_type_code, provider_type_description: final_provider_type_description, updated_at: new Date().toISOString() })
         .eq('id', id);
 
     if (error) {

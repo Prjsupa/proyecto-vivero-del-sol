@@ -12,6 +12,7 @@ import { AlertCircle, PlusCircle, Loader2 } from 'lucide-react';
 import { addProvider } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
 import type { ProviderType } from '@/lib/definitions';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 function SubmitButton() {
     const { pending } = useFormStatus();
@@ -37,6 +38,8 @@ export function AddProviderForm({ providerTypes }: { providerTypes: ProviderType
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const formRef = useRef<HTMLFormElement>(null);
     const { toast } = useToast();
+    const [selectedProviderType, setSelectedProviderType] = useState<string>('');
+    const [isAddingNew, setIsAddingNew] = useState(false);
 
     useEffect(() => {
         if (state?.message === 'success') {
@@ -44,8 +47,7 @@ export function AddProviderForm({ providerTypes }: { providerTypes: ProviderType
                 title: '¡Éxito!',
                 description: state.data,
             });
-            setIsDialogOpen(false);
-            formRef.current?.reset();
+            resetForm();
         } else if (state?.message && state.message !== 'success' && state.message !== '') {
              toast({
                 title: 'Error',
@@ -55,12 +57,30 @@ export function AddProviderForm({ providerTypes }: { providerTypes: ProviderType
         }
     }, [state, toast]);
     
+    const resetForm = () => {
+        setIsDialogOpen(false);
+        formRef.current?.reset();
+        setSelectedProviderType('');
+        setIsAddingNew(false);
+    }
+
     const onDialogChange = (open: boolean) => {
         if (!open) {
-            formRef.current?.reset();
+            resetForm();
         }
         setIsDialogOpen(open);
     }
+    
+    const handleTypeChange = (value: string) => {
+        if (value === 'add_new') {
+            setIsAddingNew(true);
+            setSelectedProviderType('');
+        } else {
+            setIsAddingNew(false);
+            setSelectedProviderType(value);
+        }
+    };
+
 
     return (
         <Dialog open={isDialogOpen} onOpenChange={onDialogChange}>
@@ -74,7 +94,7 @@ export function AddProviderForm({ providerTypes }: { providerTypes: ProviderType
                 <DialogHeader>
                     <DialogTitle>Añadir Nuevo Proveedor</DialogTitle>
                     <DialogDescription>
-                        Ingresa el nombre y el código del tipo de proveedor.
+                        Ingresa los datos del nuevo proveedor.
                     </DialogDescription>
                 </DialogHeader>
                 <form action={formAction} ref={formRef} className="grid gap-4 py-4">
@@ -89,8 +109,31 @@ export function AddProviderForm({ providerTypes }: { providerTypes: ProviderType
                          )}
                     </div>
                      <div className="space-y-2">
-                        <Label htmlFor="provider_type_code">Código de Tipo de Proveedor (Opcional)</Label>
-                        <Input id="provider_type_code" name="provider_type_code" placeholder="Ej: NAC"/>
+                        <Label htmlFor="provider_type_code">Tipo de Proveedor</Label>
+                         <Select onValueChange={handleTypeChange} value={isAddingNew ? 'add_new' : selectedProviderType}>
+                            <SelectTrigger id="provider-type-select">
+                                <SelectValue placeholder="Selecciona o crea un tipo" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {providerTypes.map(type => (
+                                    <SelectItem key={type.code} value={type.code}>{type.code} - {type.description}</SelectItem>
+                                ))}
+                                <SelectItem value="add_new">Crear nuevo tipo</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <input type="hidden" name="provider_type_code" value={selectedProviderType} />
+                        {isAddingNew && (
+                            <div className="grid grid-cols-2 gap-4 pt-2 border-t mt-4">
+                                <div className="space-y-2 col-span-2 sm:col-span-1">
+                                    <Label htmlFor="new_provider_type_code">Nuevo Código</Label>
+                                    <Input id="new_provider_type_code" name="new_provider_type_code" placeholder="Ej: NAC" />
+                                </div>
+                                <div className="space-y-2 col-span-2 sm:col-span-1">
+                                    <Label htmlFor="new_provider_type_description">Nueva Descripción</Label>
+                                    <Input id="new_provider_type_description" name="new_provider_type_description" placeholder="Ej: Nacional" />
+                                </div>
+                            </div>
+                        )}
                         <FieldError errors={state.errors?.provider_type_code} />
                     </div>
                      <DialogFooter>
