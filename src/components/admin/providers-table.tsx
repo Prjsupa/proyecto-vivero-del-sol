@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { Provider } from "@/lib/definitions";
+import type { Provider, ProviderType } from "@/lib/definitions";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format, parseISO } from 'date-fns';
 import { Building2, MoreHorizontal } from "lucide-react";
@@ -12,8 +12,9 @@ import { Dialog, DialogTrigger } from "../ui/dialog";
 import { useState } from "react";
 import { DeleteProviderAlert } from "./delete-provider-alert";
 import { EditProviderForm } from "./edit-provider-form";
+import { Badge } from "../ui/badge";
 
-function ProviderActions({ provider }: { provider: Provider }) {
+function ProviderActions({ provider, providerTypes }: { provider: Provider, providerTypes: ProviderType[] }) {
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     
@@ -42,14 +43,14 @@ function ProviderActions({ provider }: { provider: Provider }) {
                         </AlertDialogTrigger>
                     </DropdownMenuContent>
                 </DropdownMenu>
-                <EditProviderForm provider={provider} setDialogOpen={setIsEditOpen} />
+                <EditProviderForm provider={provider} providerTypes={providerTypes} setDialogOpen={setIsEditOpen} />
                 <DeleteProviderAlert providerId={provider.id} providerName={provider.name} />
              </AlertDialog>
         </Dialog>
     );
 }
 
-export function ProvidersTable({ providers }: { providers: Provider[] }) {
+export function ProvidersTable({ providers, providerTypes }: { providers: Provider[], providerTypes: ProviderType[] }) {
 
     return (
         <Table>
@@ -66,12 +67,17 @@ export function ProvidersTable({ providers }: { providers: Provider[] }) {
                 {providers.length > 0 ? (
                     providers.map((provider) => (
                         <TableRow key={provider.id}>
-                            <TableCell className="font-medium">{provider.name}</TableCell>
+                            <TableCell>
+                                <div className="font-medium">{provider.name}</div>
+                                {provider.provider_type_code && (
+                                    <Badge variant="secondary">{provider.provider_type_code}</Badge>
+                                )}
+                            </TableCell>
                             <TableCell className="hidden sm:table-cell">
                                 {format(parseISO(provider.created_at), 'dd MMM, yyyy')}
                             </TableCell>
                             <TableCell className="text-right">
-                                 <ProviderActions provider={provider} />
+                                 <ProviderActions provider={provider} providerTypes={providerTypes}/>
                             </TableCell>
                         </TableRow>
                     ))

@@ -1,6 +1,6 @@
 
 import { createClient } from "@/lib/supabase/server";
-import type { Provider } from "@/lib/definitions";
+import type { Provider, ProviderType } from "@/lib/definitions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AddProviderForm } from "@/components/admin/add-provider-form";
 import { ProvidersTable } from "@/components/admin/providers-table";
@@ -19,8 +19,23 @@ async function getProviders(): Promise<Provider[]> {
     return data;
 }
 
+async function getProviderTypes(): Promise<ProviderType[]> {
+    const supabase = createClient();
+    const { data, error } = await supabase
+        .from('provider_types')
+        .select('*')
+        .order('code', { ascending: true });
+    
+    if (error) {
+        console.error('Error fetching provider types:', error);
+        return [];
+    }
+    return data;
+}
+
 export default async function ProvidersPage() {
     const providers = await getProviders();
+    const providerTypes = await getProviderTypes();
 
     return (
         <div className="space-y-8">
@@ -29,7 +44,7 @@ export default async function ProvidersPage() {
                     <h1 className="text-2xl font-semibold">Proveedores</h1>
                     <p className="text-muted-foreground">Gestiona los proveedores del sistema.</p>
                 </div>
-                <AddProviderForm />
+                <AddProviderForm providerTypes={providerTypes} />
             </div>
             <Card>
                 <CardHeader>
@@ -37,7 +52,7 @@ export default async function ProvidersPage() {
                     <CardDescription>Aquí aparecerán tus proveedores registrados.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <ProvidersTable providers={providers} />
+                    <ProvidersTable providers={providers} providerTypes={providerTypes}/>
                 </CardContent>
             </Card>
         </div>

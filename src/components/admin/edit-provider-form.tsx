@@ -9,7 +9,8 @@ import { Label } from '@/components/ui/label';
 import { AlertCircle, Loader2 } from 'lucide-react';
 import { updateProvider } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
-import type { Provider } from '@/lib/definitions';
+import type { Provider, ProviderType } from '@/lib/definitions';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 function SubmitButton() {
     const { pending } = useFormStatus();
@@ -30,7 +31,7 @@ function FieldError({ errors }: { errors?: string[] }) {
     )
 }
 
-export function EditProviderForm({ provider, setDialogOpen }: { provider: Provider, setDialogOpen: (open: boolean) => void }) {
+export function EditProviderForm({ provider, providerTypes, setDialogOpen }: { provider: Provider, providerTypes: ProviderType[], setDialogOpen: (open: boolean) => void }) {
     const [state, formAction] = useActionState(updateProvider, { message: '' });
     const formRef = useRef<HTMLFormElement>(null);
     const { toast } = useToast();
@@ -56,7 +57,7 @@ export function EditProviderForm({ provider, setDialogOpen }: { provider: Provid
             <DialogHeader>
                 <DialogTitle>Editar Proveedor</DialogTitle>
                 <DialogDescription>
-                    Modifica el nombre del proveedor.
+                    Modifica los datos del proveedor.
                 </DialogDescription>
             </DialogHeader>
             <form action={formAction} ref={formRef} className="grid gap-4 py-4">
@@ -70,6 +71,23 @@ export function EditProviderForm({ provider, setDialogOpen }: { provider: Provid
                             <AlertCircle size={14} /> {state.message}
                         </p>
                     )}
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="provider_type_code">Tipo de Proveedor</Label>
+                    <Select name="provider_type_code" defaultValue={provider.provider_type_code || ''}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Selecciona un tipo" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="">Ninguno</SelectItem>
+                            {providerTypes.map(type => (
+                                <SelectItem key={type.code} value={type.code}>
+                                    {type.description} ({type.code})
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <FieldError errors={state.errors?.provider_type_code} />
                 </div>
                 <DialogFooter className="mt-4">
                     <DialogClose asChild>

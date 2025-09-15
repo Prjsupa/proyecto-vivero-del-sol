@@ -1837,6 +1837,7 @@ export async function createServiceDescriptionAndAssign(prevState: any, formData
 
 const providerSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido.'),
+  provider_type_code: z.string().optional().nullable(),
 });
 
 export async function addProvider(prevState: any, formData: FormData) {
@@ -1853,9 +1854,9 @@ export async function addProvider(prevState: any, formData: FormData) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { message: "No autorizado." };
 
-    const { name } = validatedFields.data;
+    const { name, provider_type_code } = validatedFields.data;
     
-    const { error } = await supabase.from('providers').insert({ name, updated_at: new Date().toISOString() });
+    const { error } = await supabase.from('providers').insert({ name, provider_type_code, updated_at: new Date().toISOString() });
     
     if (error) {
         if (error.code === '23505') { // Unique constraint violation
@@ -1865,6 +1866,7 @@ export async function addProvider(prevState: any, formData: FormData) {
     }
 
     revalidatePath('/admin/providers');
+    revalidatePath('/admin/aux-tables');
     return {
         message: 'success',
         data: `Proveedor '${name}' creado exitosamente.`,
@@ -1889,11 +1891,11 @@ export async function updateProvider(prevState: any, formData: FormData) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { message: "No autorizado." };
 
-    const { id, name } = validatedFields.data;
+    const { id, name, provider_type_code } = validatedFields.data;
     
     const { error } = await supabase
         .from('providers')
-        .update({ name, updated_at: new Date().toISOString() })
+        .update({ name, provider_type_code, updated_at: new Date().toISOString() })
         .eq('id', id);
 
     if (error) {
@@ -1904,6 +1906,7 @@ export async function updateProvider(prevState: any, formData: FormData) {
     }
 
     revalidatePath('/admin/providers');
+    revalidatePath('/admin/aux-tables');
     return {
         message: 'success',
         data: `Proveedor actualizado a '${name}' exitosamente.`,
@@ -1929,4 +1932,105 @@ export async function deleteProvider(providerId: number) {
     revalidatePath('/admin/providers');
     
     return { message: 'success', data: '¡Proveedor eliminado exitosamente!' };
+}
+
+// ============== PROVIDER TYPES =================
+
+const providerTypeSchema = z.object({
+  code: z.string().min(1, 'El código es requerido.'),
+  description: z.string().min(1, 'La descripción es requerida.'),
+});
+
+export async function addProviderType(prevState: any, formData: FormData) {
+    const validatedFields = providerTypeSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return {
+            message: "Datos de formulario inválidos.",
+            errors: validatedFields.error.flatten().fieldErrors,
+        };
+    }
+    
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { message: "No autorizado." };
+
+    const { code, description } = validatedFields.data;
+    
+    const { error } = await supabase.from('provider_types').insert({ code, description });
+    
+    if (error) {
+        if (error.code === '23505') { // Unique constraint violation
+             return { message: `Error: El código de tipo de proveedor '${code}' ya existe.` };
+        }
+        return { message: `Error creando el tipo de proveedor: ${error.message}` };
+    }
+
+    revalidatePath('/admin/aux-tables');
+    return {
+        message: 'success',
+        data: `Tipo de proveedor '${code}' creado exitosamente.`,
+    };
+}
+
+const updateProviderTypeSchema = providerTypeSchema.extend({
+    old_code: z.string(),
+});
+
+export async function updateProviderType(prevState: any, formData: FormData) {
+    const validatedFields = updateProviderTypeSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return {
+            message: "Datos de formulario inválidos.",
+            errors: validatedFields.error.flatten().fieldErrors,
+        };
+    }
+    
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { message: "No autorizado." };
+
+    const { old_code, code, description } = validatedFields.data;
+    
+    const { error } = await supabase
+        .from('provider_types')
+        .update({ code, description })
+        .eq('code', old_code);
+
+    if (error) {
+         if (error.code === '23505') { // Unique constraint violation
+             return { message: `Error: El código de tipo de proveedor '${code}' ya existe.` };
+        }
+        return { message: `Error al actualizar el tipo de proveedor: ${error.message}` };
+    }
+
+    revalidatePath('/admin/aux-tables');
+    return {
+        message: 'success',
+        data: `Tipo de proveedor actualizado exitosamente.`,
+    };
+}
+
+export async function deleteProviderType(code: string) {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { message: 'No autenticado' };
+
+    const { count, error: checkError } = await supabase.from('providers').select('*', { count: 'exact', head: true }).eq('provider_type_code', code);
+    if (checkError) {
+        return { message: `Error al verificar proveedores asociados: ${checkError.message}` };
+    }
+    if (count && count > 0) {
+        return { message: `No se puede eliminar el tipo, está asociado a ${count} proveedor(es).` };
+    }
+
+    const { error } = await supabase.from('provider_types').delete().eq('code', code);
+
+    if (error) {
+        return { message: `Error al eliminar el tipo de proveedor: ${error.message}` };
+    }
+    
+    revalidatePath('/admin/aux-tables');
+    return { message: 'success', data: '¡Tipo de proveedor eliminado exitosamente!' };
 }

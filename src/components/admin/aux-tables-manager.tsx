@@ -1,6 +1,7 @@
+
 'use client';
 import { useState } from 'react';
-import type { Product, Service } from "@/lib/definitions";
+import type { Product, Service, Provider, ProviderType } from "@/lib/definitions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CategoryProductManager } from './category-product-manager';
@@ -17,6 +18,8 @@ import { CreateColorForm } from './create-color-form';
 import { CreateSizeForm } from './create-size-form';
 import { CreateProductDescriptionForm } from './create-product-description-form';
 import { CreateServiceDescriptionForm } from './create-service-description-form';
+import { ProviderTypeManager } from './provider-type-manager';
+import { CreateProviderTypeForm } from './create-provider-type-form';
 
 type AuxTableType = 
     | 'product_categories' 
@@ -25,11 +28,14 @@ type AuxTableType =
     | 'product_colors'
     | 'product_sizes'
     | 'product_descriptions'
-    | 'service_descriptions';
+    | 'service_descriptions'
+    | 'provider_types';
 
 interface AuxTablesManagerProps {
     products: Product[];
     services: Service[];
+    providers: Provider[];
+    providerTypes: ProviderType[];
     productCategories: string[];
     productSubcategories: string[];
     serviceCategories: string[];
@@ -43,6 +49,8 @@ interface AuxTablesManagerProps {
 export function AuxTablesManager({ 
     products, 
     services,
+    providers,
+    providerTypes,
     productCategories, 
     productSubcategories, 
     serviceCategories,
@@ -69,6 +77,8 @@ export function AuxTablesManager({
                 return <ProductDescriptionManager allProducts={products} allDescriptions={productDescriptions} />;
             case 'service_descriptions':
                 return <ServiceDescriptionManager allServices={services} allDescriptions={serviceDescriptions} />;
+            case 'provider_types':
+                return <ProviderTypeManager allProviders={providers} allProviderTypes={providerTypes} />;
             default:
                 return null;
         }
@@ -90,6 +100,8 @@ export function AuxTablesManager({
                 return <CreateProductDescriptionForm allProducts={products} />;
             case 'service_descriptions':
                 return <CreateServiceDescriptionForm allServices={services} />;
+            case 'provider_types':
+                return <CreateProviderTypeForm />;
             default:
                 return null;
         }
@@ -109,6 +121,7 @@ export function AuxTablesManager({
                                     <SelectItem value="product_categories">Categorías de Productos</SelectItem>
                                     <SelectItem value="product_subcategories">Subcategorías de Productos</SelectItem>
                                     <SelectItem value="service_categories">Categorías de Servicios</SelectItem>
+                                    <SelectItem value="provider_types">Tipos de Proveedor</SelectItem>
                                     <SelectItem value="product_colors">Colores (Productos)</SelectItem>
                                     <SelectItem value="product_sizes">Tamaños (Productos)</SelectItem>
                                     <SelectItem value="product_descriptions">Descripciones (Productos)</SelectItem>

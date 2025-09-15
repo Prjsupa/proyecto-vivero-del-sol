@@ -1,6 +1,5 @@
 
 'use client';
-
 import { useActionState, useEffect, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { Button } from "@/components/ui/button";
@@ -8,16 +7,14 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AlertCircle, PlusCircle, Loader2 } from 'lucide-react';
-import { addProvider } from '@/lib/actions';
+import { addProviderType } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import type { ProviderType } from '@/lib/definitions';
 
 function SubmitButton() {
     const { pending } = useFormStatus();
     return (
         <Button type="submit" disabled={pending}>
-            {pending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creando...</> : 'Crear Proveedor'}
+            {pending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creando...</> : 'Crear Tipo de Proveedor'}
         </Button>
     )
 }
@@ -32,77 +29,53 @@ function FieldError({ errors }: { errors?: string[] }) {
     )
 }
 
-export function AddProviderForm({ providerTypes }: { providerTypes: ProviderType[] }) {
-    const [state, formAction] = useActionState(addProvider, { message: '' });
+export function CreateProviderTypeForm() {
+    const [state, formAction] = useActionState(addProviderType, { message: '' });
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const formRef = useRef<HTMLFormElement>(null);
     const { toast } = useToast();
 
     useEffect(() => {
         if (state?.message === 'success') {
-            toast({
-                title: '¡Éxito!',
-                description: state.data,
-            });
+            toast({ title: '¡Éxito!', description: state.data });
             setIsDialogOpen(false);
             formRef.current?.reset();
-        } else if (state?.message && state.message !== 'success' && state.message !== '') {
-             toast({
-                title: 'Error',
-                description: state.message,
-                variant: 'destructive'
-            });
+            window.location.reload();
+        } else if (state?.message && state.message !== 'success' && !state.errors) {
+             toast({ title: 'Error', description: state.message, variant: 'destructive' });
         }
     }, [state, toast]);
-    
-    const onDialogChange = (open: boolean) => {
-        if (!open) {
-            formRef.current?.reset();
-        }
-        setIsDialogOpen(open);
-    }
 
     return (
-        <Dialog open={isDialogOpen} onOpenChange={onDialogChange}>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
                  <Button>
                     <PlusCircle className="mr-2 h-4 w-4" />
-                    Añadir Nuevo Proveedor
+                    Crear Tipo de Proveedor
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Añadir Nuevo Proveedor</DialogTitle>
+                    <DialogTitle>Crear Nuevo Tipo de Proveedor</DialogTitle>
                     <DialogDescription>
-                        Ingresa el nombre y el tipo para crear un nuevo proveedor.
+                       Define el código y la descripción para el nuevo tipo.
                     </DialogDescription>
                 </DialogHeader>
                 <form action={formAction} ref={formRef} className="grid gap-4 py-4">
                     <div className="space-y-2">
-                        <Label htmlFor="name">Nombre del Proveedor</Label>
-                        <Input id="name" name="name" />
-                        <FieldError errors={state.errors?.name} />
+                        <Label htmlFor="code">Código</Label>
+                        <Input id="code" name="code" placeholder="Ej: NAC" />
+                        <FieldError errors={state.errors?.code} />
                          {state.message && state.message !== 'success' && !state.errors && (
-                            <p className="text-sm text-destructive flex items-center gap-1 mt-1">
+                             <p className="text-sm text-destructive flex items-center gap-1 mt-1">
                                 <AlertCircle size={14} /> {state.message}
                             </p>
                          )}
                     </div>
                      <div className="space-y-2">
-                        <Label htmlFor="provider_type_code">Tipo de Proveedor</Label>
-                        <Select name="provider_type_code">
-                            <SelectTrigger>
-                                <SelectValue placeholder="Selecciona un tipo" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {providerTypes.map(type => (
-                                    <SelectItem key={type.code} value={type.code}>
-                                        {type.description} ({type.code})
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <FieldError errors={state.errors?.provider_type_code} />
+                        <Label htmlFor="description">Descripción</Label>
+                        <Input id="description" name="description" placeholder="Ej: Proveedor Nacional" />
+                        <FieldError errors={state.errors?.description} />
                     </div>
                      <DialogFooter>
                         <DialogClose asChild>
