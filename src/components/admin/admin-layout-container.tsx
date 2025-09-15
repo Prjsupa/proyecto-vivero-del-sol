@@ -134,6 +134,14 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                             </Link>
                                         </SidebarMenuItem>
                                         <SidebarMenuItem>
+                                            <Link href="/admin/sellers" className="pl-6">
+                                                <SidebarMenuButton variant="ghost" size="sm">
+                                                    <Users />
+                                                    Vendedores
+                                                </SidebarMenuButton>
+                                            </Link>
+                                        </SidebarMenuItem>
+                                        <SidebarMenuItem>
                                             <Link href="/admin/invoicing" className="pl-6">
                                                 <SidebarMenuButton variant="ghost" size="sm">
                                                     <Receipt />

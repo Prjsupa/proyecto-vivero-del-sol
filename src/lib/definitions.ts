@@ -24,6 +24,20 @@ export type Client = {
   iva_condition?: string | null;
 }
 
+export type Seller = {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    name: string;
+    last_name: string;
+    address?: string | null;
+    dni?: string | null;
+    phone?: string | null;
+    authorized_discount?: number | null;
+    cash_sale_commission?: number | null;
+    collection_commission?: number | null;
+}
+
 
 export type Product = {
   id: string;

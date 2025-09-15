@@ -512,6 +512,52 @@ export async function addClient(prevState: any, formData: FormData) {
 }
 
 
+const addSellerSchema = z.object({
+  name: z.string().min(1, 'El nombre es requerido.'),
+  last_name: z.string().min(1, 'El apellido es requerido.'),
+  address: z.string().optional().nullable(),
+  dni: z.string().optional().nullable(),
+  phone: z.string().optional().nullable(),
+  authorized_discount: z.coerce.number().optional().nullable(),
+  cash_sale_commission: z.coerce.number().optional().nullable(),
+  collection_commission: z.coerce.number().optional().nullable(),
+});
+
+export async function addSeller(prevState: any, formData: FormData) {
+    const validatedFields = addSellerSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return {
+            message: "Datos de formulario inválidos.",
+            errors: validatedFields.error.flatten().fieldErrors,
+        };
+    }
+    
+    const supabase = createClient();
+     const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        return { message: "No autorizado. Debes ser un administrador." }
+    }
+
+    const { name, last_name, address, dni, phone, authorized_discount, cash_sale_commission, collection_commission } = validatedFields.data;
+    
+    const { error } = await supabase
+        .from('sellers')
+        .insert({ name, last_name, address, dni, phone, authorized_discount, cash_sale_commission, collection_commission, updated_at: new Date().toISOString() });
+    
+
+    if (error) {
+        return { message: `Error creando el vendedor: ${error.message}` };
+    }
+
+    revalidatePath('/admin/sellers');
+    return {
+        message: 'success',
+        data: `Vendedor ${name} ${last_name} creado exitosamente.`,
+    };
+}
+
+
 const updateClientSchema = addClientSchema.extend({
     id: z.coerce.number(),
 });
