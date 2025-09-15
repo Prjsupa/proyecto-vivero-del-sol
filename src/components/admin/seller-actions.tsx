@@ -1,0 +1,47 @@
+'use client';
+
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { MoreHorizontal } from "lucide-react";
+import type { Seller } from "@/lib/definitions";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { useState } from "react";
+import { EditSellerForm } from "./edit-seller-form";
+import { DeleteSellerAlert } from "./delete-seller-alert";
+
+export function SellerActions({ seller }: { seller: Seller }) {
+    const [isEditOpen, setIsEditOpen] = useState(false);
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+    
+    return (
+        <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+             <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button aria-haspopup="true" size="icon" variant="ghost">
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Toggle menu</span>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                        <DialogTrigger asChild>
+                            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                               Editar
+                            </DropdownMenuItem>
+                        </DialogTrigger>
+                        <DropdownMenuSeparator />
+                         <AlertDialogTrigger asChild>
+                             <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="text-destructive focus:bg-destructive/10 focus:text-destructive">
+                                Eliminar
+                            </DropdownMenuItem>
+                        </AlertDialogTrigger>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+                <EditSellerForm seller={seller} setDialogOpen={setIsEditOpen} />
+                <DeleteSellerAlert sellerId={seller.id} sellerName={`${seller.name} ${seller.last_name}`} />
+             </AlertDialog>
+        </Dialog>
+    );
+}

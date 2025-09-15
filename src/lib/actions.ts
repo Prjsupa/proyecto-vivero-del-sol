@@ -548,6 +548,9 @@ export async function addSeller(prevState: any, formData: FormData) {
     
 
     if (error) {
+        if (error.code === '23505') { // Unique constraint violation for DNI
+             return { message: `Error al crear el vendedor: El DNI '${dni}' ya existe.` };
+        }
         return { message: `Error creando el vendedor: ${error.message}` };
     }
 
@@ -557,6 +560,69 @@ export async function addSeller(prevState: any, formData: FormData) {
         data: `Vendedor ${name} ${last_name} creado exitosamente.`,
     };
 }
+
+const updateSellerSchema = addSellerSchema.extend({
+    id: z.coerce.number(),
+});
+
+export async function updateSeller(prevState: any, formData: FormData) {
+    const validatedFields = updateSellerSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return {
+            message: "Datos de formulario inválidos.",
+            errors: validatedFields.error.flatten().fieldErrors,
+        };
+    }
+    
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        return { message: "No autorizado. Debes ser un administrador." }
+    }
+
+    const { id, ...sellerData } = validatedFields.data;
+    
+    const { error } = await supabase
+        .from('sellers')
+        .update({ ...sellerData, updated_at: new Date().toISOString() })
+        .eq('id', id);
+
+    if (error) {
+         if (error.code === '23505') { // Unique constraint violation for DNI
+             return { message: `Error al actualizar el vendedor: El DNI '${sellerData.dni}' ya existe.` };
+        }
+        return { message: `Error al actualizar el vendedor: ${error.message}` };
+    }
+
+    revalidatePath('/admin/sellers');
+    return {
+        message: 'success',
+        data: `Vendedor ${sellerData.name} ${sellerData.last_name} actualizado exitosamente.`,
+    };
+}
+
+export async function deleteSeller(sellerId: number) {
+    if (!sellerId) {
+        return { message: "ID de vendedor inválido." };
+    }
+
+    const supabase = createClient();
+    
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { message: 'No autenticado' };
+    
+    const { error } = await supabase.from('sellers').delete().eq('id', sellerId);
+
+    if (error) {
+        return { message: `Error al eliminar el vendedor: ${error.message}` };
+    }
+    
+    revalidatePath('/admin/sellers');
+    
+    return { message: 'success', data: '¡Vendedor eliminado exitosamente!' };
+}
+
 
 
 const updateClientSchema = addClientSchema.extend({

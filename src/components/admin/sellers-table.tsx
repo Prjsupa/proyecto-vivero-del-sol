@@ -1,10 +1,10 @@
-
 'use client';
 
 import type { Seller } from "@/lib/definitions";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { User } from "lucide-react";
+import { SellerActions } from "./seller-actions";
 
 function getInitials(name: string, lastName: string) {
     return `${name?.charAt(0) ?? ''}${lastName?.charAt(0) ?? ''}`.toUpperCase();
@@ -41,8 +41,8 @@ export function SellersTable({ sellers }: { sellers: Seller[] }) {
                             </TableCell>
                             <TableCell className="hidden sm:table-cell">{seller.dni}</TableCell>
                             <TableCell className="hidden md:table-cell">{seller.phone}</TableCell>
-                            <TableCell>
-                                 {/* Actions will go here */}
+                            <TableCell className="text-right">
+                                 <SellerActions seller={seller} />
                             </TableCell>
                         </TableRow>
                     ))
