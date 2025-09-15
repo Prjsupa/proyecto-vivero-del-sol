@@ -4,7 +4,7 @@
 
 import { Header } from "@/components/vivero/header";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider } from "@/components/ui/sidebar";
-import { Briefcase, Package, Users, LayoutGrid, Receipt, BookUser, Wrench, ShoppingBag, BarChart3, Settings, ChevronRight, Building2, ConciergeBell, FileText } from "lucide-react";
+import { Briefcase, Package, Users, LayoutGrid, Receipt, BookUser, Wrench, ShoppingBag, BarChart3, Settings, ChevronRight, Building2, ConciergeBell, FileText, Database } from "lucide-react";
 import Link from 'next/link';
 import Image from "next/image";
 import { BranchSwitcher } from "@/components/admin/branch-switcher";
@@ -19,6 +19,7 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
     const [inventarioOpen, setInventarioOpen] = useState(false);
     const [serviciosOpen, setServiciosOpen] = useState(false);
     const [ventasOpen, setVentasOpen] = useState(false);
+    const [mantenimientoOpen, setMantenimientoOpen] = useState(false);
     const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
@@ -204,12 +205,29 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                         </SidebarMenuButton>
                                     </Link>
                                 </SidebarMenuItem>
-                                 <SidebarMenuItem>
-                                    <SidebarMenuButton>
-                                        <Wrench />
-                                        Mantenimiento
-                                    </SidebarMenuButton>
-                                </SidebarMenuItem>
+                                <Collapsible open={mantenimientoOpen} onOpenChange={setMantenimientoOpen}>
+                                    <SidebarGroup>
+                                        <CollapsibleTrigger asChild>
+                                            <SidebarMenuButton className="justify-between">
+                                                <div className="flex items-center gap-2">
+                                                    <Wrench />
+                                                    <span>Mantenimiento</span>
+                                                </div>
+                                                <ChevronRight className={cn("transform transition-transform duration-200", mantenimientoOpen && "rotate-90")} />
+                                            </SidebarMenuButton>
+                                        </CollapsibleTrigger>
+                                        <CollapsibleContent className="data-[state=open]:py-1">
+                                            <SidebarMenuItem>
+                                                <Link href="/admin/aux-tables" className="pl-6">
+                                                    <SidebarMenuButton variant="ghost" size="sm">
+                                                        <Database />
+                                                        Tablas Auxiliares
+                                                    </SidebarMenuButton>
+                                                </Link>
+                                            </SidebarMenuItem>
+                                        </CollapsibleContent>
+                                    </SidebarGroup>
+                                </Collapsible>
                                 <SidebarMenuItem>
                                     <SidebarMenuButton disabled>
                                         <Settings />
