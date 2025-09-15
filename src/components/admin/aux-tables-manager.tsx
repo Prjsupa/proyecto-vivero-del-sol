@@ -16,6 +16,8 @@ import { ProductDescriptionManager } from './product-description-manager';
 import { ServiceDescriptionManager } from './service-description-manager';
 import { CreateColorForm } from './create-color-form';
 import { CreateSizeForm } from './create-size-form';
+import { CreateProductDescriptionForm } from './create-product-description-form';
+import { CreateServiceDescriptionForm } from './create-service-description-form';
 
 type AuxTableType = 
     | 'product_categories' 
@@ -85,6 +87,10 @@ export function AuxTablesManager({
                 return <CreateColorForm allProducts={products} />;
             case 'product_sizes':
                 return <CreateSizeForm allProducts={products} />;
+            case 'product_descriptions':
+                return <CreateProductDescriptionForm allProducts={products} />;
+            case 'service_descriptions':
+                return <CreateServiceDescriptionForm allServices={services} />;
             default:
                 return null;
         }

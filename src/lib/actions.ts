@@ -1575,4 +1575,147 @@ export async function createSizeAndAssignProducts(prevState: any, formData: Form
         data: `¡Tamaño '${newSizeName}' creado! Se asignaron ${productIds.length} producto(s).`
     }
 }
+
+// ============== DESCRIPTIONS (PRODUCTS) =================
+
+const updateProductsDescriptionSchema = z.object({
+  productIds: z.string().transform(val => val.split(',')),
+  description: z.string().optional(),
+});
+
+export async function updateProductsDescription(prevState: any, formData: FormData) {
+    const supabase = createClient();
+    const validatedFields = updateProductsDescriptionSchema.safeParse(Object.fromEntries(formData.entries()));
+    if (!validatedFields.success) return { message: 'Datos inválidos.', errors: validatedFields.error.flatten().fieldErrors };
     
+    const { productIds, description } = validatedFields.data;
+    const finalDescription = description || null;
+    
+    if (!productIds || productIds.length === 0) return { message: 'No se seleccionaron productos.' };
+
+    const { error } = await supabase.from('products').update({ description: finalDescription }).in('id', productIds);
+    if (error) return { message: `Error al actualizar la descripción: ${error.message}` };
+
+    revalidatePath('/admin/aux-tables');
+    const successMessage = finalDescription ? `Se aplicó la descripción a ${productIds.length} producto(s).` : `Se eliminó la descripción de ${productIds.length} producto(s).`;
+    return { message: 'success', data: successMessage };
+}
+
+const updateDescriptionTextSchema = z.object({
+  oldDescription: z.string(),
+  newDescription: z.string().min(1, "La nueva descripción no puede estar vacía."),
+});
+
+export async function updateProductDescriptionText(prevState: any, formData: FormData) {
+    const supabase = createClient();
+    const validatedFields = updateDescriptionTextSchema.safeParse(Object.fromEntries(formData.entries()));
+    if (!validatedFields.success) return { message: 'Datos inválidos.', errors: validatedFields.error.flatten().fieldErrors };
+
+    const { oldDescription, newDescription } = validatedFields.data;
+    if (oldDescription === newDescription) return { message: 'La nueva descripción es igual a la actual.' };
+
+    const { error } = await supabase.from('products').update({ description: newDescription }).eq('description', oldDescription);
+    if (error) return { message: `Error al actualizar la descripción: ${error.message}` };
+
+    revalidatePath('/admin/aux-tables');
+    return { message: 'success', data: '¡Descripción actualizada exitosamente!' };
+}
+
+export async function deleteProductDescription(description: string) {
+    const supabase = createClient();
+    const { count, error: checkError } = await supabase.from('products').select('*', { count: 'exact', head: true }).eq('description', description);
+
+    if (checkError) return { message: `Error al verificar productos: ${checkError.message}` };
+    if (count && count > 0) return { message: `No se puede eliminar porque ${count} producto(s) usan esta descripción.` };
+    
+    revalidatePath('/admin/aux-tables');
+    return { message: 'success', data: `La descripción ya no está en uso y ha sido eliminada.` };
+}
+
+const createDescriptionAndAssignSchema = z.object({
+    newDescription: z.string().min(1, "La descripción es requerida."),
+    itemIds: z.string().transform(val => val ? val.split(',') : []),
+});
+
+export async function createProductDescriptionAndAssign(prevState: any, formData: FormData) {
+    const supabase = createClient();
+    const validatedFields = createDescriptionAndAssignSchema.safeParse({ ...Object.fromEntries(formData.entries()), itemIds: formData.get('productIds') });
+    if (!validatedFields.success) return { message: "Datos inválidos.", errors: validatedFields.error.flatten().fieldErrors };
+
+    const { newDescription, itemIds } = validatedFields.data;
+
+    if (itemIds.length > 0) {
+        const { error } = await supabase.from('products').update({ description: newDescription }).in('id', itemIds);
+        if (error) return { message: `Error al asignar la nueva descripción: ${error.message}` };
+    }
+    
+    revalidatePath('/admin/aux-tables');
+    return { message: 'success', data: `¡Descripción creada! Se asignaron ${itemIds.length} producto(s).` };
+}
+
+// ============== DESCRIPTIONS (SERVICES) =================
+
+const updateServicesDescriptionSchema = z.object({
+  serviceIds: z.string().transform(val => val.split(',')),
+  description: z.string().optional(),
+});
+
+export async function updateServicesDescription(prevState: any, formData: FormData) {
+    const supabase = createClient();
+    const validatedFields = updateServicesDescriptionSchema.safeParse(Object.fromEntries(formData.entries()));
+    if (!validatedFields.success) return { message: 'Datos inválidos.', errors: validatedFields.error.flatten().fieldErrors };
+    
+    const { serviceIds, description } = validatedFields.data;
+    const finalDescription = description || null;
+    
+    if (!serviceIds || serviceIds.length === 0) return { message: 'No se seleccionaron servicios.' };
+
+    const { error } = await supabase.from('services').update({ description: finalDescription }).in('id', serviceIds);
+    if (error) return { message: `Error al actualizar la descripción: ${error.message}` };
+
+    revalidatePath('/admin/aux-tables');
+    const successMessage = finalDescription ? `Se aplicó la descripción a ${serviceIds.length} servicio(s).` : `Se eliminó la descripción de ${serviceIds.length} servicio(s).`;
+    return { message: 'success', data: successMessage };
+}
+
+export async function updateServiceDescriptionText(prevState: any, formData: FormData) {
+    const supabase = createClient();
+    const validatedFields = updateDescriptionTextSchema.safeParse(Object.fromEntries(formData.entries()));
+    if (!validatedFields.success) return { message: 'Datos inválidos.', errors: validatedFields.error.flatten().fieldErrors };
+
+    const { oldDescription, newDescription } = validatedFields.data;
+    if (oldDescription === newDescription) return { message: 'La nueva descripción es igual a la actual.' };
+
+    const { error } = await supabase.from('services').update({ description: newDescription }).eq('description', oldDescription);
+    if (error) return { message: `Error al actualizar la descripción: ${error.message}` };
+
+    revalidatePath('/admin/aux-tables');
+    return { message: 'success', data: '¡Descripción actualizada exitosamente!' };
+}
+
+export async function deleteServiceDescription(description: string) {
+    const supabase = createClient();
+    const { count, error: checkError } = await supabase.from('services').select('*', { count: 'exact', head: true }).eq('description', description);
+
+    if (checkError) return { message: `Error al verificar servicios: ${checkError.message}` };
+    if (count && count > 0) return { message: `No se puede eliminar porque ${count} servicio(s) usan esta descripción.` };
+    
+    revalidatePath('/admin/aux-tables');
+    return { message: 'success', data: `La descripción ya no está en uso y ha sido eliminada.` };
+}
+
+export async function createServiceDescriptionAndAssign(prevState: any, formData: FormData) {
+    const supabase = createClient();
+    const validatedFields = createDescriptionAndAssignSchema.safeParse({ ...Object.fromEntries(formData.entries()), itemIds: formData.get('serviceIds') });
+    if (!validatedFields.success) return { message: "Datos inválidos.", errors: validatedFields.error.flatten().fieldErrors };
+
+    const { newDescription, itemIds } = validatedFields.data;
+
+    if (itemIds.length > 0) {
+        const { error } = await supabase.from('services').update({ description: newDescription }).in('id', itemIds);
+        if (error) return { message: `Error al asignar la nueva descripción: ${error.message}` };
+    }
+    
+    revalidatePath('/admin/aux-tables');
+    return { message: 'success', data: `¡Descripción creada! Se asignaron ${itemIds.length} servicio(s).` };
+}
