@@ -2085,3 +2085,75 @@ export async function deleteProviderType(code: string) {
     revalidatePath('/admin/providers');
     return { message: 'success', data: '¡Tipo de proveedor desasociado de todos los proveedores!' };
 }
+
+// ============== PROMOTIONS =================
+
+const promotionSchema = z.object({
+  name: z.string().min(3, "El nombre debe tener al menos 3 caracteres."),
+  is_active: z.coerce.boolean(),
+  discount_type: z.enum(['x_for_y', 'price_discount', 'cross_selling', 'progressive_discount']),
+  x_for_y_take: z.coerce.number().optional(),
+  x_for_y_pay: z.coerce.number().optional(),
+  apply_to_type: z.enum(['all', 'categories', 'products', 'services']),
+  apply_to_ids: z.array(z.string()).optional(),
+  can_be_combined: z.coerce.boolean(),
+  usage_limit_type: z.enum(['unlimited', 'period']),
+  start_date: z.string().optional(),
+  end_date: z.string().optional(),
+  custom_tag: z.string().optional(),
+});
+
+export async function addPromotion(prevState: any, formData: FormData) {
+    const validatedFields = promotionSchema.safeParse({
+        ...Object.fromEntries(formData.entries()),
+        apply_to_ids: formData.getAll('apply_to_ids')
+    });
+    
+    if (!validatedFields.success) {
+        return {
+            message: "Datos de formulario inválidos.",
+            errors: validatedFields.error.flatten().fieldErrors,
+        };
+    }
+    
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { message: "No autorizado." };
+
+    const { name, is_active, discount_type, apply_to_type, apply_to_ids, can_be_combined, usage_limit_type, start_date, end_date, custom_tag, x_for_y_take, x_for_y_pay } = validatedFields.data;
+
+    let discount_value = {};
+    if (discount_type === 'x_for_y') {
+        if (!x_for_y_take || !x_for_y_pay) {
+            return { message: "Para el tipo 'Llevá X y pagá Y', los campos 'Llevando' y 'Pagás' son requeridos." };
+        }
+        discount_value = { take: x_for_y_take, pay: x_for_y_pay };
+    }
+    // TODO: Add logic for other discount types
+
+    const promotionData = {
+        name,
+        is_active,
+        discount_type,
+        discount_value,
+        apply_to_type,
+        apply_to_ids: apply_to_ids && apply_to_ids.length > 0 ? apply_to_ids : null,
+        can_be_combined,
+        usage_limit_type,
+        start_date: usage_limit_type === 'period' ? start_date : null,
+        end_date: usage_limit_type === 'period' ? end_date : null,
+        custom_tag
+    };
+    
+    const { error } = await supabase.from('promotions').insert(promotionData);
+
+    if (error) {
+        return { message: `Error creando la promoción: ${error.message}` };
+    }
+
+    revalidatePath('/admin/promotions');
+    return {
+        message: 'success',
+        data: `Promoción '${name}' creada exitosamente.`,
+    };
+}

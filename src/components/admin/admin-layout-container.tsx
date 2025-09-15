@@ -184,8 +184,8 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                             </Link>
                                         </SidebarMenuItem>
                                         <SidebarMenuItem>
-                                            <Link href="#" className="pl-6">
-                                                <SidebarMenuButton variant="ghost" size="sm" disabled>
+                                            <Link href="/admin/promotions" className="pl-6">
+                                                <SidebarMenuButton variant="ghost" size="sm">
                                                     <Gift />
                                                     Promociones
                                                 </SidebarMenuButton>

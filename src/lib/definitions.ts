@@ -83,6 +83,23 @@ export type Service = {
   sku?: string | null;
 };
 
+export type Promotion = {
+    id: number;
+    created_at: string;
+    updated_at: string;
+    name: string;
+    is_active: boolean;
+    discount_type: 'x_for_y' | 'price_discount' | 'cross_selling' | 'progressive_discount';
+    discount_value: Json;
+    apply_to_type: 'all' | 'categories' | 'products' | 'services';
+    apply_to_ids?: string[] | null;
+    can_be_combined: boolean;
+    usage_limit_type: 'unlimited' | 'period';
+    start_date?: string | null;
+    end_date?: string | null;
+    custom_tag?: string | null;
+}
+
 
 export type Order = {
   id: string;
