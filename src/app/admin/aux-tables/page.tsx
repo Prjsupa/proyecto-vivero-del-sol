@@ -26,13 +26,23 @@ async function getData() {
 
     if (providersError) console.error('Error fetching providers:', providersError);
     
-    const { data: providerTypes, error: providerTypesError } = await supabase
-        .from('provider_types')
-        .select('*')
-        .order('code', { ascending: true });
-    
+    const { data: providerTypesData, error: providerTypesError } = await supabase
+        .from('providers')
+        .select('provider_type_code, provider_type_description')
+        .not('provider_type_code', 'is', null);
+
     if (providerTypesError) console.error('Error fetching provider types:', providerTypesError);
 
+    const uniqueProviderTypesMap = new Map<string, ProviderType>();
+    (providerTypesData || []).forEach(item => {
+        if (item.provider_type_code && !uniqueProviderTypesMap.has(item.provider_type_code)) {
+            uniqueProviderTypesMap.set(item.provider_type_code, {
+                code: item.provider_type_code,
+                description: item.provider_type_description || ''
+            });
+        }
+    });
+    const providerTypes = Array.from(uniqueProviderTypesMap.values()).sort((a, b) => a.code.localeCompare(b.code));
 
     const productCategories = Array.from(new Set((products || []).map(item => item.category))).sort();
     const productSubcategories = Array.from(new Set((products || []).map(item => item.subcategory).filter(Boolean) as string[])).sort();

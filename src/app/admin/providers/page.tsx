@@ -22,15 +22,26 @@ async function getProviders(): Promise<Provider[]> {
 async function getProviderTypes(): Promise<ProviderType[]> {
     const supabase = createClient();
     const { data, error } = await supabase
-        .from('provider_types')
-        .select('*')
-        .order('code', { ascending: true });
-    
+        .from('providers')
+        .select('provider_type_code, provider_type_description')
+        .not('provider_type_code', 'is', null);
+
     if (error) {
         console.error('Error fetching provider types:', error);
         return [];
     }
-    return data;
+    
+    const uniqueTypesMap = new Map<string, ProviderType>();
+    data.forEach(item => {
+        if (item.provider_type_code && !uniqueTypesMap.has(item.provider_type_code)) {
+            uniqueTypesMap.set(item.provider_type_code, {
+                code: item.provider_type_code,
+                description: item.provider_type_description || ''
+            });
+        }
+    });
+
+    return Array.from(uniqueTypesMap.values()).sort((a, b) => a.code.localeCompare(b.code));
 }
 
 export default async function ProvidersPage() {
