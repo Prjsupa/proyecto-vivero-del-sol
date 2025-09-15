@@ -19,6 +19,7 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
     const [inventarioOpen, setInventarioOpen] = useState(false);
     const [serviciosOpen, setServiciosOpen] = useState(false);
     const [ventasOpen, setVentasOpen] = useState(false);
+    const [proveedoresOpen, setProveedoresOpen] = useState(false);
     const [mantenimientoOpen, setMantenimientoOpen] = useState(false);
     const [isClient, setIsClient] = useState(false);
 
@@ -154,6 +155,86 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                                 <SidebarMenuButton variant="ghost" size="sm">
                                                     <BookUser />
                                                     Cuentas Corrientes
+                                                </SidebarMenuButton>
+                                            </Link>
+                                        </SidebarMenuItem>
+                                    </CollapsibleContent>
+                                </SidebarGroup>
+                            </Collapsible>
+
+                            <Collapsible open={proveedoresOpen} onOpenChange={setProveedoresOpen}>
+                                <SidebarGroup>
+                                    <CollapsibleTrigger asChild>
+                                        <SidebarMenuButton className="justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <Building2 />
+                                                <span>Proveedores</span>
+                                            </div>
+                                            <ChevronRight className={cn("transform transition-transform duration-200", proveedoresOpen && "rotate-90")} />
+                                        </SidebarMenuButton>
+                                    </CollapsibleTrigger>
+                                     <CollapsibleContent className="data-[state=open]:py-1">
+                                        <SidebarMenuItem>
+                                            <Link href="#" className="pl-6">
+                                                <SidebarMenuButton variant="ghost" size="sm" disabled>
+                                                    <Users />
+                                                    Proveedores
+                                                </SidebarMenuButton>
+                                            </Link>
+                                        </SidebarMenuItem>
+                                        <SidebarMenuItem>
+                                            <Link href="#" className="pl-6">
+                                                <SidebarMenuButton variant="ghost" size="sm" disabled>
+                                                    <BookUser />
+                                                    Cuentas Corrientes
+                                                </SidebarMenuButton>
+                                            </Link>
+                                        </SidebarMenuItem>
+                                        <SidebarMenuItem>
+                                            <Link href="#" className="pl-6">
+                                                <SidebarMenuButton variant="ghost" size="sm" disabled>
+                                                    <Receipt />
+                                                    Facturas Proveedores
+                                                </SidebarMenuButton>
+                                            </Link>
+                                        </SidebarMenuItem>
+                                        <SidebarMenuItem>
+                                            <Link href="#" className="pl-6">
+                                                <SidebarMenuButton variant="ghost" size="sm" disabled>
+                                                    <FileText />
+                                                    Nota Débito Prov.
+                                                </SidebarMenuButton>
+                                            </Link>
+                                        </SidebarMenuItem>
+                                         <SidebarMenuItem>
+                                            <Link href="#" className="pl-6">
+                                                <SidebarMenuButton variant="ghost" size="sm" disabled>
+                                                    <FileText />
+                                                    Nota Crédito Prov.
+                                                </SidebarMenuButton>
+                                            </Link>
+                                        </SidebarMenuItem>
+                                         <SidebarMenuItem>
+                                            <Link href="#" className="pl-6">
+                                                <SidebarMenuButton variant="ghost" size="sm" disabled>
+                                                    <Search />
+                                                    Consulta de Facturas
+                                                </SidebarMenuButton>
+                                            </Link>
+                                        </SidebarMenuItem>
+                                        <SidebarMenuItem>
+                                            <Link href="#" className="pl-6">
+                                                <SidebarMenuButton variant="ghost" size="sm" disabled>
+                                                    <FileText />
+                                                    Rem. Proveedores
+                                                </SidebarMenuButton>
+                                            </Link>
+                                        </SidebarMenuItem>
+                                        <SidebarMenuItem>
+                                            <Link href="#" className="pl-6">
+                                                <SidebarMenuButton variant="ghost" size="sm" disabled>
+                                                    <ShoppingBag />
+                                                    Pedidos a Proveed.
                                                 </SidebarMenuButton>
                                             </Link>
                                         </SidebarMenuItem>
