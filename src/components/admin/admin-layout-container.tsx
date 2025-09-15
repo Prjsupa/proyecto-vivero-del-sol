@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Header } from "@/components/vivero/header";
@@ -88,6 +89,14 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                                 <SidebarMenuButton variant="ghost" size="sm">
                                                     <LayoutGrid />
                                                     Categorías de Productos
+                                                </SidebarMenuButton>
+                                            </Link>
+                                        </SidebarMenuItem>
+                                        <SidebarMenuItem>
+                                            <Link href="/admin/subcategories" className="pl-6">
+                                                <SidebarMenuButton variant="ghost" size="sm">
+                                                    <LayoutGrid />
+                                                    Subcategorías de Productos
                                                 </SidebarMenuButton>
                                             </Link>
                                         </SidebarMenuItem>
