@@ -45,7 +45,7 @@ export function EditProductForm({ product, categories, setDialogOpen }: { produc
     // State for pricing logic
     const [precioCosto, setPrecioCosto] = useState(formatInputValue(String(product.precio_costo).replace('.', ',')));
     const [precioVenta, setPrecioVenta] = useState(formatInputValue(String(product.precio_venta).replace('.', ',')));
-    const [porcentaje, setPorcentaje] = useState(0);
+    const [porcentaje, setPorcentaje] = useState<number | string>("");
     const [pricingMethod, setPricingMethod] = useState('manual');
 
 
@@ -76,12 +76,13 @@ export function EditProductForm({ product, categories, setDialogOpen }: { produc
         }
     };
     
+    // Calculate sale price based on percentage
     useEffect(() => {
         if (pricingMethod === 'porcentaje') {
             const cost = parseFloat(precioCosto.replace(/\./g, '').replace(',', '.')) || 0;
-            const percentage = Number(porcentaje) || 0;
-             if (cost > 0 && percentage > 0) {
-              const calculatedSalePrice = cost * (1 + percentage / 100);
+            const percentageValue = Number(porcentaje) || 0;
+             if (cost > 0 && percentageValue > 0) {
+              const calculatedSalePrice = cost * (1 + percentageValue / 100);
               setPrecioVenta(formatInputValue(calculatedSalePrice.toFixed(2).replace('.', ',')));
             } else {
                 setPrecioVenta(formatInputValue(String(product.precio_venta).replace('.', ',')));
@@ -89,14 +90,42 @@ export function EditProductForm({ product, categories, setDialogOpen }: { produc
         }
     }, [precioCosto, porcentaje, pricingMethod, product.precio_venta]);
 
+    // Calculate percentage based on sale price
+    useEffect(() => {
+        const cost = parseFloat(precioCosto.replace(/\./g, '').replace(',', '.')) || 0;
+        const sale = parseFloat(precioVenta.replace(/\./g, '').replace(',', '.')) || 0;
+        if (cost > 0 && sale > cost) {
+            const calculatedPercentage = ((sale - cost) / cost) * 100;
+            setPorcentaje(calculatedPercentage.toFixed(2));
+        } else {
+            setPorcentaje("");
+        }
+    }, [precioCosto, precioVenta]);
+    
+    useEffect(() => {
+        if (pricingMethod === 'manual') {
+            const cost = parseFloat(precioCosto.replace(/\./g, '').replace(',', '.')) || 0;
+            const sale = parseFloat(precioVenta.replace(/\./g, '').replace(',', '.')) || 0;
+            if (cost > 0 && sale > cost) {
+                const calculatedPercentage = ((sale - cost) / cost) * 100;
+                setPorcentaje(calculatedPercentage.toFixed(2));
+            } else {
+                setPorcentaje("");
+            }
+        }
+    }, [precioCosto, precioVenta, pricingMethod]);
+
+
     const handlePrecioCostoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setPrecioCosto(formatInputValue(e.target.value));
     };
 
     const handlePrecioVentaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (pricingMethod === 'manual') {
-            setPrecioVenta(formatInputValue(e.target.value));
-        }
+        setPrecioVenta(formatInputValue(e.target.value));
+    };
+
+    const handlePorcentajeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setPorcentaje(e.target.value);
     };
 
 
@@ -191,17 +220,17 @@ export function EditProductForm({ product, categories, setDialogOpen }: { produc
                         </RadioGroup>
                     </div>
                     
-                    {pricingMethod === 'porcentaje' && (
-                        <div className="space-y-2">
-                            <Label htmlFor="porcentaje_ganancia">Porcentaje de Ganancia (%)</Label>
-                            <Input 
-                                id="porcentaje_ganancia"
-                                type="number"
-                                placeholder="Ej: 50"
-                                onChange={(e) => setPorcentaje(Number(e.target.value))}
-                            />
-                        </div>
-                    )}
+                    <div className="space-y-2">
+                        <Label htmlFor="porcentaje_ganancia">Porcentaje de Ganancia (%)</Label>
+                        <Input 
+                            id="porcentaje_ganancia"
+                            type="number"
+                            placeholder="Ej: 50"
+                            value={porcentaje}
+                            onChange={handlePorcentajeChange}
+                            readOnly={pricingMethod === 'manual'}
+                        />
+                    </div>
                     
                     <div className="space-y-2">
                         <Label htmlFor="precio_venta_display">Precio de Venta</Label>
