@@ -175,8 +175,8 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                     </CollapsibleTrigger>
                                      <CollapsibleContent className="data-[state=open]:py-1">
                                         <SidebarMenuItem>
-                                            <Link href="#" className="pl-6">
-                                                <SidebarMenuButton variant="ghost" size="sm" disabled>
+                                            <Link href="/admin/providers" className="pl-6">
+                                                <SidebarMenuButton variant="ghost" size="sm">
                                                     <Users />
                                                     Proveedores
                                                 </SidebarMenuButton>

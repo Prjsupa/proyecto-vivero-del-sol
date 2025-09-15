@@ -1,4 +1,5 @@
 
+
 export type Profile = {
   id: string;
   created_at: string;
@@ -36,6 +37,13 @@ export type Seller = {
     authorized_discount?: number | null;
     cash_sale_commission?: number | null;
     collection_commission?: number | null;
+}
+
+export type Provider = {
+  id: number;
+  created_at: string;
+  updated_at: string;
+  name: string;
 }
 
 

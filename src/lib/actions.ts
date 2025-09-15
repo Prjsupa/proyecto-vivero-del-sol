@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import { z } from 'zod';
@@ -1764,4 +1765,102 @@ export async function createServiceDescriptionAndAssign(prevState: any, formData
     
     revalidatePath('/admin/aux-tables');
     return { message: 'success', data: `¡Descripción creada! Se asignaron ${itemIds.length} servicio(s).` };
+}
+
+// ============== PROVIDERS =================
+
+const providerSchema = z.object({
+  name: z.string().min(1, 'El nombre es requerido.'),
+});
+
+export async function addProvider(prevState: any, formData: FormData) {
+    const validatedFields = providerSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return {
+            message: "Datos de formulario inválidos.",
+            errors: validatedFields.error.flatten().fieldErrors,
+        };
+    }
+    
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { message: "No autorizado." };
+
+    const { name } = validatedFields.data;
+    
+    const { error } = await supabase.from('providers').insert({ name, updated_at: new Date().toISOString() });
+    
+    if (error) {
+        if (error.code === '23505') { // Unique constraint violation
+             return { message: `Error: El proveedor '${name}' ya existe.` };
+        }
+        return { message: `Error creando el proveedor: ${error.message}` };
+    }
+
+    revalidatePath('/admin/providers');
+    return {
+        message: 'success',
+        data: `Proveedor '${name}' creado exitosamente.`,
+    };
+}
+
+const updateProviderSchema = providerSchema.extend({
+    id: z.coerce.number(),
+});
+
+export async function updateProvider(prevState: any, formData: FormData) {
+    const validatedFields = updateProviderSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return {
+            message: "Datos de formulario inválidos.",
+            errors: validatedFields.error.flatten().fieldErrors,
+        };
+    }
+    
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { message: "No autorizado." };
+
+    const { id, name } = validatedFields.data;
+    
+    const { error } = await supabase
+        .from('providers')
+        .update({ name, updated_at: new Date().toISOString() })
+        .eq('id', id);
+
+    if (error) {
+        if (error.code === '23505') { // Unique constraint violation
+             return { message: `Error: El proveedor '${name}' ya existe.` };
+        }
+        return { message: `Error al actualizar el proveedor: ${error.message}` };
+    }
+
+    revalidatePath('/admin/providers');
+    return {
+        message: 'success',
+        data: `Proveedor actualizado a '${name}' exitosamente.`,
+    };
+}
+
+export async function deleteProvider(providerId: number) {
+    if (!providerId) {
+        return { message: "ID de proveedor inválido." };
+    }
+
+    const supabase = createClient();
+    
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { message: 'No autenticado' };
+    
+    const { error } = await supabase.from('providers').delete().eq('id', providerId);
+
+    if (error) {
+        return { message: `Error al eliminar el proveedor: ${error.message}` };
+    }
+    
+    revalidatePath('/admin/providers');
+    
+    return { message: 'success', data: '¡Proveedor eliminado exitosamente!' };
 }
