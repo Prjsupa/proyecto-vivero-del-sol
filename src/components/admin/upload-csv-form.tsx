@@ -88,17 +88,29 @@ export function UploadCsvForm() {
                                     </ul>
                                 </AlertDescription>
                             </Alert>
-                             <div className="flex items-center gap-4">
+                             <div className="flex items-center gap-4 flex-wrap">
                                 <Button variant="link" asChild className="p-0 h-auto">
                                     <Link href="/api/sample-csv">
                                         <Download className="mr-2 h-4 w-4" />
-                                        Descargar .csv de ejemplo
+                                        Descargar ejemplo .csv
                                     </Link>
                                 </Button>
                                  <Button variant="link" asChild className="p-0 h-auto">
                                     <Link href="/api/sample-xlsx">
                                         <Download className="mr-2 h-4 w-4" />
-                                        Descargar .xlsx de ejemplo
+                                        Descargar ejemplo .xlsx
+                                    </Link>
+                                </Button>
+                                <Button variant="link" asChild className="p-0 h-auto">
+                                    <Link href="/api/template-csv">
+                                        <Download className="mr-2 h-4 w-4" />
+                                        Descargar plantilla .csv
+                                    </Link>
+                                </Button>
+                                 <Button variant="link" asChild className="p-0 h-auto">
+                                    <Link href="/api/template-xlsx">
+                                        <Download className="mr-2 h-4 w-4" />
+                                        Descargar plantilla .xlsx
                                     </Link>
                                 </Button>
                             </div>
