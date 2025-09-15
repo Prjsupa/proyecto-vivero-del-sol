@@ -13,12 +13,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 export function ServiceList({ services, categories }: { services: Service[], categories: string[] }) {
     const [searchTerm, setSearchTerm] = useState('');
-    const [categoryFilter, setCategoryFilter] = useState('Todas');
-    const [availabilityFilter, setAvailabilityFilter] = useState('all');
+    const [categoryFilter, setCategoryFilter] = useState('Categoría');
+    const [availabilityFilter, setAvailabilityFilter] = useState('Disponibilidad');
     const [sortFilter, setSortFilter] = useState('none');
 
     const serviceCategories = useMemo(() => {
-        return ['Todas', ...categories];
+        return ['Categoría', ...categories];
     }, [categories]);
     
 
@@ -32,11 +32,11 @@ export function ServiceList({ services, categories }: { services: Service[], cat
             );
         }
 
-        if (categoryFilter !== 'Todas') {
+        if (categoryFilter !== 'Categoría') {
             filtered = filtered.filter(s => s.category === categoryFilter);
         }
 
-        if (availabilityFilter !== 'all') {
+        if (availabilityFilter !== 'Disponibilidad') {
             const isAvailable = availabilityFilter === 'available';
             filtered = filtered.filter(s => s.available === isAvailable);
         }
@@ -91,7 +91,7 @@ export function ServiceList({ services, categories }: { services: Service[], cat
                             <SelectValue placeholder="Disponibilidad" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">Todos</SelectItem>
+                            <SelectItem value="Disponibilidad">Disponibilidad</SelectItem>
                             <SelectItem value="available">Disponible</SelectItem>
                             <SelectItem value="unavailable">No disponible</SelectItem>
                         </SelectContent>
