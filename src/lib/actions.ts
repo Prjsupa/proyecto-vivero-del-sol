@@ -1,3 +1,4 @@
+
 'use server';
 
 import { z } from 'zod';
@@ -53,7 +54,10 @@ const baseProductSchema = z.object({
   ),
   stock: z.coerce.number().int().min(0, "El stock no puede ser negativo."),
   available: z.coerce.boolean(),
-  description: z.string().optional(),
+  description: z.string().optional().nullable(),
+  color: z.string().optional().nullable(),
+  tamaño: z.string().optional().nullable(),
+  proveedor: z.string().optional().nullable(),
 });
 
 const productSchema = baseProductSchema.refine(data => data.category || data.new_category, {
@@ -72,7 +76,7 @@ export async function addProduct(prevState: any, formData: FormData) {
     }
     
     const supabase = createClient();
-    const { name, sku, precio_costo, precio_venta, stock, available, description, subcategory } = validatedFields.data;
+    const { name, sku, precio_costo, precio_venta, stock, available, description, subcategory, color, tamaño, proveedor } = validatedFields.data;
     const category = validatedFields.data.new_category || validatedFields.data.category;
 
 
@@ -86,6 +90,9 @@ export async function addProduct(prevState: any, formData: FormData) {
         stock,
         available,
         description,
+        color,
+        tamaño,
+        proveedor,
     });
 
     if (insertError) {
@@ -127,13 +134,13 @@ export async function updateProduct(prevState: any, formData: FormData) {
     }
 
     const supabase = createClient();
-    const { id, name, sku, precio_costo, precio_venta, stock, available, description, subcategory } = validatedFields.data;
+    const { id, name, sku, precio_costo, precio_venta, stock, available, description, subcategory, color, tamaño, proveedor } = validatedFields.data;
     const category = validatedFields.data.new_category || validatedFields.data.category;
 
 
     const { error: updateError } = await supabase
         .from('products')
-        .update({ name, sku, category, precio_costo, precio_venta, stock, available, description, subcategory })
+        .update({ name, sku, category, precio_costo, precio_venta, stock, available, description, subcategory, color, tamaño, proveedor })
         .eq('id', id);
 
     if (updateError) {
@@ -563,6 +570,9 @@ const csvProductSchema = z.object({
     return false;
   }, z.boolean()),
   description: z.string().optional().nullable(),
+  color: z.string().optional().nullable(),
+  tamaño: z.string().optional().nullable(),
+  proveedor: z.string().optional().nullable(),
 });
 
 async function parseCsv(fileContent: string): Promise<z.infer<typeof csvProductSchema>[]> {
@@ -652,6 +662,9 @@ export async function uploadProductsFromCsv(prevState: any, formData: FormData) 
             sku: p.sku || null,
             subcategory: p.subcategory || null,
             description: p.description || null,
+            color: p.color || null,
+            tamaño: p.tamaño || null,
+            proveedor: p.proveedor || null,
         })));
         if (insertError) {
              if (insertError.code === '23505') { // Unique constraint violation

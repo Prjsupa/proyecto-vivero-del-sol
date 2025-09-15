@@ -38,6 +38,9 @@ export type Product = {
   available: boolean;
   sku?: string | null;
   img_url?: string | null;
+  color?: string | null;
+  tamaño?: string | null;
+  proveedor?: string | null;
 };
 
 export type Service = {

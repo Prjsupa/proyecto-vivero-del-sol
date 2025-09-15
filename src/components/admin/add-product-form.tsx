@@ -99,7 +99,7 @@ export function AddProductForm({ categories }: { categories: string[] }) {
         if (pricingMethod === 'porcentaje') {
             const cost = parseFloat(precioCosto.replace(/\./g, '').replace(',', '.')) || 0;
             const percentageValue = Number(porcentaje) || 0;
-            if (cost > 0 && percentageValue > -100) {
+            if (cost > 0) {
               const calculatedSalePrice = cost * (1 + percentageValue / 100);
               setPrecioVenta(formatInputValue(calculatedSalePrice.toFixed(2).replace('.', ',')));
             } else {
@@ -197,6 +197,21 @@ export function AddProductForm({ categories }: { categories: string[] }) {
                             <Label htmlFor="subcategory">Subcategoría (Opcional)</Label>
                             <Input id="subcategory" name="subcategory" placeholder="Ej: Hojas grandes"/>
                             <FieldError errors={state.errors?.subcategory} />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="color">Color (Opcional)</Label>
+                            <Input id="color" name="color" placeholder="Ej: Rojo"/>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="tamaño">Tamaño (Opcional)</Label>
+                            <Input id="tamaño" name="tamaño" placeholder="Ej: 20cm"/>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="proveedor">Proveedor (Opcional)</Label>
+                            <Input id="proveedor" name="proveedor" placeholder="Ej: Vivero Mayorista"/>
                         </div>
                     </div>
                     

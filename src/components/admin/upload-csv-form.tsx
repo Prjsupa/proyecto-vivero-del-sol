@@ -71,7 +71,7 @@ export function UploadCsvForm() {
                                 <AlertCircle className="h-4 w-4" />
                                 <AlertTitle>Estructura del Archivo</AlertTitle>
                                 <AlertDescription>
-                                    <p className="text-xs mb-2">La primera fila debe ser la cabecera: <strong>name,sku,category,subcategory,precio_costo,precio_venta,stock,available,description</strong></p>
+                                    <p className="text-xs mb-2">La primera fila debe ser la cabecera: <strong>name,sku,category,subcategory,precio_costo,precio_venta,stock,available,description,color,tamaño,proveedor</strong></p>
                                     <ul className="list-disc list-inside text-xs space-y-1">
                                         <li><b>name:</b> Texto (Ej: "Monstera Deliciosa")</li>
                                         <li><b>sku:</b> Texto (opcional, ej: 'PL-INT-001')</li>
@@ -82,6 +82,9 @@ export function UploadCsvForm() {
                                         <li><b>stock:</b> Número entero (Ej: 150)</li>
                                         <li><b>available:</b> TRUE o FALSE</li>
                                         <li><b>description:</b> Texto (opcional)</li>
+                                        <li><b>color:</b> Texto (opcional, ej: 'Verde')</li>
+                                        <li><b>tamaño:</b> Texto (opcional, ej: '60cm')</li>
+                                        <li><b>proveedor:</b> Texto (opcional, ej: 'Proveedor A')</li>
                                     </ul>
                                 </AlertDescription>
                             </Alert>
