@@ -26,8 +26,8 @@ export async function GET() {
 
   // Define headers
   worksheet.columns = [
-    { header: 'Nombre', key: 'name', width: 35 },
     { header: 'SKU', key: 'sku', width: 20 },
+    { header: 'Nombre', key: 'name', width: 35 },
     { header: 'Categoría', key: 'category', width: 20 },
     { header: 'Subcategoría', key: 'subcategory', width: 20 },
     { header: 'Color', key: 'color', width: 15 },
