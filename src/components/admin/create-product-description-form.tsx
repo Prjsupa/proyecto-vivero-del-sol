@@ -13,6 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Checkbox } from '../ui/checkbox';
 import { Badge } from '../ui/badge';
 import { Textarea } from '../ui/textarea';
+import { Input } from '../ui/input';
 
 function SubmitButton() {
     const { pending } = useFormStatus();
