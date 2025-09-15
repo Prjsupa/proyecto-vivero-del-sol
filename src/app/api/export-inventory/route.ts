@@ -26,10 +26,13 @@ export async function GET() {
 
   // Define headers
   worksheet.columns = [
-    { header: 'Nombre', key: 'name', width: 35 },
     { header: 'SKU', key: 'sku', width: 20 },
+    { header: 'Nombre', key: 'name', width: 35 },
     { header: 'Categoría', key: 'category', width: 20 },
     { header: 'Subcategoría', key: 'subcategory', width: 20 },
+    { header: 'Color', key: 'color', width: 15 },
+    { header: 'Tamaño', key: 'tamaño', width: 15 },
+    { header: 'Proveedor', key: 'proveedor', width: 20 },
     { header: 'Precio Costo', key: 'precio_costo', width: 15, style: { numFmt: '$#,##0.00' } },
     { header: 'Precio Venta', key: 'precio_venta', width: 15, style: { numFmt: '$#,##0.00' } },
     { header: 'Rentabilidad', key: 'rentabilidad', width: 15, style: { numFmt: '0.00%' } },
@@ -56,10 +59,13 @@ export async function GET() {
     }
 
     worksheet.addRow({
-      name: product.name,
       sku: product.sku,
+      name: product.name,
       category: product.category,
       subcategory: product.subcategory,
+      color: product.color,
+      tamaño: product.tamaño,
+      proveedor: product.proveedor,
       precio_costo: product.precio_costo,
       precio_venta: product.precio_venta,
       rentabilidad: rentabilidad,
