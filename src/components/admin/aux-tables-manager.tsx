@@ -1,4 +1,3 @@
-
 'use client';
 import { useState } from 'react';
 import type { Product, Service } from "@/lib/definitions";
