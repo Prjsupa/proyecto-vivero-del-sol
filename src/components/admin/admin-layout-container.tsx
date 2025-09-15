@@ -87,7 +87,7 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                             <Link href="/admin/categories" className="pl-6">
                                                 <SidebarMenuButton variant="ghost" size="sm">
                                                     <LayoutGrid />
-                                                    Categorías
+                                                    Categorías de Productos
                                                 </SidebarMenuButton>
                                             </Link>
                                         </SidebarMenuItem>
@@ -119,7 +119,7 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                             <Link href="/admin/service-categories" className="pl-6">
                                                 <SidebarMenuButton variant="ghost" size="sm">
                                                     <LayoutGrid />
-                                                    Categorías
+                                                    Categorías de Servicios
                                                 </SidebarMenuButton>
                                             </Link>
                                         </SidebarMenuItem>
