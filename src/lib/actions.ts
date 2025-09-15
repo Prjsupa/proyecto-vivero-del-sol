@@ -1855,8 +1855,32 @@ export async function addProvider(prevState: any, formData: FormData) {
     if (!user) return { message: "No autorizado." };
 
     const { name, provider_type_code } = validatedFields.data;
+    let provider_type_description: string | null = null;
     
-    const { error } = await supabase.from('providers').insert({ name, provider_type_code, updated_at: new Date().toISOString() });
+    if (provider_type_code) {
+        const { data: existingType, error: typeError } = await supabase
+            .from('providers')
+            .select('provider_type_description')
+            .eq('provider_type_code', provider_type_code)
+            .not('provider_type_description', 'is', null)
+            .limit(1)
+            .single();
+
+        if (typeError && typeError.code !== 'PGRST116') { // Ignore "No rows found"
+            return { message: `Error al buscar descripción: ${typeError.message}` };
+        }
+        if (existingType) {
+            provider_type_description = existingType.provider_type_description;
+        }
+    }
+
+
+    const { error } = await supabase.from('providers').insert({ 
+        name, 
+        provider_type_code,
+        provider_type_description, 
+        updated_at: new Date().toISOString() 
+    });
     
     if (error) {
         if (error.code === '23505') { // Unique constraint violation
@@ -1893,9 +1917,27 @@ export async function updateProvider(prevState: any, formData: FormData) {
 
     const { id, name, provider_type_code } = validatedFields.data;
     
+    let provider_type_description: string | null = null;
+    
+    if (provider_type_code) {
+        const { data: existingType, error: typeError } = await supabase
+            .from('providers')
+            .select('provider_type_description')
+            .eq('provider_type_code', provider_type_code)
+            .not('provider_type_description', 'is', null)
+            .limit(1)
+            .single();
+        if (typeError && typeError.code !== 'PGRST116') {
+             return { message: `Error al buscar descripción: ${typeError.message}` };
+        }
+        if (existingType) {
+            provider_type_description = existingType.provider_type_description;
+        }
+    }
+
     const { error } = await supabase
         .from('providers')
-        .update({ name, provider_type_code, updated_at: new Date().toISOString() })
+        .update({ name, provider_type_code, provider_type_description, updated_at: new Date().toISOString() })
         .eq('id', id);
 
     if (error) {
@@ -1957,15 +1999,20 @@ export async function addProviderType(prevState: any, formData: FormData) {
 
     const { code, description } = validatedFields.data;
     
-    // This action now conceptually creates a new "type" by using it,
-    // but there is no provider_types table to insert into.
-    // The management of these types will be done in the UI by fetching distinct values.
-    // We can revalidate the aux-tables path to refresh the UI.
+    const { error } = await supabase
+        .from('providers')
+        .update({ provider_type_description: description })
+        .eq('provider_type_code', code);
     
+    if (error) {
+        return { message: `Error actualizando proveedores existentes: ${error.message}` };
+    }
+
     revalidatePath('/admin/aux-tables');
+    revalidatePath('/admin/providers');
     return {
         message: 'success',
-        data: `Tipo de proveedor '${code}' disponible para su uso.`,
+        data: `Tipo '${code}' guardado. Se actualizaron los proveedores existentes.`,
     };
 }
 
@@ -1989,24 +2036,20 @@ export async function updateProviderType(prevState: any, formData: FormData) {
 
     const { old_code, code, description } = validatedFields.data;
 
-    // As there is no provider_types table, we need to update all providers using the old code.
-    // NOTE: This logic assumes the "description" of the type is not stored, only the code.
-    // If both code and description were to be managed, the data model would need rethinking.
-    
     const { error } = await supabase
         .from('providers')
-        .update({ provider_type_code: code })
+        .update({ provider_type_code: code, provider_type_description: description })
         .eq('provider_type_code', old_code);
 
     if (error) {
-        return { message: `Error al actualizar los proveedores con el nuevo tipo: ${error.message}` };
+        return { message: `Error al actualizar los proveedores: ${error.message}` };
     }
 
     revalidatePath('/admin/aux-tables');
     revalidatePath('/admin/providers');
     return {
         message: 'success',
-        data: `Los proveedores con tipo '${old_code}' han sido actualizados a '${code}'.`,
+        data: `El tipo '${old_code}' ha sido actualizado a '${code}' en todos los proveedores.`,
     };
 }
 
@@ -2015,16 +2058,16 @@ export async function deleteProviderType(code: string) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { message: 'No autenticado' };
 
-    const { count, error: checkError } = await supabase.from('providers').select('*', { count: 'exact', head: true }).eq('provider_type_code', code);
-    if (checkError) {
-        return { message: `Error al verificar proveedores asociados: ${checkError.message}` };
+    const { error } = await supabase
+        .from('providers')
+        .update({ provider_type_code: null, provider_type_description: null })
+        .eq('provider_type_code', code);
+    
+    if (error) {
+        return { message: `Error al desasociar el tipo de los proveedores: ${error.message}` };
     }
-    if (count && count > 0) {
-        return { message: `No se puede eliminar el tipo, está asociado a ${count} proveedor(es).` };
-    }
-
-    // Since there is no table, "deleting" means it is no longer in use.
     
     revalidatePath('/admin/aux-tables');
-    return { message: 'success', data: '¡Tipo de proveedor eliminado exitosamente!' };
+    revalidatePath('/admin/providers');
+    return { message: 'success', data: '¡Tipo de proveedor desasociado de todos los proveedores!' };
 }

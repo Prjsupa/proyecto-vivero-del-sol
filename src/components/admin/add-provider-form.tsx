@@ -74,7 +74,7 @@ export function AddProviderForm({ providerTypes }: { providerTypes: ProviderType
                 <DialogHeader>
                     <DialogTitle>Añadir Nuevo Proveedor</DialogTitle>
                     <DialogDescription>
-                        Ingresa el nombre y el tipo para crear un nuevo proveedor.
+                        Ingresa el nombre y el código del tipo de proveedor.
                     </DialogDescription>
                 </DialogHeader>
                 <form action={formAction} ref={formRef} className="grid gap-4 py-4">
@@ -89,8 +89,8 @@ export function AddProviderForm({ providerTypes }: { providerTypes: ProviderType
                          )}
                     </div>
                      <div className="space-y-2">
-                        <Label htmlFor="provider_type_code">Tipo de Proveedor (Opcional)</Label>
-                        <Input id="provider_type_code" name="provider_type_code" placeholder="Ej: NAC (Nacional)"/>
+                        <Label htmlFor="provider_type_code">Código de Tipo de Proveedor (Opcional)</Label>
+                        <Input id="provider_type_code" name="provider_type_code" placeholder="Ej: NAC"/>
                         <FieldError errors={state.errors?.provider_type_code} />
                     </div>
                      <DialogFooter>

@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import type { Provider, ProviderType } from "@/lib/definitions";
@@ -57,7 +58,8 @@ export function ProvidersTable({ providers, providerTypes }: { providers: Provid
             <TableHeader>
                 <TableRow>
                     <TableHead>Nombre</TableHead>
-                    <TableHead className="hidden sm:table-cell">Fecha de registro</TableHead>
+                    <TableHead className="hidden sm:table-cell">Tipo</TableHead>
+                    <TableHead className="hidden md:table-cell">Fecha de registro</TableHead>
                     <TableHead>
                         <span className="sr-only">Acciones</span>
                     </TableHead>
@@ -69,11 +71,16 @@ export function ProvidersTable({ providers, providerTypes }: { providers: Provid
                         <TableRow key={provider.id}>
                             <TableCell>
                                 <div className="font-medium">{provider.name}</div>
-                                {provider.provider_type_code && (
-                                    <Badge variant="secondary">{provider.provider_type_code}</Badge>
-                                )}
                             </TableCell>
                             <TableCell className="hidden sm:table-cell">
+                                {provider.provider_type_code && (
+                                    <div className="flex flex-col">
+                                        <Badge variant="secondary" className="w-fit">{provider.provider_type_code}</Badge>
+                                        <span className="text-xs text-muted-foreground">{provider.provider_type_description}</span>
+                                    </div>
+                                )}
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
                                 {format(parseISO(provider.created_at), 'dd MMM, yyyy')}
                             </TableCell>
                             <TableCell className="text-right">
@@ -83,7 +90,7 @@ export function ProvidersTable({ providers, providerTypes }: { providers: Provid
                     ))
                 ) : (
                     <TableRow>
-                        <TableCell colSpan={3} className="h-48 text-center">
+                        <TableCell colSpan={4} className="h-48 text-center">
                             <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
                                 <Building2 className="h-12 w-12" />
                                 <p className="font-semibold">No se encontraron proveedores.</p>

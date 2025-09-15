@@ -1,4 +1,5 @@
 
+
 'use client';
 import { useActionState, useEffect, useRef } from 'react';
 import { useFormStatus } from 'react-dom';
@@ -72,8 +73,8 @@ export function EditProviderForm({ provider, providerTypes, setDialogOpen }: { p
                     )}
                 </div>
                  <div className="space-y-2">
-                    <Label htmlFor="provider_type_code">Tipo de Proveedor (Opcional)</Label>
-                    <Input id="provider_type_code" name="provider_type_code" defaultValue={provider.provider_type_code || ''} placeholder="Ej: NAC (Nacional)"/>
+                    <Label htmlFor="provider_type_code">Código de Tipo de Proveedor (Opcional)</Label>
+                    <Input id="provider_type_code" name="provider_type_code" defaultValue={provider.provider_type_code || ''} placeholder="Ej: NAC"/>
                     <FieldError errors={state.errors?.provider_type_code} />
                 </div>
                 <DialogFooter className="mt-4">

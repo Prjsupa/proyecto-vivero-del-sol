@@ -45,6 +45,7 @@ export type Provider = {
   updated_at: string;
   name: string;
   provider_type_code?: string | null;
+  provider_type_description?: string | null;
 }
 
 export type ProviderType = {
