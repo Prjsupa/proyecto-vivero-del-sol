@@ -85,22 +85,6 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                                 </SidebarMenuButton>
                                             </Link>
                                         </SidebarMenuItem>
-                                        <SidebarMenuItem>
-                                            <Link href="/admin/categories" className="pl-6">
-                                                <SidebarMenuButton variant="ghost" size="sm">
-                                                    <LayoutGrid />
-                                                    Categorías de Productos
-                                                </SidebarMenuButton>
-                                            </Link>
-                                        </SidebarMenuItem>
-                                        <SidebarMenuItem>
-                                            <Link href="/admin/subcategories" className="pl-6">
-                                                <SidebarMenuButton variant="ghost" size="sm">
-                                                    <LayoutGrid />
-                                                    Subcategorías de Productos
-                                                </SidebarMenuButton>
-                                            </Link>
-                                        </SidebarMenuItem>
                                     </CollapsibleContent>
                                 </SidebarGroup>
                             </Collapsible>
@@ -122,14 +106,6 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                                 <SidebarMenuButton variant="ghost" size="sm">
                                                     <ConciergeBell />
                                                     Listado Servicios
-                                                </SidebarMenuButton>
-                                            </Link>
-                                        </SidebarMenuItem>
-                                        <SidebarMenuItem>
-                                            <Link href="/admin/service-categories" className="pl-6">
-                                                <SidebarMenuButton variant="ghost" size="sm">
-                                                    <LayoutGrid />
-                                                    Categorías de Servicios
                                                 </SidebarMenuButton>
                                             </Link>
                                         </SidebarMenuItem>
@@ -218,10 +194,26 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                         </CollapsibleTrigger>
                                         <CollapsibleContent className="data-[state=open]:py-1">
                                             <SidebarMenuItem>
-                                                <Link href="/admin/aux-tables" className="pl-6">
+                                                <Link href="/admin/categories" className="pl-6">
                                                     <SidebarMenuButton variant="ghost" size="sm">
-                                                        <Database />
-                                                        Tablas Auxiliares
+                                                        <LayoutGrid />
+                                                        Categorías de Productos
+                                                    </SidebarMenuButton>
+                                                </Link>
+                                            </SidebarMenuItem>
+                                            <SidebarMenuItem>
+                                                <Link href="/admin/subcategories" className="pl-6">
+                                                    <SidebarMenuButton variant="ghost" size="sm">
+                                                        <LayoutGrid />
+                                                        Subcategorías de Productos
+                                                    </SidebarMenuButton>
+                                                </Link>
+                                            </SidebarMenuItem>
+                                            <SidebarMenuItem>
+                                                <Link href="/admin/service-categories" className="pl-6">
+                                                    <SidebarMenuButton variant="ghost" size="sm">
+                                                        <LayoutGrid />
+                                                        Categorías de Servicios
                                                     </SidebarMenuButton>
                                                 </Link>
                                             </SidebarMenuItem>
