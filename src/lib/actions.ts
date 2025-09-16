@@ -1910,12 +1910,19 @@ export async function addProvider(prevState: any, formData: FormData) {
     };
 }
 
-const updateProviderSchema = baseProviderSchema.extend({
+const baseUpdateProviderSchema = z.object({
     id: z.coerce.number(),
-}).refine(providerRefinement, { 
+    name: z.string().min(1, 'El nombre es requerido.'),
+    provider_type_code: z.string().optional().nullable(),
+    new_provider_type_code: z.string().optional(),
+    new_provider_type_description: z.string().optional(),
+});
+
+const updateProviderSchema = baseUpdateProviderSchema.refine(providerRefinement, { 
     message: "El código y la descripción son requeridos para un nuevo tipo.",
     path: ['new_provider_type_code'] 
 });
+
 
 export async function updateProvider(prevState: any, formData: FormData) {
     const validatedFields = updateProviderSchema.safeParse(Object.fromEntries(formData.entries()));
@@ -2099,9 +2106,9 @@ const promotionSchema = z.object({
   discount_type: z.enum(['x_for_y', 'price_discount', 'cross_selling', 'progressive_discount']),
   x_for_y_take: z.coerce.number().optional(),
   x_for_y_pay: z.coerce.number().optional(),
-  progressive_tiers: z.string().transform((val) => JSON.parse(val)).pipe(z.array(progressiveTierSchema)).optional(),
-  apply_to_type: z.enum(['all', 'categories', 'products', 'services']),
-  apply_to_ids: z.array(z.string()).optional(),
+  progressive_tiers: z.string().transform((val) => val ? JSON.parse(val) : []).pipe(z.array(progressiveTierSchema)).optional(),
+  apply_to_type: z.enum(['all_store', 'all_products', 'all_services', 'product_categories', 'product_subcategories', 'service_categories', 'products', 'services']),
+  apply_to_ids: z.string().transform(val => val ? val.split(',') : []),
   can_be_combined: z.coerce.boolean(),
   usage_limit_type: z.enum(['unlimited', 'period']),
   start_date: z.string().optional(),
@@ -2110,10 +2117,7 @@ const promotionSchema = z.object({
 });
 
 export async function addPromotion(prevState: any, formData: FormData) {
-    const validatedFields = promotionSchema.safeParse({
-        ...Object.fromEntries(formData.entries()),
-        apply_to_ids: formData.getAll('apply_to_ids')
-    });
+    const validatedFields = promotionSchema.safeParse(Object.fromEntries(formData));
     
     if (!validatedFields.success) {
         return {

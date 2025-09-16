@@ -91,7 +91,7 @@ export type Promotion = {
     is_active: boolean;
     discount_type: 'x_for_y' | 'price_discount' | 'cross_selling' | 'progressive_discount';
     discount_value: Json;
-    apply_to_type: 'all' | 'categories' | 'products' | 'services';
+    apply_to_type: 'all_store' | 'all_products' | 'all_services' | 'product_categories' | 'product_subcategories' | 'service_categories' | 'products' | 'services';
     apply_to_ids?: string[] | null;
     can_be_combined: boolean;
     usage_limit_type: 'unlimited' | 'period';

@@ -1,3 +1,4 @@
+
 'use client';
 import { useActionState, useEffect, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
@@ -6,7 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { AlertCircle, PlusCircle, Loader2, Trash2 } from 'lucide-react';
+import { AlertCircle, PlusCircle, Loader2, Trash2, Calendar as CalendarIcon, Search, X } from 'lucide-react';
 import { addPromotion } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '../ui/textarea';
@@ -17,9 +18,9 @@ import type { Product, Service } from '@/lib/definitions';
 import { Calendar } from '../ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { cn } from '@/lib/utils';
-import { Calendar as CalendarIcon } from "lucide-react"
 import { format } from "date-fns"
-
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '../ui/command';
+import { Badge } from '../ui/badge';
 
 function SubmitButton() {
     const { pending } = useFormStatus();
@@ -34,6 +35,7 @@ interface AddPromotionFormProps {
     products: Product[];
     services: Service[];
     productCategories: string[];
+    productSubcategories: string[];
     serviceCategories: string[];
 }
 
@@ -42,7 +44,7 @@ type DiscountTier = {
     percentage: string;
 }
 
-export function AddPromotionForm({ products, services, productCategories, serviceCategories }: AddPromotionFormProps) {
+export function AddPromotionForm({ products, services, productCategories, productSubcategories, serviceCategories }: AddPromotionFormProps) {
     const [state, formAction] = useActionState(addPromotion, { message: '' });
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const formRef = useRef<HTMLFormElement>(null);
@@ -50,6 +52,7 @@ export function AddPromotionForm({ products, services, productCategories, servic
 
     const [discountType, setDiscountType] = useState<string>('');
     const [applyToType, setApplyToType] = useState<string>('');
+    const [selectedApplyToIds, setSelectedApplyToIds] = useState<Set<string>>(new Set());
     const [usageLimitType, setUsageLimitType] = useState<string>('unlimited');
     const [date, setDate] = useState<{from: Date | undefined, to: Date | undefined}>({ from: undefined, to: undefined });
     const [progressiveTiers, setProgressiveTiers] = useState<DiscountTier[]>([{ quantity: '', percentage: '' }]);
@@ -69,6 +72,7 @@ export function AddPromotionForm({ products, services, productCategories, servic
         formRef.current?.reset();
         setDiscountType('');
         setApplyToType('');
+        setSelectedApplyToIds(new Set());
         setUsageLimitType('unlimited');
         setDate({ from: undefined, to: undefined });
         setProgressiveTiers([{ quantity: '', percentage: '' }]);
@@ -77,6 +81,23 @@ export function AddPromotionForm({ products, services, productCategories, servic
     const onDialogChange = (open: boolean) => {
         if (!open) resetFormState();
         setIsDialogOpen(open);
+    }
+    
+    const handleApplyToTypeChange = (value: string) => {
+        setApplyToType(value);
+        setSelectedApplyToIds(new Set());
+    }
+    
+    const handleMultiSelectToggle = (id: string) => {
+        setSelectedApplyToIds(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(id)) {
+                newSet.delete(id);
+            } else {
+                newSet.add(id);
+            }
+            return newSet;
+        });
     }
 
     const addTier = () => {
@@ -113,6 +134,7 @@ export function AddPromotionForm({ products, services, productCategories, servic
                      <input type="hidden" name="start_date" value={date.from?.toISOString()} />
                      <input type="hidden" name="end_date" value={date.to?.toISOString()} />
                      <input type="hidden" name="progressive_tiers" value={JSON.stringify(progressiveTiers)} />
+                     <input type="hidden" name="apply_to_ids" value={Array.from(selectedApplyToIds).join(',')} />
                     
                     {/* General Info */}
                     <div className="space-y-4 border-b pb-4">
@@ -158,12 +180,12 @@ export function AddPromotionForm({ products, services, productCategories, servic
 
                         {discountType === 'progressive_discount' && (
                             <div className="p-4 border rounded-md bg-muted/50 space-y-4">
-                                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-muted-foreground">
+                                 <div className="grid grid-cols-[1fr_1fr_auto] gap-x-4 gap-y-2 text-sm text-muted-foreground">
                                     <p>Descuento</p>
                                     <p>Al comprar por lo menos</p>
                                 </div>
                                 {progressiveTiers.map((tier, index) => (
-                                    <div key={index} className="flex items-center gap-2">
+                                    <div key={index} className="grid grid-cols-[1fr_1fr_auto] items-center gap-2">
                                         <div className="flex items-center w-full">
                                             <Input id={`tier-percentage-${index}`} type="number" min="0" max="100" placeholder="10" value={tier.percentage} onChange={(e) => handleTierChange(index, 'percentage', e.target.value)} className="rounded-r-none" />
                                             <div className="bg-gray-200 border border-l-0 border-input rounded-r-md px-3 py-2 text-sm text-muted-foreground">%</div>
@@ -191,16 +213,43 @@ export function AddPromotionForm({ products, services, productCategories, servic
                      <div className="space-y-4 border-b pb-4">
                         <div className="space-y-2">
                             <Label htmlFor="apply_to_type">Aplicar a</Label>
-                            <Select name="apply_to_type" onValueChange={setApplyToType}>
+                            <Select name="apply_to_type" onValueChange={handleApplyToTypeChange}>
                                 <SelectTrigger><SelectValue placeholder="Selecciona dónde aplicar" /></SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">Toda la tienda</SelectItem>
-                                    <SelectItem value="categories">Categorías específicas</SelectItem>
+                                    <SelectItem value="all_store">Toda la tienda</SelectItem>
+                                    <SelectItem value="all_products">Todos los productos</SelectItem>
+                                    <SelectItem value="all_services">Todos los servicios</SelectItem>
+                                    <SelectItem value="product_categories">Categorías de productos específicas</SelectItem>
+                                    <SelectItem value="product_subcategories">Subcategorías de productos específicas</SelectItem>
+                                    <SelectItem value="service_categories">Categorías de servicios específicas</SelectItem>
                                     <SelectItem value="products">Productos específicos</SelectItem>
                                     <SelectItem value="services">Servicios específicos</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
+
+                         {['product_categories', 'product_subcategories', 'service_categories'].includes(applyToType) && (
+                            <MultiSelect
+                                placeholder={`Seleccionar ${applyToType === 'product_categories' ? 'categorías de producto' : applyToType === 'product_subcategories' ? 'subcategorías' : 'categorías de servicio'}...`}
+                                options={
+                                    applyToType === 'product_categories' ? productCategories.map(c => ({ value: c, label: c })) :
+                                    applyToType === 'product_subcategories' ? productSubcategories.map(s => ({ value: s, label: s })) :
+                                    serviceCategories.map(c => ({ value: c, label: c }))
+                                }
+                                selected={selectedApplyToIds}
+                                onToggle={handleMultiSelectToggle}
+                            />
+                        )}
+
+                        {['products', 'services'].includes(applyToType) && (
+                            <ItemSelector
+                                items={applyToType === 'products' ? products : services}
+                                selectedIds={selectedApplyToIds}
+                                onToggle={handleMultiSelectToggle}
+                                placeholder={`Buscar ${applyToType === 'products' ? 'productos' : 'servicios'}...`}
+                            />
+                        )}
+
                     </div>
 
                     {/* Limits */}
@@ -256,5 +305,88 @@ export function AddPromotionForm({ products, services, productCategories, servic
                 </DialogFooter>
             </DialogContent>
         </Dialog>
+    );
+}
+
+function MultiSelect({ placeholder, options, selected, onToggle }: { placeholder: string, options: { value: string, label: string }[], selected: Set<string>, onToggle: (value: string) => void }) {
+    const [open, setOpen] = useState(false);
+    return (
+        <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+                <Button variant="outline" role="combobox" aria-expanded={open} className="w-full justify-between">
+                    <span className='line-clamp-1 text-left'>{selected.size > 0 ? `${selected.size} seleccionado(s)` : placeholder}</span>
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                <Command>
+                    <CommandInput placeholder={placeholder} />
+                    <CommandList>
+                        <CommandEmpty>No se encontraron resultados.</CommandEmpty>
+                        <CommandGroup>
+                            {options.map((option) => (
+                                <CommandItem key={option.value} onSelect={() => onToggle(option.value)}>
+                                    <Checkbox className="mr-2" checked={selected.has(option.value)} />
+                                    {option.label}
+                                </CommandItem>
+                            ))}
+                        </CommandGroup>
+                    </CommandList>
+                </Command>
+            </PopoverContent>
+        </Popover>
+    );
+}
+
+function ItemSelector({ items, selectedIds, onToggle, placeholder }: { items: (Product | Service)[], selectedIds: Set<string>, onToggle: (id: string) => void, placeholder: string }) {
+    const [searchTerm, setSearchTerm] = useState('');
+    const selectedItems = items.filter(item => selectedIds.has(item.id));
+
+    const filteredItems = items.filter(item => 
+        item.name.toLowerCase().includes(searchTerm.toLowerCase()) && !selectedIds.has(item.id)
+    );
+
+    return (
+        <div className='space-y-2'>
+            <Popover>
+                <PopoverTrigger asChild>
+                    <div className='relative'>
+                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder={placeholder}
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="pl-10"
+                        />
+                    </div>
+                </PopoverTrigger>
+                <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                    <Command>
+                        <CommandList>
+                            <CommandEmpty>No se encontraron items.</CommandEmpty>
+                            {filteredItems.slice(0, 50).map(item => (
+                                <CommandItem key={item.id} onSelect={() => { onToggle(item.id); setSearchTerm(''); }}>
+                                    {item.name}
+                                </CommandItem>
+                            ))}
+                        </CommandList>
+                    </Command>
+                </PopoverContent>
+            </Popover>
+             <div className="space-y-2 rounded-md border p-2 h-32 overflow-y-auto">
+                 {selectedItems.length > 0 ? (
+                    selectedItems.map(item => (
+                        <Badge key={item.id} variant="secondary" className='mr-1 mb-1'>
+                            {item.name}
+                            <button type="button" onClick={() => onToggle(item.id)} className="ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2">
+                                <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                            </button>
+                        </Badge>
+                    ))
+                 ) : (
+                    <p className='text-sm text-muted-foreground text-center py-4'>No hay items seleccionados.</p>
+                 )}
+            </div>
+        </div>
     );
 }
