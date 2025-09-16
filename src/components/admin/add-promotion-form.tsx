@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { AlertCircle, PlusCircle, Loader2, Trash2, Calendar as CalendarIcon, Search, X } from 'lucide-react';
+import { AlertCircle, PlusCircle, Loader2, Trash2, Calendar as CalendarIcon, Search, X, ChevronsUpDown } from 'lucide-react';
 import { addPromotion } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '../ui/textarea';
@@ -180,7 +180,7 @@ export function AddPromotionForm({ products, services, productCategories, produc
 
                         {discountType === 'progressive_discount' && (
                             <div className="p-4 border rounded-md bg-muted/50 space-y-4">
-                                 <div className="grid grid-cols-[1fr_1fr_auto] gap-x-4 gap-y-2 text-sm text-muted-foreground">
+                                <div className="grid grid-cols-[1fr_1fr_auto] gap-x-4 gap-y-2 text-sm text-muted-foreground">
                                     <p>Descuento</p>
                                     <p>Al comprar por lo menos</p>
                                 </div>
