@@ -19,6 +19,10 @@ async function getData() {
     if(productCategoriesError) console.error('Error fetching product categories:', productCategoriesError);
     const productCategories = Array.from(new Set((productCategoriesData || []).map(p => p.category)));
 
+    const { data: productSubcategoriesData, error: productSubcategoriesError } = await supabase.from('products').select('subcategory');
+    if(productSubcategoriesError) console.error('Error fetching product subcategories:', productSubcategoriesError);
+    const productSubcategories = Array.from(new Set((productSubcategoriesData || []).map(p => p.subcategory).filter(Boolean) as string[]));
+
     const { data: serviceCategoriesData, error: serviceCategoriesError } = await supabase.from('services').select('category');
     if(serviceCategoriesError) console.error('Error fetching service categories:', serviceCategoriesError);
     const serviceCategories = Array.from(new Set((serviceCategoriesData || []).map(s => s.category)));
@@ -28,13 +32,14 @@ async function getData() {
         services: services || [],
         promotions: promotions || [],
         productCategories,
+        productSubcategories,
         serviceCategories,
     }
 }
 
 
 export default async function PromotionsPage() {
-    const { products, services, promotions, productCategories, serviceCategories } = await getData();
+    const { products, services, promotions, productCategories, productSubcategories, serviceCategories } = await getData();
 
     return (
         <div className="space-y-6">
@@ -48,6 +53,7 @@ export default async function PromotionsPage() {
                         products={products}
                         services={services}
                         productCategories={productCategories}
+                        productSubcategories={productSubcategories}
                         serviceCategories={serviceCategories}
                     />
                 </div>
