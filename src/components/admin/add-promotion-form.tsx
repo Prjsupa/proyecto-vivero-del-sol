@@ -103,14 +103,14 @@ export function AddPromotionForm({ products, services, productCategories, servic
                     Crear Promoción
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-3xl max-h-[90vh]">
+            <DialogContent className="sm:max-w-3xl max-h-[90vh] flex flex-col">
                 <DialogHeader>
                     <DialogTitle>Crear Nueva Promoción</DialogTitle>
                     <DialogDescription>
                         Completa los detalles para configurar una nueva promoción.
                     </DialogDescription>
                 </DialogHeader>
-                <form action={formAction} ref={formRef} className="grid gap-4 py-4 overflow-y-auto pr-4">
+                <form action={formAction} ref={formRef} className="flex-grow grid gap-4 py-4 overflow-y-auto pr-4">
                      <input type="hidden" name="start_date" value={date.from?.toISOString()} />
                      <input type="hidden" name="end_date" value={date.to?.toISOString()} />
                      <input type="hidden" name="progressive_tiers" value={JSON.stringify(progressiveTiers)} />
@@ -180,7 +180,7 @@ export function AddPromotionForm({ products, services, productCategories, servic
                                         </Button>
                                     </div>
                                 ))}
-                                <Button variant="link" size="sm" onClick={addTier} type="button" className="p-0 text-primary">
+                                <Button variant="outline" size="sm" onClick={addTier} type="button">
                                     <PlusCircle className="mr-2 h-4 w-4" />
                                     Nuevo descuento progresivo
                                 </Button>
@@ -250,12 +250,11 @@ export function AddPromotionForm({ products, services, productCategories, servic
                         <Input id="custom_tag" name="custom_tag" placeholder="Ej: ¡OFERTA!" />
                         <p className="text-xs text-muted-foreground">Esta etiqueta aparecerá en los productos/servicios en promoción.</p>
                     </div>
-
-                     <DialogFooter className="mt-4">
-                        <DialogClose asChild><Button variant="outline">Cancelar</Button></DialogClose>
-                        <SubmitButton />
-                    </DialogFooter>
                 </form>
+                <DialogFooter className="mt-4 shrink-0 border-t pt-4">
+                    <DialogClose asChild><Button variant="outline">Cancelar</Button></DialogClose>
+                    <SubmitButton />
+                </DialogFooter>
             </DialogContent>
         </Dialog>
     );
