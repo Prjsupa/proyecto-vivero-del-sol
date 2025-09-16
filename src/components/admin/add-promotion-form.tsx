@@ -1,4 +1,3 @@
-
 'use client';
 import { useActionState, useEffect, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
@@ -148,11 +147,11 @@ export function AddPromotionForm({ products, services, productCategories, servic
                             <div className="grid grid-cols-2 gap-4 p-4 border rounded-md bg-muted/50">
                                 <div className="space-y-2">
                                     <Label htmlFor="x_for_y_take">Llevando</Label>
-                                    <Input id="x_for_y_take" name="x_for_y_take" type="number" placeholder="Ej: 3" />
+                                    <Input id="x_for_y_take" name="x_for_y_take" type="number" min="1" placeholder="Ej: 3" />
                                 </div>
                                  <div className="space-y-2">
                                     <Label htmlFor="x_for_y_pay">Pagás</Label>
-                                    <Input id="x_for_y_pay" name="x_for_y_pay" type="number" placeholder="Ej: 2" />
+                                    <Input id="x_for_y_pay" name="x_for_y_pay" type="number" min="1" placeholder="Ej: 2" />
                                 </div>
                             </div>
                         )}
@@ -166,12 +165,12 @@ export function AddPromotionForm({ products, services, productCategories, servic
                                 {progressiveTiers.map((tier, index) => (
                                     <div key={index} className="flex items-center gap-2">
                                         <div className="flex items-center w-full">
-                                            <Input id={`tier-percentage-${index}`} type="number" placeholder="10" value={tier.percentage} onChange={(e) => handleTierChange(index, 'percentage', e.target.value)} className="rounded-r-none" />
+                                            <Input id={`tier-percentage-${index}`} type="number" min="0" max="100" placeholder="10" value={tier.percentage} onChange={(e) => handleTierChange(index, 'percentage', e.target.value)} className="rounded-r-none" />
                                             <div className="bg-gray-200 border border-l-0 border-input rounded-r-md px-3 py-2 text-sm text-muted-foreground">%</div>
                                         </div>
 
                                         <div className="flex items-center w-full">
-                                            <Input id={`tier-quantity-${index}`} type="number" placeholder="2" value={tier.quantity} onChange={(e) => handleTierChange(index, 'quantity', e.target.value)} className="rounded-r-none" />
+                                            <Input id={`tier-quantity-${index}`} type="number" min="1" placeholder="2" value={tier.quantity} onChange={(e) => handleTierChange(index, 'quantity', e.target.value)} className="rounded-r-none" />
                                              <div className="bg-gray-200 border border-l-0 border-input rounded-r-md px-3 py-2 text-sm text-muted-foreground whitespace-nowrap">Productos</div>
                                         </div>
                                         
