@@ -159,24 +159,30 @@ export function AddPromotionForm({ products, services, productCategories, servic
 
                         {discountType === 'progressive_discount' && (
                             <div className="p-4 border rounded-md bg-muted/50 space-y-4">
+                                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-muted-foreground">
+                                    <p>Descuento</p>
+                                    <p>Al comprar por lo menos</p>
+                                </div>
                                 {progressiveTiers.map((tier, index) => (
-                                    <div key={index} className="flex items-end gap-2">
-                                        <div className="flex-1 space-y-2">
-                                            <Label htmlFor={`tier-quantity-${index}`}>Cantidad mínima</Label>
-                                            <Input id={`tier-quantity-${index}`} type="number" placeholder="Ej: 10" value={tier.quantity} onChange={(e) => handleTierChange(index, 'quantity', e.target.value)} />
+                                    <div key={index} className="flex items-center gap-2">
+                                        <div className="flex items-center w-full">
+                                            <Input id={`tier-percentage-${index}`} type="number" placeholder="10" value={tier.percentage} onChange={(e) => handleTierChange(index, 'percentage', e.target.value)} className="rounded-r-none" />
+                                            <div className="bg-gray-200 border border-l-0 border-input rounded-r-md px-3 py-2 text-sm text-muted-foreground">%</div>
                                         </div>
-                                        <div className="flex-1 space-y-2">
-                                            <Label htmlFor={`tier-percentage-${index}`}>Porcentaje de descuento (%)</Label>
-                                            <Input id={`tier-percentage-${index}`} type="number" placeholder="Ej: 15" value={tier.percentage} onChange={(e) => handleTierChange(index, 'percentage', e.target.value)} />
+
+                                        <div className="flex items-center w-full">
+                                            <Input id={`tier-quantity-${index}`} type="number" placeholder="2" value={tier.quantity} onChange={(e) => handleTierChange(index, 'quantity', e.target.value)} className="rounded-r-none" />
+                                             <div className="bg-gray-200 border border-l-0 border-input rounded-r-md px-3 py-2 text-sm text-muted-foreground whitespace-nowrap">Productos</div>
                                         </div>
-                                        <Button variant="ghost" size="icon" onClick={() => removeTier(index)} type="button">
+                                        
+                                        <Button variant="ghost" size="icon" onClick={() => removeTier(index)} type="button" className="shrink-0">
                                             <Trash2 className="h-4 w-4 text-destructive" />
                                         </Button>
                                     </div>
                                 ))}
-                                <Button variant="outline" size="sm" onClick={addTier} type="button">
+                                <Button variant="link" size="sm" onClick={addTier} type="button" className="p-0 text-primary">
                                     <PlusCircle className="mr-2 h-4 w-4" />
-                                    Añadir tramo
+                                    Nuevo descuento progresivo
                                 </Button>
                             </div>
                         )}
