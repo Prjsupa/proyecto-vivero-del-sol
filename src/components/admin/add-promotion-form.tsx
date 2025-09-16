@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { AlertCircle, PlusCircle, Loader2 } from 'lucide-react';
+import { AlertCircle, PlusCircle, Loader2, Trash2 } from 'lucide-react';
 import { addPromotion } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '../ui/textarea';
@@ -38,6 +38,11 @@ interface AddPromotionFormProps {
     serviceCategories: string[];
 }
 
+type DiscountTier = {
+    quantity: string;
+    percentage: string;
+}
+
 export function AddPromotionForm({ products, services, productCategories, serviceCategories }: AddPromotionFormProps) {
     const [state, formAction] = useActionState(addPromotion, { message: '' });
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -48,6 +53,7 @@ export function AddPromotionForm({ products, services, productCategories, servic
     const [applyToType, setApplyToType] = useState<string>('');
     const [usageLimitType, setUsageLimitType] = useState<string>('unlimited');
     const [date, setDate] = useState<{from: Date | undefined, to: Date | undefined}>({ from: undefined, to: undefined });
+    const [progressiveTiers, setProgressiveTiers] = useState<DiscountTier[]>([{ quantity: '', percentage: '' }]);
 
 
     useEffect(() => {
@@ -66,12 +72,28 @@ export function AddPromotionForm({ products, services, productCategories, servic
         setApplyToType('');
         setUsageLimitType('unlimited');
         setDate({ from: undefined, to: undefined });
+        setProgressiveTiers([{ quantity: '', percentage: '' }]);
     };
 
     const onDialogChange = (open: boolean) => {
         if (!open) resetFormState();
         setIsDialogOpen(open);
     }
+
+    const addTier = () => {
+        setProgressiveTiers([...progressiveTiers, { quantity: '', percentage: '' }]);
+    };
+
+    const removeTier = (index: number) => {
+        const newTiers = progressiveTiers.filter((_, i) => i !== index);
+        setProgressiveTiers(newTiers);
+    };
+
+    const handleTierChange = (index: number, field: keyof DiscountTier, value: string) => {
+        const newTiers = [...progressiveTiers];
+        newTiers[index][field] = value;
+        setProgressiveTiers(newTiers);
+    };
     
     return (
         <Dialog open={isDialogOpen} onOpenChange={onDialogChange}>
@@ -91,6 +113,7 @@ export function AddPromotionForm({ products, services, productCategories, servic
                 <form action={formAction} ref={formRef} className="grid gap-4 py-4 overflow-y-auto pr-4">
                      <input type="hidden" name="start_date" value={date.from?.toISOString()} />
                      <input type="hidden" name="end_date" value={date.to?.toISOString()} />
+                     <input type="hidden" name="progressive_tiers" value={JSON.stringify(progressiveTiers)} />
                     
                     {/* General Info */}
                     <div className="space-y-4 border-b pb-4">
@@ -114,9 +137,9 @@ export function AddPromotionForm({ products, services, productCategories, servic
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="x_for_y">Llevá X y pagá Y (2x1, 3x2, etc.)</SelectItem>
+                                    <SelectItem value="progressive_discount">Descuento progresivo por cantidad</SelectItem>
                                     <SelectItem value="price_discount" disabled>Descuento sobre precios</SelectItem>
                                     <SelectItem value="cross_selling" disabled>Cross selling</SelectItem>
-                                    <SelectItem value="progressive_discount" disabled>Descuento progresivo por cantidad</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -131,6 +154,30 @@ export function AddPromotionForm({ products, services, productCategories, servic
                                     <Label htmlFor="x_for_y_pay">Pagás</Label>
                                     <Input id="x_for_y_pay" name="x_for_y_pay" type="number" placeholder="Ej: 2" />
                                 </div>
+                            </div>
+                        )}
+
+                        {discountType === 'progressive_discount' && (
+                            <div className="p-4 border rounded-md bg-muted/50 space-y-4">
+                                {progressiveTiers.map((tier, index) => (
+                                    <div key={index} className="flex items-end gap-2">
+                                        <div className="flex-1 space-y-2">
+                                            <Label htmlFor={`tier-quantity-${index}`}>Cantidad mínima</Label>
+                                            <Input id={`tier-quantity-${index}`} type="number" placeholder="Ej: 10" value={tier.quantity} onChange={(e) => handleTierChange(index, 'quantity', e.target.value)} />
+                                        </div>
+                                        <div className="flex-1 space-y-2">
+                                            <Label htmlFor={`tier-percentage-${index}`}>Porcentaje de descuento (%)</Label>
+                                            <Input id={`tier-percentage-${index}`} type="number" placeholder="Ej: 15" value={tier.percentage} onChange={(e) => handleTierChange(index, 'percentage', e.target.value)} />
+                                        </div>
+                                        <Button variant="ghost" size="icon" onClick={() => removeTier(index)} type="button">
+                                            <Trash2 className="h-4 w-4 text-destructive" />
+                                        </Button>
+                                    </div>
+                                ))}
+                                <Button variant="outline" size="sm" onClick={addTier} type="button">
+                                    <PlusCircle className="mr-2 h-4 w-4" />
+                                    Añadir tramo
+                                </Button>
                             </div>
                         )}
                     </div>

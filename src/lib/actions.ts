@@ -2088,12 +2088,18 @@ export async function deleteProviderType(code: string) {
 
 // ============== PROMOTIONS =================
 
+const progressiveTierSchema = z.object({
+  quantity: z.coerce.number().min(1, "La cantidad debe ser al menos 1."),
+  percentage: z.coerce.number().min(0, "El porcentaje no puede ser negativo.").max(100, "El porcentaje no puede ser mayor a 100."),
+});
+
 const promotionSchema = z.object({
   name: z.string().min(3, "El nombre debe tener al menos 3 caracteres."),
   is_active: z.coerce.boolean(),
   discount_type: z.enum(['x_for_y', 'price_discount', 'cross_selling', 'progressive_discount']),
   x_for_y_take: z.coerce.number().optional(),
   x_for_y_pay: z.coerce.number().optional(),
+  progressive_tiers: z.string().transform((val) => JSON.parse(val)).pipe(z.array(progressiveTierSchema)).optional(),
   apply_to_type: z.enum(['all', 'categories', 'products', 'services']),
   apply_to_ids: z.array(z.string()).optional(),
   can_be_combined: z.coerce.boolean(),
@@ -2120,7 +2126,7 @@ export async function addPromotion(prevState: any, formData: FormData) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { message: "No autorizado." };
 
-    const { name, is_active, discount_type, apply_to_type, apply_to_ids, can_be_combined, usage_limit_type, start_date, end_date, custom_tag, x_for_y_take, x_for_y_pay } = validatedFields.data;
+    const { name, is_active, discount_type, apply_to_type, apply_to_ids, can_be_combined, usage_limit_type, start_date, end_date, custom_tag, x_for_y_take, x_for_y_pay, progressive_tiers } = validatedFields.data;
 
     let discount_value = {};
     if (discount_type === 'x_for_y') {
@@ -2128,6 +2134,14 @@ export async function addPromotion(prevState: any, formData: FormData) {
             return { message: "Para el tipo 'Llevá X y pagá Y', los campos 'Llevando' y 'Pagás' son requeridos." };
         }
         discount_value = { take: x_for_y_take, pay: x_for_y_pay };
+    }
+    if (discount_type === 'progressive_discount') {
+        if (!progressive_tiers || progressive_tiers.length === 0) {
+            return { message: "Debe añadir al menos un tramo para el descuento progresivo." };
+        }
+        // Ensure tiers are sorted by quantity
+        const sortedTiers = progressive_tiers.sort((a, b) => a.quantity - b.quantity);
+        discount_value = { tiers: sortedTiers };
     }
     // TODO: Add logic for other discount types
 
