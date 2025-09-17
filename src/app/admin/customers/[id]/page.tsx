@@ -6,9 +6,10 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowLeft, BookUser, Mail, Phone, User, FileText } from "lucide-react";
-import { format, parseISO } from "date-fns";
+import { ArrowLeft, BookUser, Mail, Phone, User, FileText, Home, Birthday } from "lucide-react";
+import { format, parseISO, isValid } from "date-fns";
 import { InvoicesTable } from "@/components/admin/invoices-table";
+import { Separator } from "@/components/ui/separator";
 
 function getInitials(name: string, lastName: string) {
     return `${name?.charAt(0) ?? ''}${lastName?.charAt(0) ?? ''}`.toUpperCase();
@@ -70,18 +71,31 @@ export default async function CustomerDetailPage({ params }: { params: { id: str
                                 <AvatarFallback className="text-4xl">{getInitials(client.name, client.last_name)}</AvatarFallback>
                             </Avatar>
                             <CardTitle>{client.name} {client.last_name}</CardTitle>
+                            <CardDescription>
+                                {client.razon_social || client.nombre_fantasia || 'Cliente'}
+                            </CardDescription>
                             <CardDescription>Cliente desde {format(parseISO(client.created_at), 'MMM yyyy')}</CardDescription>
                         </CardHeader>
                         <CardContent className="text-sm space-y-4">
-                             <div className="flex items-start gap-3">
+                            <Separator />
+                             <div className="flex items-start gap-3 pt-4">
                                 <FileText className="h-4 w-4 mt-1 text-muted-foreground" />
                                 <div>
                                     <p className="font-semibold">Información Fiscal</p>
                                     <p className="text-muted-foreground">{client.document_type || 'Documento'}: {client.document_number || 'No especificado'}</p>
                                     <p className="text-muted-foreground">IVA: {client.iva_condition || 'No especificado'}</p>
+                                    <p className="text-muted-foreground">Factura por defecto: {client.default_invoice_type || 'No especificado'}</p>
                                 </div>
                             </div>
                             <div className="flex items-start gap-3">
+                                <Home className="h-4 w-4 mt-1 text-muted-foreground" />
+                                <div>
+                                    <p className="font-semibold">Dirección</p>
+                                    <p className="text-muted-foreground">{client.address || 'No especificada'}</p>
+                                    <p className="text-muted-foreground">{client.city}, {client.province} {client.postal_code}</p>
+                                </div>
+                            </div>
+                             <div className="flex items-start gap-3">
                                 <Mail className="h-4 w-4 mt-1 text-muted-foreground" />
                                 <div>
                                     <p className="font-semibold">Email</p>
@@ -91,10 +105,21 @@ export default async function CustomerDetailPage({ params }: { params: { id: str
                              <div className="flex items-start gap-3">
                                 <Phone className="h-4 w-4 mt-1 text-muted-foreground" />
                                 <div>
-                                    <p className="font-semibold">Teléfono</p>
-                                    <p className="text-muted-foreground">{client.phone || client.mobile_phone || 'No especificado'}</p>
+                                    <p className="font-semibold">Teléfonos</p>
+                                    <p className="text-muted-foreground">Celular: {client.mobile_phone || 'No especificado'}</p>
+                                    <p className="text-muted-foreground">Fijo: {client.phone || 'No especificado'}</p>
                                 </div>
                             </div>
+                             {client.birth_date && isValid(parseISO(client.birth_date)) && (
+                                <div className="flex items-start gap-3">
+                                    <Birthday className="h-4 w-4 mt-1 text-muted-foreground" />
+                                    <div>
+                                        <p className="font-semibold">Fecha de Nacimiento</p>
+                                        <p className="text-muted-foreground">{format(parseISO(client.birth_date), 'dd/MM/yyyy')}</p>
+                                    </div>
+                                </div>
+                            )}
+
                         </CardContent>
                     </Card>
                 </div>
