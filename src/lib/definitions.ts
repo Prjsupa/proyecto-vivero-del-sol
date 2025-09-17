@@ -53,6 +53,11 @@ export type ProviderType = {
     description: string;
 }
 
+export type IncomeVoucher = {
+    code: string;
+    description: string;
+}
+
 
 export type Product = {
   id: string;
