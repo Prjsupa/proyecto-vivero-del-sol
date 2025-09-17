@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import { z } from 'zod';
@@ -2110,22 +2111,20 @@ const basePromotionSchema = z.object({
   start_date: z.string().optional().nullable(),
   end_date: z.string().optional().nullable(),
   custom_tag: z.string().optional(),
-  x_for_y_take: z.string().optional(),
-  x_for_y_pay: z.string().optional(),
+  x_for_y_take: z.coerce.number().optional(),
+  x_for_y_pay: z.coerce.number().optional(),
   progressive_tiers: z.string().transform((val) => val ? JSON.parse(val) : []).pipe(z.array(progressiveTierSchema).optional()),
 });
 
 const promotionSchema = basePromotionSchema.superRefine((data, ctx) => {
     if (data.discount_type === 'x_for_y') {
-        const take = Number(data.x_for_y_take);
-        const pay = Number(data.x_for_y_pay);
-        if (isNaN(take) || take <= 0) {
+        if (!data.x_for_y_take || data.x_for_y_take <= 0) {
             ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Debe ser un número mayor a 0.", path: ['x_for_y_take'] });
         }
-        if (isNaN(pay) || pay <= 0) {
+        if (!data.x_for_y_pay || data.x_for_y_pay <= 0) {
             ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Debe ser un número mayor a 0.", path: ['x_for_y_pay'] });
         }
-        if (!isNaN(take) && !isNaN(pay) && take <= pay) {
+        if (data.x_for_y_take && data.x_for_y_pay && data.x_for_y_take <= data.x_for_y_pay) {
              ctx.addIssue({ code: z.ZodIssueCode.custom, message: "La cantidad a llevar debe ser mayor a la cantidad a pagar.", path: ['x_for_y_take'] });
         }
     }
@@ -2156,7 +2155,7 @@ export async function addPromotion(prevState: any, formData: FormData) {
 
     let discount_value: object = {};
     if (discount_type === 'x_for_y' && x_for_y_take && x_for_y_pay) {
-        discount_value = { take: Number(x_for_y_take), pay: Number(x_for_y_pay) };
+        discount_value = { take: x_for_y_take, pay: x_for_y_pay };
     } else if (discount_type === 'progressive_discount' && progressive_tiers) {
         const sortedTiers = progressive_tiers.sort((a, b) => a.quantity - b.quantity);
         discount_value = { tiers: sortedTiers };
