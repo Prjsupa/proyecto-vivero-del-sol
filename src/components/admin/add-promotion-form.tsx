@@ -401,5 +401,3 @@ function ItemSelector({ items, selectedIds, onToggle, placeholder }: { items: (P
         </div>
     );
 }
-
-    
