@@ -14,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Popover, PopoverTrigger, PopoverContent } from '../ui/popover';
 import { Calendar } from '../ui/calendar';
-import { format } from 'date-fns';
+import { format, parseISO, isValid } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 function SubmitButton() {
@@ -65,20 +65,23 @@ const provinces = [
 
 
 export function EditClientForm({ client, setOpen }: { client: Client, setOpen: (open: boolean) => void }) {
-    const [state, formAction] = useActionState(updateClient, { message: '' });
+    const [state, formAction] = useActionState(updateClient, undefined);
     const formRef = useRef<HTMLFormElement>(null);
     const { toast } = useToast();
-    const [birthDate, setBirthDate] = useState<Date | undefined>(client.birth_date ? new Date(client.birth_date) : undefined);
+    const [birthDate, setBirthDate] = useState<Date | undefined>(
+        client.birth_date && isValid(parseISO(client.birth_date)) ? parseISO(client.birth_date) : undefined
+    );
     const [activeTab, setActiveTab] = useState('personal');
 
     useEffect(() => {
-        if (state?.message === 'success') {
+        if (!state) return;
+        if (state.message === 'success') {
             toast({
                 title: '¡Éxito!',
                 description: state.data,
             });
             setOpen(false);
-        } else if (state?.message && state.message !== 'success') {
+        } else if (state.message) {
              toast({
                 title: 'Error',
                 description: state.message,
@@ -109,12 +112,12 @@ export function EditClientForm({ client, setOpen }: { client: Client, setOpen: (
                                 <div className="space-y-2">
                                     <Label htmlFor="name">Nombre</Label>
                                     <Input id="name" name="name" defaultValue={client.name} />
-                                    <FieldError errors={state.errors?.name} />
+                                    <FieldError errors={state?.errors?.name} />
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="last_name">Apellido</Label>
                                     <Input id="last_name" name="last_name" defaultValue={client.last_name} />
-                                    <FieldError errors={state.errors?.last_name} />
+                                    <FieldError errors={state?.errors?.last_name} />
                                 </div>
                             </div>
                             <div className="space-y-2">
@@ -166,7 +169,7 @@ export function EditClientForm({ client, setOpen }: { client: Client, setOpen: (
                                 <div className="space-y-2">
                                     <Label htmlFor="document_number">Nº de Documento</Label>
                                     <Input id="document_number" name="document_number" defaultValue={client.document_number || ''} />
-                                    {state.message && state.message.includes('documento') && !state.errors && (
+                                    {state?.message && state.message.includes('documento') && !state.errors && (
                                         <p className="text-sm text-destructive flex items-center gap-1 mt-1">
                                             <AlertCircle size={14} /> {state.message}
                                         </p>
@@ -240,7 +243,7 @@ export function EditClientForm({ client, setOpen }: { client: Client, setOpen: (
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email</Label>
                                 <Input id="email" name="email" type="email" defaultValue={client.email || ''} />
-                                <FieldError errors={state.errors?.email} />
+                                <FieldError errors={state?.errors?.email} />
                             </div>
                         </TabsContent>
                     </div>

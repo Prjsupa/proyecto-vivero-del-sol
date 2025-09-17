@@ -66,7 +66,7 @@ const provinces = [
 
 
 export function AddClientForm() {
-    const [state, formAction] = useActionState(addClient, { message: '' });
+    const [state, formAction] = useActionState(addClient, undefined);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const formRef = useRef<HTMLFormElement>(null);
     const { toast } = useToast();
@@ -75,7 +75,8 @@ export function AddClientForm() {
 
 
     useEffect(() => {
-        if (state?.message === 'success') {
+        if (!state) return;
+        if (state.message === 'success') {
             toast({
                 title: '¡Éxito!',
                 description: state.data,
@@ -84,7 +85,7 @@ export function AddClientForm() {
             formRef.current?.reset();
             setBirthDate(undefined);
             setActiveTab('personal');
-        } else if (state?.message && state.message !== 'success' && state.message !== '') {
+        } else if (state.message) {
              toast({
                 title: 'Error',
                 description: state.message,
@@ -130,12 +131,12 @@ export function AddClientForm() {
                                     <div className="space-y-2">
                                         <Label htmlFor="name">Nombre</Label>
                                         <Input id="name" name="name" />
-                                        <FieldError errors={state.errors?.name} />
+                                        <FieldError errors={state?.errors?.name} />
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="last_name">Apellido</Label>
                                         <Input id="last_name" name="last_name" />
-                                        <FieldError errors={state.errors?.last_name} />
+                                        <FieldError errors={state?.errors?.last_name} />
                                     </div>
                                 </div>
                                  <div className="space-y-2">
@@ -187,7 +188,7 @@ export function AddClientForm() {
                                     <div className="space-y-2">
                                         <Label htmlFor="document_number">Nº de Documento</Label>
                                         <Input id="document_number" name="document_number" />
-                                        {state.message && state.message.includes('documento') && !state.errors && (
+                                        {state?.message && state.message.includes('documento') && !state.errors && (
                                             <p className="text-sm text-destructive flex items-center gap-1 mt-1">
                                                 <AlertCircle size={14} /> {state.message}
                                             </p>
@@ -261,7 +262,7 @@ export function AddClientForm() {
                                 <div className="space-y-2">
                                     <Label htmlFor="email">Email</Label>
                                     <Input id="email" name="email" type="email" />
-                                    <FieldError errors={state.errors?.email} />
+                                    <FieldError errors={state?.errors?.email} />
                                 </div>
                             </TabsContent>
                         </div>
