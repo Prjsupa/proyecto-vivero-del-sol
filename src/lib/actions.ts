@@ -1,3 +1,4 @@
+
 'use server';
 
 import { z } from 'zod';
@@ -485,7 +486,7 @@ const clientSchema = z.object({
   postal_code: z.string().optional().nullable(),
   phone: z.string().optional().nullable(),
   mobile_phone: z.string().optional().nullable(),
-  email: z.string().email('El email no es válido.').optional().nullable(),
+  email: z.string().email('El email no es válido.').optional().or(z.literal('')),
   default_invoice_type: z.enum(['A', 'B', 'C']).optional().nullable(),
   birth_date: z.preprocess((arg) => {
     if (typeof arg == "string" || arg instanceof Date) return new Date(arg);
