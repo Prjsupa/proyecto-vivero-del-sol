@@ -1283,6 +1283,62 @@ export async function createInvoice(prevState: any, formData: FormData) {
     };
 }
 
+const quoteSchema = z.object({
+    title: z.string().min(1, "El título es requerido."),
+    client_id: z.coerce.number().min(1, "Debes seleccionar un cliente."),
+    valid_until: z.string().optional(),
+    items: z.string().min(1, "Debes añadir al menos un artículo.").transform((val) => val ? JSON.parse(val) : [])
+});
+
+export async function saveQuote(prevState: any, formData: FormData) {
+    const supabase = createClient();
+    const validatedFields = quoteSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return {
+            message: "Datos de formulario inválidos.",
+            errors: validatedFields.error.flatten().fieldErrors,
+        };
+    }
+    
+    const { title, client_id, valid_until, items } = validatedFields.data;
+
+    if (!items || items.length === 0) {
+        return { message: "No se puede guardar un presupuesto sin artículos." };
+    }
+
+    const { data: clientData, error: clientError } = await supabase.from('clients').select('name, last_name').eq('id', client_id).single();
+    if (clientError || !clientData) {
+        return { message: "Cliente no encontrado." };
+    }
+
+    const total_amount = items.reduce((acc: number, item: any) => acc + item.total, 0);
+
+    const quoteData = {
+        title,
+        client_id,
+        client_name: `${clientData.name} ${clientData.last_name}`,
+        items,
+        total_amount,
+        valid_until,
+        status: 'draft' as const,
+    };
+
+    const { data, error } = await supabase.from('quotes').insert([quoteData]).select('id').single();
+
+    if (error) {
+        console.error('Error saving quote:', error);
+        return { message: `Error al guardar el presupuesto: ${error.message}` };
+    }
+
+    revalidatePath('/admin/quotes');
+    
+    return {
+        message: 'success',
+        data: data
+    };
+}
+
 const updateServiceCategorySchema = z.object({
   oldCategoryName: z.string().min(1, "El nombre de la categoría actual es requerido."),
   newCategoryName: z.string().min(1, "El nuevo nombre de la categoría es requerido."),

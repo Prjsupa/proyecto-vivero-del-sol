@@ -168,6 +168,18 @@ export type Promotion = {
     custom_tag?: string | null;
 }
 
+export type Quote = {
+  id: string;
+  created_at: string;
+  title: string;
+  client_id: number;
+  client_name: string;
+  items: Json;
+  total_amount: number;
+  valid_until: string;
+  status: 'draft' | 'sent' | 'accepted' | 'rejected';
+}
+
 
 export type Order = {
   id: string;
