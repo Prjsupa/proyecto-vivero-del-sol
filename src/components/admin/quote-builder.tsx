@@ -1,6 +1,7 @@
+
 'use client';
 import { useState, useMemo, useEffect, useActionState, useRef } from 'react';
-import type { Product, Service, Client } from '@/lib/definitions';
+import type { Product, Service, Client, Currency } from '@/lib/definitions';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -26,7 +27,7 @@ type QuoteItem = {
     max_quantity?: number;
 };
 
-export function QuoteBuilder({ products, services, clients }: { products: Product[], services: Service[], clients: Client[] }) {
+export function QuoteBuilder({ products, services, clients, currencies }: { products: Product[], services: Service[], clients: Client[], currencies: Currency[] }) {
     const [state, formAction] = useActionState(saveQuote, { message: '' });
     const { toast } = useToast();
     const router = useRouter();
@@ -36,6 +37,7 @@ export function QuoteBuilder({ products, services, clients }: { products: Produc
     const [validUntil, setValidUntil] = useState<Date | undefined>();
     const [searchTerm, setSearchTerm] = useState('');
     const [items, setItems] = useState<QuoteItem[]>([]);
+    const [selectedCurrency, setSelectedCurrency] = useState<string>('ARS');
 
     const availableItems = useMemo(() => {
         const productItems = products.filter(p => p.available && p.stock > 0).map(p => ({
@@ -113,6 +115,7 @@ export function QuoteBuilder({ products, services, clients }: { products: Produc
         setValidUntil(undefined);
         setItems([]);
         setSearchTerm('');
+        setSelectedCurrency('ARS');
     }
 
     const formRef = useRef<HTMLFormElement>(null);
@@ -127,7 +130,7 @@ export function QuoteBuilder({ products, services, clients }: { products: Produc
         <form ref={formRef} onSubmit={handleSubmit}>
             <Card>
                 <CardHeader>
-                    <div className="grid md:grid-cols-3 gap-4">
+                    <div className="grid md:grid-cols-4 gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="title">Título del Presupuesto</Label>
                             <Input id="title" name="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ej: Diseño de jardín frontal" />
@@ -161,6 +164,17 @@ export function QuoteBuilder({ products, services, clients }: { products: Produc
                             </Popover>
                             <input type="hidden" name="valid_until" value={validUntil?.toISOString()} />
                         </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="currency">Moneda</Label>
+                            <Select name="currency" onValueChange={setSelectedCurrency} value={selectedCurrency}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Selecciona una moneda" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {currencies.map(c => <SelectItem key={c.code} value={c.code}>{c.description} ({c.code})</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -182,7 +196,7 @@ export function QuoteBuilder({ products, services, clients }: { products: Produc
                                                 <p>{item.name}</p>
                                                 <p className="text-xs text-muted-foreground">{item.type === 'product' ? 'Producto' : 'Servicio'}</p>
                                             </div>
-                                            <span className="text-muted-foreground">{formatPrice(item.unit_price)}</span>
+                                            <span className="text-muted-foreground">{formatPrice(item.unit_price, selectedCurrency)}</span>
                                         </div>
                                     )) : (
                                         <div className="px-4 py-2 text-muted-foreground">No se encontraron items.</div>
@@ -217,8 +231,8 @@ export function QuoteBuilder({ products, services, clients }: { products: Produc
                                                         className="h-8 w-24"
                                                     />
                                                 </td>
-                                                <td className="p-2 text-right font-mono">{formatPrice(item.unit_price)}</td>
-                                                <td className="p-2 text-right font-mono font-semibold">{formatPrice(item.total)}</td>
+                                                <td className="p-2 text-right font-mono">{formatPrice(item.unit_price, selectedCurrency)}</td>
+                                                <td className="p-2 text-right font-mono font-semibold">{formatPrice(item.total, selectedCurrency)}</td>
                                                 <td className="p-2 text-center">
                                                     <Button variant="ghost" size="icon" onClick={() => removeItem(item.id, item.type)}>
                                                         <Trash2 className="h-4 w-4 text-destructive"/>
@@ -235,8 +249,8 @@ export function QuoteBuilder({ products, services, clients }: { products: Produc
                     <div className="flex justify-end pt-4 border-t">
                         <div className="w-full max-w-sm space-y-2">
                             <div className="flex justify-between font-semibold text-lg">
-                                <span>TOTAL</span>
-                                <span className="font-mono">{formatPrice(total)}</span>
+                                <span>TOTAL ({selectedCurrency})</span>
+                                <span className="font-mono">{formatPrice(total, selectedCurrency)}</span>
                             </div>
                         </div>
                     </div>

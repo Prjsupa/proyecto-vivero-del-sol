@@ -1,6 +1,6 @@
 
 import { createClient } from "@/lib/supabase/server";
-import type { Product, Service, Client } from "@/lib/definitions";
+import type { Product, Service, Client, Currency } from "@/lib/definitions";
 import { QuoteBuilder } from "@/components/admin/quote-builder";
 
 async function getData() {
@@ -14,15 +14,19 @@ async function getData() {
     const { data: clients, error: clientsError } = await supabase.from('clients').select('*');
     if (clientsError) console.error('Error fetching clients:', clientsError);
 
+    const { data: currencies, error: currenciesError } = await supabase.from('currencies').select('*');
+    if (currenciesError) console.error('Error fetching currencies:', currenciesError);
+
     return {
         products: products || [],
         services: services || [],
         clients: clients || [],
+        currencies: currencies || [],
     }
 }
 
 export default async function QuotesPage() {
-    const { products, services, clients } = await getData();
+    const { products, services, clients, currencies } = await getData();
 
     return (
         <div className="space-y-6">
@@ -32,7 +36,7 @@ export default async function QuotesPage() {
                     <p className="text-muted-foreground">Crea presupuestos personalizados para tus clientes.</p>
                 </div>
             </div>
-            <QuoteBuilder products={products} services={services} clients={clients} />
+            <QuoteBuilder products={products} services={services} clients={clients} currencies={currencies} />
         </div>
     );
 }

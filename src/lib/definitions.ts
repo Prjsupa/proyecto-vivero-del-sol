@@ -176,6 +176,7 @@ export type Quote = {
   client_name: string;
   items: Json;
   total_amount: number;
+  currency: string;
   valid_until: string;
   status: 'draft' | 'sent' | 'accepted' | 'rejected';
 }

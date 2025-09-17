@@ -1,5 +1,4 @@
 
-
 'use server';
 
 import { z } from 'zod';
@@ -1287,6 +1286,7 @@ const quoteSchema = z.object({
     title: z.string().min(1, "El título es requerido."),
     client_id: z.coerce.number().min(1, "Debes seleccionar un cliente."),
     valid_until: z.string().optional(),
+    currency: z.string().min(1, "La moneda es requerida."),
     items: z.string().min(1, "Debes añadir al menos un artículo.").transform((val) => val ? JSON.parse(val) : [])
 });
 
@@ -1301,7 +1301,7 @@ export async function saveQuote(prevState: any, formData: FormData) {
         };
     }
     
-    const { title, client_id, valid_until, items } = validatedFields.data;
+    const { title, client_id, valid_until, currency, items } = validatedFields.data;
 
     if (!items || items.length === 0) {
         return { message: "No se puede guardar un presupuesto sin artículos." };
@@ -1320,6 +1320,7 @@ export async function saveQuote(prevState: any, formData: FormData) {
         client_name: `${clientData.name} ${clientData.last_name}`,
         items,
         total_amount,
+        currency,
         valid_until,
         status: 'draft' as const,
     };

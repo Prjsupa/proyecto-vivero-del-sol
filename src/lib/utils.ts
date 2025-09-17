@@ -6,17 +6,37 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatPrice(price: number) {
+export function formatPrice(price: number, currencyCode: string = 'ARS') {
   const options: Intl.NumberFormatOptions = {
     style: 'currency',
-    currency: 'ARS',
+    currency: currencyCode,
     minimumFractionDigits: price % 1 === 0 ? 0 : 2,
     maximumFractionDigits: 2,
   };
+  
+  // Intl.NumberFormat might not support all codes as symbols, especially ARS.
+  // We handle ARS manually for consistency.
+  if (currencyCode === 'ARS') {
+      const formatted = new Intl.NumberFormat('es-AR', {
+        style: 'decimal',
+        minimumFractionDigits: options.minimumFractionDigits,
+        maximumFractionDigits: options.maximumFractionDigits,
+      }).format(price);
+      return `$ ${formatted}`;
+  }
 
-  const formatted = new Intl.NumberFormat('es-AR', options).format(price);
-  // ARS is not a standard currency symbol, so we add it manually. The space is correct for AR locale.
-  return `ARS ${formatted.replace('ARS', '').trim()}`;
+  try {
+    // For other currencies, try to use the standard formatter.
+    return new Intl.NumberFormat(undefined, options).format(price);
+  } catch (e) {
+    // Fallback for unsupported currency codes
+    const formatted = new Intl.NumberFormat('es-AR', {
+        style: 'decimal',
+        minimumFractionDigits: options.minimumFractionDigits,
+        maximumFractionDigits: options.maximumFractionDigits,
+      }).format(price);
+    return `${currencyCode} ${formatted}`;
+  }
 }
 
 export function formatInputValue(value: string) {
