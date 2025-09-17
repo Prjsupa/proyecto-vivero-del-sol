@@ -2103,9 +2103,6 @@ const basePromotionSchema = z.object({
   name: z.string().min(3, "El nombre debe tener al menos 3 caracteres."),
   is_active: z.coerce.boolean(),
   discount_type: z.string().min(1, "Debes seleccionar un tipo de descuento."),
-  x_for_y_take: z.string().optional(),
-  x_for_y_pay: z.string().optional(),
-  progressive_tiers: z.string().transform((val) => val ? JSON.parse(val) : []).pipe(z.array(progressiveTierSchema).optional()),
   apply_to_type: z.string().min(1, "Debes seleccionar a qué aplica la promoción."),
   apply_to_ids: z.string().transform(val => val ? val.split(',') : []),
   can_be_combined: z.coerce.boolean(),
@@ -2113,26 +2110,29 @@ const basePromotionSchema = z.object({
   start_date: z.string().optional().nullable(),
   end_date: z.string().optional().nullable(),
   custom_tag: z.string().optional(),
+  x_for_y_take: z.string().optional(),
+  x_for_y_pay: z.string().optional(),
+  progressive_tiers: z.string().transform((val) => val ? JSON.parse(val) : []).pipe(z.array(progressiveTierSchema).optional()),
 });
 
 const promotionSchema = basePromotionSchema.superRefine((data, ctx) => {
     if (data.discount_type === 'x_for_y') {
-        if (!data.x_for_y_take || Number(data.x_for_y_take) <= 0) {
+        const take = Number(data.x_for_y_take);
+        const pay = Number(data.x_for_y_pay);
+        if (isNaN(take) || take <= 0) {
             ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Debe ser un número mayor a 0.", path: ['x_for_y_take'] });
         }
-         if (!data.x_for_y_pay || Number(data.x_for_y_pay) <= 0) {
+        if (isNaN(pay) || pay <= 0) {
             ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Debe ser un número mayor a 0.", path: ['x_for_y_pay'] });
+        }
+        if (!isNaN(take) && !isNaN(pay) && take <= pay) {
+             ctx.addIssue({ code: z.ZodIssueCode.custom, message: "La cantidad a llevar debe ser mayor a la cantidad a pagar.", path: ['x_for_y_take'] });
         }
     }
     if (data.discount_type === 'progressive_discount') {
         if (!data.progressive_tiers || data.progressive_tiers.length === 0) {
             ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Debe añadir al menos un tramo de descuento.", path: ['progressive_tiers'] });
         }
-        data.progressive_tiers.forEach(tier => {
-            if (tier.quantity <= 0 || tier.percentage <= 0) {
-                ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Los valores de descuento progresivo deben ser mayores a 0.", path: ['progressive_tiers'] });
-            }
-        })
     }
 });
 
@@ -2141,9 +2141,9 @@ export async function addPromotion(prevState: any, formData: FormData) {
     const validatedFields = promotionSchema.safeParse(Object.fromEntries(formData));
     
     if (!validatedFields.success) {
-        console.log(validatedFields.error.flatten());
+        console.log("Validation Errors:", validatedFields.error.flatten());
         return {
-            message: "Datos de formulario inválidos.",
+            message: "Datos de formulario inválidos. Revisa los campos marcados.",
             errors: validatedFields.error.flatten().fieldErrors,
         };
     }

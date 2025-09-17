@@ -139,7 +139,7 @@ export function AddPromotionForm({ products, services, productCategories, produc
                         Completa los detalles para configurar una nueva promoción.
                     </DialogDescription>
                 </DialogHeader>
-                <form action={formAction} ref={formRef} className="flex-grow overflow-hidden flex flex-col">
+                <form action={formAction} ref={formRef} className="flex-grow overflow-hidden flex flex-col gap-4">
                     <ScrollArea className="flex-grow pr-6 -mr-6">
                         <div className="space-y-4">
                             <input type="hidden" name="start_date" value={date?.from?.toISOString() ?? ''} />
@@ -163,7 +163,7 @@ export function AddPromotionForm({ products, services, productCategories, produc
                             <div className="space-y-4 border-b pb-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="discount_type">Tipo de descuento</Label>
-                                    <Select name="discount_type" onValueChange={setDiscountType}>
+                                    <Select name="discount_type" onValueChange={setDiscountType} value={discountType}>
                                         <SelectTrigger><SelectValue placeholder="Selecciona un tipo" /></SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="x_for_y">Llevá X y pagá Y (2x1, 3x2, etc.)</SelectItem>
@@ -222,7 +222,7 @@ export function AddPromotionForm({ products, services, productCategories, produc
                             <div className="space-y-4 border-b pb-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="apply_to_type">Aplicar a</Label>
-                                    <Select name="apply_to_type" onValueChange={handleApplyToTypeChange}>
+                                    <Select name="apply_to_type" onValueChange={handleApplyToTypeChange} value={applyToType}>
                                         <SelectTrigger><SelectValue placeholder="Selecciona dónde aplicar" /></SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="all_store">Toda la tienda</SelectItem>
@@ -269,7 +269,7 @@ export function AddPromotionForm({ products, services, productCategories, produc
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Límites de uso</Label>
-                                    <RadioGroup name="usage_limit_type" defaultValue="unlimited" onValueChange={setUsageLimitType}>
+                                    <RadioGroup name="usage_limit_type" defaultValue="unlimited" onValueChange={setUsageLimitType} value={usageLimitType}>
                                         <div className="flex items-center space-x-2">
                                             <RadioGroupItem value="unlimited" id="limit-unlimited" />
                                             <Label htmlFor="limit-unlimited">Ilimitada</Label>
@@ -309,7 +309,7 @@ export function AddPromotionForm({ products, services, productCategories, produc
                             </div>
                         </div>
                     </ScrollArea>
-                    <DialogFooter className="shrink-0 border-t pt-4 mt-4">
+                    <DialogFooter className="shrink-0 border-t pt-4 mt-auto">
                         <DialogClose asChild><Button variant="outline">Cancelar</Button></DialogClose>
                         <SubmitButton />
                     </DialogFooter>
