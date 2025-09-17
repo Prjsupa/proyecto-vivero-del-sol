@@ -33,13 +33,22 @@ export type Client = {
   updated_at: string;
   name: string;
   last_name: string;
-  email?: string | null;
-  cuit?: string | null;
+  razon_social?: string | null;
+  nombre_fantasia?: string | null;
+  iva_condition?: string | null;
+  document_type?: string | null;
+  document_number?: string | null;
+  opcion?: string | null;
+  price_list?: string | null;
+  province?: string | null;
   address?: string | null;
   city?: string | null;
-  province?: string | null;
+  postal_code?: string | null;
   phone?: string | null;
-  iva_condition?: string | null;
+  mobile_phone?: string | null;
+  email?: string | null;
+  default_invoice_type?: 'A' | 'B' | 'C' | null;
+  birth_date?: string | null;
 }
 
 export type Seller = {

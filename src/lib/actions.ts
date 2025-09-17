@@ -471,14 +471,32 @@ export async function addUser(prevState: any, formData: FormData) {
 }
 
 
-const addClientSchema = z.object({
+const clientSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido.'),
   last_name: z.string().min(1, 'El apellido es requerido.'),
+  razon_social: z.string().optional().nullable(),
+  nombre_fantasia: z.string().optional().nullable(),
+  iva_condition: z.string().optional().nullable(),
+  document_type: z.string().optional().nullable(),
+  document_number: z.string().optional().nullable(),
+  opcion: z.string().optional().nullable(),
+  price_list: z.string().optional().nullable(),
+  province: z.string().optional().nullable(),
+  address: z.string().optional().nullable(),
+  city: z.string().optional().nullable(),
+  postal_code: z.string().optional().nullable(),
+  phone: z.string().optional().nullable(),
+  mobile_phone: z.string().optional().nullable(),
   email: z.string().email('El email no es válido.').optional().nullable(),
+  default_invoice_type: z.enum(['A', 'B', 'C']).optional().nullable(),
+  birth_date: z.preprocess((arg) => {
+    if (typeof arg == "string" || arg instanceof Date) return new Date(arg);
+  }, z.date().optional().nullable()),
 });
 
+
 export async function addClient(prevState: any, formData: FormData) {
-    const validatedFields = addClientSchema.safeParse(Object.fromEntries(formData.entries()));
+    const validatedFields = clientSchema.safeParse(Object.fromEntries(formData.entries()));
 
     if (!validatedFields.success) {
         return {
@@ -492,22 +510,22 @@ export async function addClient(prevState: any, formData: FormData) {
     if (!user) {
         return { message: "No autorizado. Debes ser un administrador." }
     }
-
-    const { name, last_name, email } = validatedFields.data;
     
     const { error } = await supabase
         .from('clients')
-        .insert({ name, last_name, email, updated_at: new Date().toISOString() });
-    
+        .insert({ ...validatedFields.data, updated_at: new Date().toISOString() });
 
     if (error) {
+        if(error.code === '23505') { // Unique constraint on document_number
+            return { message: `Error: El número de documento '${validatedFields.data.document_number}' ya existe.` };
+        }
         return { message: `Error creando el cliente: ${error.message}` };
     }
 
     revalidatePath('/admin/customers');
     return {
         message: 'success',
-        data: `Cliente ${name} ${last_name} creado exitosamente.`,
+        data: `Cliente ${validatedFields.data.name} ${validatedFields.data.last_name} creado exitosamente.`,
     };
 }
 
@@ -624,7 +642,7 @@ export async function deleteSeller(sellerId: number) {
 
 
 
-const updateClientSchema = addClientSchema.extend({
+const updateClientSchema = clientSchema.extend({
     id: z.coerce.number(),
 });
 
@@ -644,14 +662,17 @@ export async function updateClient(prevState: any, formData: FormData) {
         return { message: "No autorizado. Debes ser un administrador." }
     }
 
-    const { id, name, last_name, email } = validatedFields.data;
+    const { id, ...clientData } = validatedFields.data;
     
     const { error } = await supabase
         .from('clients')
-        .update({ name, last_name, email, updated_at: new Date().toISOString() })
+        .update({ ...clientData, updated_at: new Date().toISOString() })
         .eq('id', id);
 
     if (error) {
+        if(error.code === '23505') { // Unique constraint on document_number
+            return { message: `Error: El número de documento '${clientData.document_number}' ya existe.` };
+        }
         return { message: `Error al actualizar el cliente: ${error.message}` };
     }
 
@@ -659,7 +680,7 @@ export async function updateClient(prevState: any, formData: FormData) {
     revalidatePath(`/admin/customers/${id}`);
     return {
         message: 'success',
-        data: `Cliente ${name} ${last_name} actualizado exitosamente.`,
+        data: `Cliente ${clientData.name} ${clientData.last_name} actualizado exitosamente.`,
     };
 }
 
