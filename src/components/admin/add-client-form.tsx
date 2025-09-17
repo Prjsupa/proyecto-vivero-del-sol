@@ -9,12 +9,13 @@ import { Label } from '@/components/ui/label';
 import { AlertCircle, PlusCircle, Loader2 } from 'lucide-react';
 import { addClient } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Calendar } from '../ui/calendar';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 function SubmitButton() {
     const { pending } = useFormStatus();
@@ -37,6 +38,7 @@ function FieldError({ errors }: { errors?: string[] }) {
 
 const provinces = [
     "Buenos Aires",
+    "Ciudad Autónoma de Buenos Aires",
     "Catamarca",
     "Chaco",
     "Chubut",
@@ -68,6 +70,7 @@ export function AddClientForm() {
     const formRef = useRef<HTMLFormElement>(null);
     const { toast } = useToast();
     const [birthDate, setBirthDate] = useState<Date | undefined>();
+    const [activeTab, setActiveTab] = useState('personal');
 
 
     useEffect(() => {
@@ -79,6 +82,7 @@ export function AddClientForm() {
             setIsDialogOpen(false);
             formRef.current?.reset();
             setBirthDate(undefined);
+            setActiveTab('personal');
         } else if (state?.message && state.message !== 'success' && state.message !== '') {
              toast({
                 title: 'Error',
@@ -92,6 +96,7 @@ export function AddClientForm() {
         if (!open) {
             formRef.current?.reset();
             setBirthDate(undefined);
+            setActiveTab('personal');
         }
         setIsDialogOpen(open);
     }
@@ -112,14 +117,14 @@ export function AddClientForm() {
                     </DialogDescription>
                 </DialogHeader>
                 <form action={formAction} ref={formRef} className="flex-grow overflow-hidden">
-                    <Tabs defaultValue="personal" className="flex flex-col h-full">
+                    <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col h-full">
                         <TabsList className="grid w-full grid-cols-3">
                             <TabsTrigger value="personal">Datos Personales</TabsTrigger>
                             <TabsTrigger value="fiscal">Datos Fiscales</TabsTrigger>
                             <TabsTrigger value="contact">Contacto y Dirección</TabsTrigger>
                         </TabsList>
-                        <div className="flex-grow overflow-y-auto p-1">
-                            <TabsContent value="personal" className="space-y-4 pt-4">
+                        <div className="flex-grow overflow-y-auto p-1 pt-4 space-y-4">
+                            <div className={cn("space-y-4", activeTab !== 'personal' && 'hidden')}>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="name">Nombre</Label>
@@ -163,8 +168,8 @@ export function AddClientForm() {
                                     </Popover>
                                      <input type="hidden" name="birth_date" value={birthDate?.toISOString()} />
                                 </div>
-                            </TabsContent>
-                            <TabsContent value="fiscal" className="space-y-4 pt-4">
+                            </div>
+                            <div className={cn("space-y-4", activeTab !== 'fiscal' && 'hidden')}>
                                  <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="document_type">Tipo de Documento</Label>
@@ -217,8 +222,8 @@ export function AddClientForm() {
                                         <Input id="price_list" name="price_list" />
                                     </div>
                                  </div>
-                            </TabsContent>
-                            <TabsContent value="contact" className="space-y-4 pt-4">
+                            </div>
+                            <div className={cn("space-y-4", activeTab !== 'contact' && 'hidden')}>
                                <div className="space-y-2">
                                     <Label htmlFor="address">Dirección</Label>
                                     <Input id="address" name="address" />
@@ -257,7 +262,7 @@ export function AddClientForm() {
                                     <Input id="email" name="email" type="email" />
                                     <FieldError errors={state.errors?.email} />
                                 </div>
-                            </TabsContent>
+                            </div>
                         </div>
                     </Tabs>
                     <DialogFooter className="mt-4 pt-4 border-t shrink-0">

@@ -9,11 +9,12 @@ import { AlertCircle, Loader2, Calendar as CalendarIcon } from 'lucide-react';
 import { updateClient } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
 import type { Client } from '@/lib/definitions';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Popover, PopoverTrigger, PopoverContent } from '../ui/popover';
 import { Calendar } from '../ui/calendar';
 import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 function SubmitButton() {
     const { pending } = useFormStatus();
@@ -36,6 +37,7 @@ function FieldError({ errors }: { errors?: string[] }) {
 
 const provinces = [
     "Buenos Aires",
+    "Ciudad Autónoma de Buenos Aires",
     "Catamarca",
     "Chaco",
     "Chubut",
@@ -66,6 +68,7 @@ export function EditClientForm({ client, setOpen }: { client: Client, setOpen: (
     const formRef = useRef<HTMLFormElement>(null);
     const { toast } = useToast();
     const [birthDate, setBirthDate] = useState<Date | undefined>(client.birth_date ? new Date(client.birth_date) : undefined);
+    const [activeTab, setActiveTab] = useState('personal');
 
     useEffect(() => {
         if (state?.message === 'success') {
@@ -93,14 +96,14 @@ export function EditClientForm({ client, setOpen }: { client: Client, setOpen: (
             </DialogHeader>
             <form action={formAction} ref={formRef} className="flex-grow overflow-hidden">
                 <input type="hidden" name="id" value={client.id} />
-                <Tabs defaultValue="personal" className="flex flex-col h-full">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col h-full">
                     <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value="personal">Datos Personales</TabsTrigger>
                         <TabsTrigger value="fiscal">Datos Fiscales</TabsTrigger>
                         <TabsTrigger value="contact">Contacto y Dirección</TabsTrigger>
                     </TabsList>
-                    <div className="flex-grow overflow-y-auto p-1">
-                        <TabsContent value="personal" className="space-y-4 pt-4">
+                    <div className="flex-grow overflow-y-auto p-1 pt-4 space-y-4">
+                        <div className={cn("space-y-4", activeTab !== 'personal' && 'hidden')}>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="name">Nombre</Label>
@@ -144,8 +147,8 @@ export function EditClientForm({ client, setOpen }: { client: Client, setOpen: (
                                 </Popover>
                                 <input type="hidden" name="birth_date" value={birthDate?.toISOString()} />
                             </div>
-                        </TabsContent>
-                        <TabsContent value="fiscal" className="space-y-4 pt-4">
+                        </div>
+                        <div className={cn("space-y-4", activeTab !== 'fiscal' && 'hidden')}>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="document_type">Tipo de Documento</Label>
@@ -198,8 +201,8 @@ export function EditClientForm({ client, setOpen }: { client: Client, setOpen: (
                                     <Input id="price_list" name="price_list" defaultValue={client.price_list || ''} />
                                 </div>
                             </div>
-                        </TabsContent>
-                        <TabsContent value="contact" className="space-y-4 pt-4">
+                        </div>
+                        <div className={cn("space-y-4", activeTab !== 'contact' && 'hidden')}>
                             <div className="space-y-2">
                                 <Label htmlFor="address">Dirección</Label>
                                 <Input id="address" name="address" defaultValue={client.address || ''} />
@@ -238,7 +241,7 @@ export function EditClientForm({ client, setOpen }: { client: Client, setOpen: (
                                 <Input id="email" name="email" type="email" defaultValue={client.email || ''} />
                                 <FieldError errors={state.errors?.email} />
                             </div>
-                        </TabsContent>
+                        </div>
                     </div>
                 </Tabs>
                 <DialogFooter className="mt-4 pt-4 border-t shrink-0">
