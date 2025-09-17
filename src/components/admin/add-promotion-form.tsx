@@ -1,4 +1,3 @@
-
 'use client';
 import { useActionState, useEffect, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
@@ -115,7 +114,7 @@ export function AddPromotionForm({ products, services, productCategories, produc
 
     const handleTierChange = (index: number, field: keyof DiscountTier, value: string) => {
         const newTiers = [...progressiveTiers];
-        newTiers[index][field] = value;
+        newTiers[index][field] = value ?? ''; // Ensure value is never undefined
         setProgressiveTiers(newTiers);
     };
     
