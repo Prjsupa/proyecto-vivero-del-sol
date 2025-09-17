@@ -90,7 +90,7 @@ export type Promotion = {
     name: string;
     is_active: boolean;
     discount_type: 'x_for_y' | 'price_discount' | 'cross_selling' | 'progressive_discount';
-    discount_value: Json;
+    discount_value: jsonb;
     apply_to_type: 'all_store' | 'all_products' | 'all_services' | 'product_categories' | 'product_subcategories' | 'service_categories' | 'products' | 'services';
     apply_to_ids?: string[] | null;
     can_be_combined: boolean;
@@ -134,3 +134,11 @@ export type Json =
   | null
   | { [key: string]: Json | undefined }
   | Json[]
+
+export type jsonb =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: jsonb | undefined }
+  | jsonb[]

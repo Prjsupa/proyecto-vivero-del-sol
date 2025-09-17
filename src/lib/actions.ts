@@ -1,3 +1,4 @@
+
 'use server';
 
 import { z } from 'zod';
@@ -2101,11 +2102,11 @@ const progressiveTierSchema = z.object({
 const basePromotionSchema = z.object({
   name: z.string().min(3, "El nombre debe tener al menos 3 caracteres."),
   is_active: z.coerce.boolean(),
-  discount_type: z.enum(['x_for_y', 'price_discount', 'cross_selling', 'progressive_discount'], { required_error: "Debes seleccionar un tipo de descuento." }),
+  discount_type: z.string().min(1, "Debes seleccionar un tipo de descuento."),
   x_for_y_take: z.string().optional(),
   x_for_y_pay: z.string().optional(),
   progressive_tiers: z.string().transform((val) => val ? JSON.parse(val) : []).pipe(z.array(progressiveTierSchema).optional()),
-  apply_to_type: z.enum(['all_store', 'all_products', 'all_services', 'product_categories', 'product_subcategories', 'service_categories', 'products', 'services'], { required_error: "Debes seleccionar a qué aplica la promoción." }),
+  apply_to_type: z.string().min(1, "Debes seleccionar a qué aplica la promoción."),
   apply_to_ids: z.string().transform(val => val ? val.split(',') : []),
   can_be_combined: z.coerce.boolean(),
   usage_limit_type: z.enum(['unlimited', 'period']),
