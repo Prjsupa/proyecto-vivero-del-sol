@@ -293,7 +293,7 @@ export function AddPromotionForm({ products, services, productCategories, produc
                                 </Button>
                                 </PopoverTrigger>
                                 <PopoverContent className="w-auto p-0" align="start">
-                                    <Calendar mode="range" selected={date} onSelect={setDate} initialFocus/>
+                                    <Calendar mode="range" selected={date || undefined} onSelect={setDate} initialFocus/>
                                 </PopoverContent>
                             </Popover>
                         )}
