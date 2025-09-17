@@ -15,7 +15,7 @@ async function getData() {
 
     const { data: services, error: servicesError } = await supabase
         .from('services')
-        .select('*
+        .select('*')
         .order('name', { ascending: true });
     
     if (servicesError) console.error('Error fetching services:', servicesError);
