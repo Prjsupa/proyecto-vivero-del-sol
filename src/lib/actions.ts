@@ -472,25 +472,23 @@ export async function addUser(prevState: any, formData: FormData) {
 }
 
 
-const optionalString = z.string().optional().transform(val => val === '' ? null : val).nullable();
-
 const clientSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido.'),
   last_name: z.string().min(1, 'El apellido es requerido.'),
-  razon_social: optionalString,
-  nombre_fantasia: optionalString,
-  iva_condition: optionalString,
-  document_type: optionalString,
-  document_number: optionalString,
-  price_list: optionalString,
-  province: optionalString,
-  address: optionalString,
-  city: optionalString,
-  postal_code: optionalString,
-  phone: optionalString,
-  mobile_phone: optionalString,
-  email: z.string().email('El email no es válido.').or(z.literal('')).optional().transform(val => val === '' ? null : val).nullable(),
-  default_invoice_type: z.enum(['A', 'B', 'C']).or(z.literal('')).optional().transform(val => val === '' ? null : val).nullable(),
+  razon_social: z.string().optional(),
+  nombre_fantasia: z.string().optional(),
+  iva_condition: z.string().optional(),
+  document_type: z.string().optional(),
+  document_number: z.string().optional(),
+  price_list: z.string().optional(),
+  province: z.string().optional(),
+  address: z.string().optional(),
+  city: z.string().optional(),
+  postal_code: z.string().optional(),
+  phone: z.string().optional(),
+  mobile_phone: z.string().optional(),
+  email: z.string().email('El email no es válido.').or(z.literal('')).optional(),
+  default_invoice_type: z.enum(['A', 'B', 'C']).or(z.literal('')).optional(),
   birth_date: z.preprocess((arg) => {
     if (typeof arg == "string" || arg instanceof Date) return new Date(arg);
     return undefined;
@@ -514,9 +512,14 @@ export async function addClient(prevState: any, formData: FormData) {
         return { message: "No autorizado. Debes ser un administrador." }
     }
     
+    // Transform empty strings to null for optional fields
+    const clientData = Object.fromEntries(
+        Object.entries(validatedFields.data).map(([key, value]) => [key, value === '' ? null : value])
+    );
+
     const { error } = await supabase
         .from('clients')
-        .insert({ ...validatedFields.data, updated_at: new Date().toISOString() });
+        .insert({ ...clientData, updated_at: new Date().toISOString() });
 
     if (error) {
         if(error.code === '23505') { // Unique constraint on document_number
@@ -665,7 +668,12 @@ export async function updateClient(prevState: any, formData: FormData) {
         return { message: "No autorizado. Debes ser un administrador." }
     }
 
-    const { id, ...clientData } = validatedFields.data;
+    const { id, ...clientFormData } = validatedFields.data;
+
+    // Transform empty strings to null for optional fields
+    const clientData = Object.fromEntries(
+        Object.entries(clientFormData).map(([key, value]) => [key, value === '' ? null : value])
+    );
     
     const { error } = await supabase
         .from('clients')
@@ -2696,5 +2704,6 @@ export async function updateCompanyData(prevState: any, formData: FormData) {
         data: `¡Datos de la empresa actualizados exitosamente!`,
     };
 }
+
 
 
