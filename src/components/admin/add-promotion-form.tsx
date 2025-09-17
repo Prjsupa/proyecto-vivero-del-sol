@@ -137,8 +137,8 @@ export function AddPromotionForm({ products, services, productCategories, produc
                     </DialogDescription>
                 </DialogHeader>
                 <form action={formAction} ref={formRef} className="flex-grow grid gap-4 py-4 overflow-y-auto pr-4">
-                     <input type="hidden" name="start_date" value={date?.from?.toISOString()} />
-                     <input type="hidden" name="end_date" value={date?.to?.toISOString()} />
+                     <input type="hidden" name="start_date" value={date?.from?.toISOString() ?? ''} />
+                     <input type="hidden" name="end_date" value={date?.to?.toISOString() ?? ''} />
                      <input type="hidden" name="progressive_tiers" value={JSON.stringify(progressiveTiers)} />
                      <input type="hidden" name="apply_to_ids" value={Array.from(selectedApplyToIds).join(',')} />
                     

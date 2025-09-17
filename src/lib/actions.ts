@@ -2104,15 +2104,15 @@ const promotionSchema = z.object({
   name: z.string().min(3, "El nombre debe tener al menos 3 caracteres."),
   is_active: z.coerce.boolean(),
   discount_type: z.enum(['x_for_y', 'price_discount', 'cross_selling', 'progressive_discount']),
-  x_for_y_take: z.coerce.number().optional(),
-  x_for_y_pay: z.coerce.number().optional(),
-  progressive_tiers: z.string().transform((val) => val ? JSON.parse(val) : []).pipe(z.array(progressiveTierSchema)).optional(),
+  x_for_y_take: z.coerce.number({invalid_type_error: "Debe ser un número"}).optional(),
+  x_for_y_pay: z.coerce.number({invalid_type_error: "Debe ser un número"}).optional(),
+  progressive_tiers: z.string().transform((val) => val ? JSON.parse(val) : []).pipe(z.array(progressiveTierSchema).optional()),
   apply_to_type: z.enum(['all_store', 'all_products', 'all_services', 'product_categories', 'product_subcategories', 'service_categories', 'products', 'services']),
   apply_to_ids: z.string().transform(val => val ? val.split(',') : []),
   can_be_combined: z.coerce.boolean(),
   usage_limit_type: z.enum(['unlimited', 'period']),
-  start_date: z.string().optional(),
-  end_date: z.string().optional(),
+  start_date: z.string().optional().nullable(),
+  end_date: z.string().optional().nullable(),
   custom_tag: z.string().optional(),
 });
 
@@ -2120,6 +2120,7 @@ export async function addPromotion(prevState: any, formData: FormData) {
     const validatedFields = promotionSchema.safeParse(Object.fromEntries(formData));
     
     if (!validatedFields.success) {
+        console.log(validatedFields.error.flatten());
         return {
             message: "Datos de formulario inválidos.",
             errors: validatedFields.error.flatten().fieldErrors,
@@ -2158,8 +2159,8 @@ export async function addPromotion(prevState: any, formData: FormData) {
         apply_to_ids: apply_to_ids && apply_to_ids.length > 0 ? apply_to_ids : null,
         can_be_combined,
         usage_limit_type,
-        start_date: usage_limit_type === 'period' ? start_date : null,
-        end_date: usage_limit_type === 'period' ? end_date : null,
+        start_date: (usage_limit_type === 'period' && start_date) ? start_date : null,
+        end_date: (usage_limit_type === 'period' && end_date) ? end_date : null,
         custom_tag
     };
     
