@@ -54,7 +54,7 @@ export function AddPromotionForm({ products, services, productCategories, produc
     const [applyToType, setApplyToType] = useState<string>('');
     const [selectedApplyToIds, setSelectedApplyToIds] = useState<Set<string>>(new Set());
     const [usageLimitType, setUsageLimitType] = useState<string>('unlimited');
-    const [date, setDate] = useState<DateRange | undefined>();
+    const [date, setDate] = useState<DateRange | undefined>({});
     const [progressiveTiers, setProgressiveTiers] = useState<DiscountTier[]>([{ quantity: '', percentage: '' }]);
     const [xForYTake, setXForYTake] = useState('');
     const [xForYPay, setXForYPay] = useState('');
