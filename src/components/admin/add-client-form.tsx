@@ -35,6 +35,33 @@ function FieldError({ errors }: { errors?: string[] }) {
     )
 }
 
+const provinces = [
+    "Buenos Aires",
+    "Catamarca",
+    "Chaco",
+    "Chubut",
+    "Córdoba",
+    "Corrientes",
+    "Entre Ríos",
+    "Formosa",
+    "Jujuy",
+    "La Pampa",
+    "La Rioja",
+    "Mendoza",
+    "Misiones",
+    "Neuquén",
+    "Río Negro",
+    "Salta",
+    "San Juan",
+    "San Luis",
+    "Santa Cruz",
+    "Santa Fe",
+    "Santiago del Estero",
+    "Tierra del Fuego, Antártida e Islas del Atlántico Sur",
+    "Tucumán"
+];
+
+
 export function AddClientForm() {
     const [state, formAction] = useActionState(addClient, { message: '' });
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -203,7 +230,12 @@ export function AddClientForm() {
                                     </div>
                                      <div className="space-y-2">
                                         <Label htmlFor="province">Provincia</Label>
-                                        <Input id="province" name="province" />
+                                        <Select name="province">
+                                            <SelectTrigger><SelectValue placeholder="Seleccionar provincia..." /></SelectTrigger>
+                                            <SelectContent>
+                                                {provinces.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                                            </SelectContent>
+                                        </Select>
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="postal_code">Código Postal</Label>
