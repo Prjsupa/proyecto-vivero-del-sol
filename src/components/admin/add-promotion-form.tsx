@@ -145,7 +145,7 @@ export function AddPromotionForm({ products, services, productCategories, produc
                      <input type="hidden" name="progressive_tiers" value={JSON.stringify(progressiveTiers)} />
                      <input type="hidden" name="apply_to_ids" value={Array.from(selectedApplyToIds).join(',')} />
                     
-                    <ScrollArea className="flex-grow pr-4 -mr-4">
+                    <ScrollArea className="flex-grow pr-6 -mr-6">
                         <div className="space-y-4">
                             {/* General Info */}
                             <div className="space-y-4 border-b pb-4">
@@ -309,7 +309,7 @@ export function AddPromotionForm({ products, services, productCategories, produc
                             </div>
                         </div>
                     </ScrollArea>
-                    <DialogFooter className="mt-auto shrink-0 border-t pt-4">
+                    <DialogFooter className="shrink-0 border-t pt-4">
                         <DialogClose asChild><Button variant="outline">Cancelar</Button></DialogClose>
                         <SubmitButton />
                     </DialogFooter>
@@ -401,3 +401,5 @@ function ItemSelector({ items, selectedIds, onToggle, placeholder }: { items: (P
         </div>
     );
 }
+
+    
