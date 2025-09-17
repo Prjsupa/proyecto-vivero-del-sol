@@ -1,4 +1,3 @@
-
 'use server';
 
 import { z } from 'zod';
@@ -479,7 +478,6 @@ const clientSchema = z.object({
   iva_condition: z.string().optional().nullable(),
   document_type: z.string().optional().nullable(),
   document_number: z.string().optional().nullable(),
-  opcion: z.string().optional().nullable(),
   price_list: z.string().optional().nullable(),
   province: z.string().optional().nullable(),
   address: z.string().optional().nullable(),

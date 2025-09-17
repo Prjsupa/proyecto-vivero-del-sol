@@ -1,5 +1,4 @@
 
-
 export type Profile = {
   id: string;
   created_at: string;
@@ -38,7 +37,6 @@ export type Client = {
   iva_condition?: string | null;
   document_type?: string | null;
   document_number?: string | null;
-  opcion?: string | null;
   price_list?: string | null;
   province?: string | null;
   address?: string | null;

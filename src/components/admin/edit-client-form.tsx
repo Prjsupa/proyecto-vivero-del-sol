@@ -165,11 +165,7 @@ export function EditClientForm({ client, setOpen }: { client: Client, setOpen: (
                                     </SelectContent>
                                 </Select>
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="opcion">Opción (Opcional)</Label>
-                                    <Input id="opcion" name="opcion" defaultValue={client.opcion || ''} />
-                                </div>
+                            <div className="grid grid-cols-1 gap-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="price_list">Listado de Precios (Opcional)</Label>
                                     <Input id="price_list" name="price_list" defaultValue={client.price_list || ''} />
