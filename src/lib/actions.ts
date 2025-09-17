@@ -488,10 +488,10 @@ const clientSchema = z.object({
   phone: z.string().optional(),
   mobile_phone: z.string().optional(),
   email: z.string().email('El email no es válido.').or(z.literal('')).optional(),
-  default_invoice_type: z.enum(['A', 'B', 'C']).optional().nullable(),
+  default_invoice_type: z.enum(['A', 'B', 'C', '']).optional().transform(val => val === '' ? null : val),
   birth_date: z.preprocess((arg) => {
     if (typeof arg == "string" || arg instanceof Date) return new Date(arg);
-  }, z.date().optional().nullable()),
+  }, z.date().optional()),
 });
 
 
