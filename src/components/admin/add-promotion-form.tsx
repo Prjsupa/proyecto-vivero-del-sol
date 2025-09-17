@@ -21,6 +21,7 @@ import { format } from "date-fns"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '../ui/command';
 import { Badge } from '../ui/badge';
 import type { DateRange } from 'react-day-picker';
+import { ScrollArea } from '../ui/scroll-area';
 
 function SubmitButton() {
     const { pending } = useFormStatus();
@@ -49,7 +50,8 @@ export function AddPromotionForm({ products, services, productCategories, produc
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const formRef = useRef<HTMLFormElement>(null);
     const { toast } = useToast();
-
+    
+    const [name, setName] = useState('');
     const [discountType, setDiscountType] = useState<string>('');
     const [applyToType, setApplyToType] = useState<string>('');
     const [selectedApplyToIds, setSelectedApplyToIds] = useState<Set<string>>(new Set());
@@ -66,13 +68,14 @@ export function AddPromotionForm({ products, services, productCategories, produc
             toast({ title: '¡Éxito!', description: state.data });
             setIsDialogOpen(false);
             resetFormState();
-        } else if (state?.message && state.message !== 'success') {
+        } else if (state?.message && state.message !== 'success' && state.message !== '') {
              toast({ title: 'Error', description: state.message, variant: 'destructive' });
         }
     }, [state, toast]);
 
     const resetFormState = () => {
         formRef.current?.reset();
+        setName('');
         setDiscountType('');
         setApplyToType('');
         setSelectedApplyToIds(new Set());
@@ -130,185 +133,189 @@ export function AddPromotionForm({ products, services, productCategories, produc
                 </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-3xl max-h-[90vh] flex flex-col">
-                <DialogHeader>
+                <DialogHeader className="shrink-0">
                     <DialogTitle>Crear Nueva Promoción</DialogTitle>
                     <DialogDescription>
                         Completa los detalles para configurar una nueva promoción.
                     </DialogDescription>
                 </DialogHeader>
-                <form action={formAction} ref={formRef} className="flex-grow grid gap-4 py-4 overflow-y-auto pr-4">
+                <form action={formAction} ref={formRef} className="flex-grow flex flex-col gap-4 overflow-hidden">
                      <input type="hidden" name="start_date" value={date?.from?.toISOString() ?? ''} />
                      <input type="hidden" name="end_date" value={date?.to?.toISOString() ?? ''} />
                      <input type="hidden" name="progressive_tiers" value={JSON.stringify(progressiveTiers)} />
                      <input type="hidden" name="apply_to_ids" value={Array.from(selectedApplyToIds).join(',')} />
                     
-                    {/* General Info */}
-                    <div className="space-y-4 border-b pb-4">
-                         <div className="space-y-2">
-                            <Label htmlFor="name">Nombre de la Promoción</Label>
-                            <Input id="name" name="name" placeholder="Ej: Promo Día de la Madre"/>
-                        </div>
-                         <div className="flex items-center space-x-2">
-                            <Switch id="is_active" name="is_active" defaultChecked />
-                            <Label htmlFor="is_active">Activa</Label>
-                        </div>
-                    </div>
-
-                    {/* Discount Type */}
-                    <div className="space-y-4 border-b pb-4">
-                         <div className="space-y-2">
-                            <Label htmlFor="discount_type">Tipo de descuento</Label>
-                            <Select name="discount_type" onValueChange={setDiscountType}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Selecciona un tipo" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="x_for_y">Llevá X y pagá Y (2x1, 3x2, etc.)</SelectItem>
-                                    <SelectItem value="progressive_discount">Descuento progresivo por cantidad</SelectItem>
-                                    <SelectItem value="price_discount" disabled>Descuento sobre precios</SelectItem>
-                                    <SelectItem value="cross_selling" disabled>Cross selling</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        {discountType === 'x_for_y' && (
-                            <div className="grid grid-cols-2 gap-4 p-4 border rounded-md bg-muted/50">
+                    <ScrollArea className="flex-grow pr-4 -mr-4">
+                        <div className="space-y-4">
+                            {/* General Info */}
+                            <div className="space-y-4 border-b pb-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="x_for_y_take">Llevando</Label>
-                                    <Input id="x_for_y_take" name="x_for_y_take" type="number" min="1" placeholder="Ej: 3" value={xForYTake} onChange={(e) => setXForYTake(e.target.value)} />
+                                    <Label htmlFor="name">Nombre de la Promoción</Label>
+                                    <Input id="name" name="name" placeholder="Ej: Promo Día de la Madre" value={name} onChange={e => setName(e.target.value)} />
                                 </div>
-                                 <div className="space-y-2">
-                                    <Label htmlFor="x_for_y_pay">Pagás</Label>
-                                    <Input id="x_for_y_pay" name="x_for_y_pay" type="number" min="1" placeholder="Ej: 2" value={xForYPay} onChange={(e) => setXForYPay(e.target.value)} />
+                                <div className="flex items-center space-x-2">
+                                    <Switch id="is_active" name="is_active" defaultChecked />
+                                    <Label htmlFor="is_active">Activa</Label>
                                 </div>
                             </div>
-                        )}
 
-                        {discountType === 'progressive_discount' && (
-                            <div className="p-4 border rounded-md bg-muted/50 space-y-4">
-                                <div className="grid grid-cols-[1fr_1fr_auto] gap-x-4 gap-y-2 text-sm text-muted-foreground">
-                                    <p>Descuento</p>
-                                    <p>Al comprar por lo menos</p>
+                            {/* Discount Type */}
+                            <div className="space-y-4 border-b pb-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="discount_type">Tipo de descuento</Label>
+                                    <Select name="discount_type" onValueChange={setDiscountType}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Selecciona un tipo" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="x_for_y">Llevá X y pagá Y (2x1, 3x2, etc.)</SelectItem>
+                                            <SelectItem value="progressive_discount">Descuento progresivo por cantidad</SelectItem>
+                                            <SelectItem value="price_discount" disabled>Descuento sobre precios</SelectItem>
+                                            <SelectItem value="cross_selling" disabled>Cross selling</SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
-                                {progressiveTiers.map((tier, index) => (
-                                    <div key={index} className="grid grid-cols-[1fr_1fr_auto] items-center gap-2">
-                                        <div className="flex items-center w-full">
-                                            <Input id={`tier-percentage-${index}`} type="number" min="0" max="100" placeholder="10" value={tier.percentage} onChange={(e) => handleTierChange(index, 'percentage', e.target.value)} className="rounded-r-none" />
-                                            <div className="bg-gray-200 border border-l-0 border-input rounded-r-md px-3 py-2 text-sm text-muted-foreground">%</div>
-                                        </div>
 
-                                        <div className="flex items-center w-full">
-                                            <Input id={`tier-quantity-${index}`} type="number" min="1" placeholder="2" value={tier.quantity} onChange={(e) => handleTierChange(index, 'quantity', e.target.value)} className="rounded-r-none" />
-                                             <div className="bg-gray-200 border border-l-0 border-input rounded-r-md px-3 py-2 text-sm text-muted-foreground whitespace-nowrap">Productos</div>
+                                {discountType === 'x_for_y' && (
+                                    <div className="grid grid-cols-2 gap-4 p-4 border rounded-md bg-muted/50">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="x_for_y_take">Llevando</Label>
+                                            <Input id="x_for_y_take" name="x_for_y_take" type="number" min="1" placeholder="Ej: 3" value={xForYTake} onChange={(e) => setXForYTake(e.target.value)} />
                                         </div>
-                                        
-                                        <Button variant="ghost" size="icon" onClick={() => removeTier(index)} type="button" className="shrink-0">
-                                            <Trash2 className="h-4 w-4 text-destructive" />
+                                        <div className="space-y-2">
+                                            <Label htmlFor="x_for_y_pay">Pagás</Label>
+                                            <Input id="x_for_y_pay" name="x_for_y_pay" type="number" min="1" placeholder="Ej: 2" value={xForYPay} onChange={(e) => setXForYPay(e.target.value)} />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {discountType === 'progressive_discount' && (
+                                    <div className="p-4 border rounded-md bg-muted/50 space-y-4">
+                                        <div className="grid grid-cols-[1fr_1fr_auto] gap-x-4 gap-y-2 text-sm text-muted-foreground">
+                                            <p>Descuento</p>
+                                            <p>Al comprar por lo menos</p>
+                                        </div>
+                                        {progressiveTiers.map((tier, index) => (
+                                            <div key={index} className="grid grid-cols-[1fr_1fr_auto] items-center gap-2">
+                                                <div className="flex items-center w-full">
+                                                    <Input id={`tier-percentage-${index}`} type="number" min="0" max="100" placeholder="10" value={tier.percentage} onChange={(e) => handleTierChange(index, 'percentage', e.target.value)} className="rounded-r-none" />
+                                                    <div className="bg-gray-200 border border-l-0 border-input rounded-r-md px-3 py-2 text-sm text-muted-foreground">%</div>
+                                                </div>
+
+                                                <div className="flex items-center w-full">
+                                                    <Input id={`tier-quantity-${index}`} type="number" min="1" placeholder="2" value={tier.quantity} onChange={(e) => handleTierChange(index, 'quantity', e.target.value)} className="rounded-r-none" />
+                                                    <div className="bg-gray-200 border border-l-0 border-input rounded-r-md px-3 py-2 text-sm text-muted-foreground whitespace-nowrap">Productos</div>
+                                                </div>
+                                                
+                                                <Button variant="ghost" size="icon" onClick={() => removeTier(index)} type="button" className="shrink-0">
+                                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                                </Button>
+                                            </div>
+                                        ))}
+                                        <Button variant="outline" size="sm" onClick={addTier} type="button">
+                                            <PlusCircle className="mr-2 h-4 w-4" />
+                                            Nuevo descuento progresivo
                                         </Button>
                                     </div>
-                                ))}
-                                <Button variant="outline" size="sm" onClick={addTier} type="button">
-                                    <PlusCircle className="mr-2 h-4 w-4" />
-                                    Nuevo descuento progresivo
-                                </Button>
+                                )}
                             </div>
-                        )}
-                    </div>
-                    
-                    {/* Apply To */}
-                     <div className="space-y-4 border-b pb-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="apply_to_type">Aplicar a</Label>
-                            <Select name="apply_to_type" onValueChange={handleApplyToTypeChange}>
-                                <SelectTrigger><SelectValue placeholder="Selecciona dónde aplicar" /></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all_store">Toda la tienda</SelectItem>
-                                    <SelectItem value="all_products">Todos los productos</SelectItem>
-                                    <SelectItem value="all_services">Todos los servicios</SelectItem>
-                                    <SelectItem value="product_categories">Categorías de productos específicas</SelectItem>
-                                    <SelectItem value="product_subcategories">Subcategorías de productos específicas</SelectItem>
-                                    <SelectItem value="service_categories">Categorías de servicios específicas</SelectItem>
-                                    <SelectItem value="products">Productos específicos</SelectItem>
-                                    <SelectItem value="services">Servicios específicos</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                         {['product_categories', 'product_subcategories', 'service_categories'].includes(applyToType) && (
-                            <MultiSelect
-                                placeholder={`Seleccionar ${applyToType === 'product_categories' ? 'categorías de producto' : applyToType === 'product_subcategories' ? 'subcategorías' : 'categorías de servicio'}...`}
-                                options={
-                                    applyToType === 'product_categories' ? productCategories.map(c => ({ value: c, label: c })) :
-                                    applyToType === 'product_subcategories' ? productSubcategories.map(s => ({ value: s, label: s })) :
-                                    serviceCategories.map(c => ({ value: c, label: c }))
-                                }
-                                selected={selectedApplyToIds}
-                                onToggle={handleMultiSelectToggle}
-                            />
-                        )}
-
-                        {['products', 'services'].includes(applyToType) && (
-                            <ItemSelector
-                                items={applyToType === 'products' ? products : services}
-                                selectedIds={selectedApplyToIds}
-                                onToggle={handleMultiSelectToggle}
-                                placeholder={`Buscar ${applyToType === 'products' ? 'productos' : 'servicios'}...`}
-                            />
-                        )}
-
-                    </div>
-
-                    {/* Limits */}
-                    <div className="space-y-4 border-b pb-4">
-                         <div className="flex items-center space-x-2">
-                            <Checkbox id="can_be_combined" name="can_be_combined" />
-                            <Label htmlFor="can_be_combined">Permitir combinar con otras promociones.</Label>
-                        </div>
-                        <div className="space-y-2">
-                            <Label>Límites de uso</Label>
-                            <RadioGroup name="usage_limit_type" defaultValue="unlimited" onValueChange={setUsageLimitType}>
-                                <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="unlimited" id="limit-unlimited" />
-                                    <Label htmlFor="limit-unlimited">Ilimitada</Label>
+                            
+                            {/* Apply To */}
+                            <div className="space-y-4 border-b pb-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="apply_to_type">Aplicar a</Label>
+                                    <Select name="apply_to_type" onValueChange={handleApplyToTypeChange}>
+                                        <SelectTrigger><SelectValue placeholder="Selecciona dónde aplicar" /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all_store">Toda la tienda</SelectItem>
+                                            <SelectItem value="all_products">Todos los productos</SelectItem>
+                                            <SelectItem value="all_services">Todos los servicios</SelectItem>
+                                            <SelectItem value="product_categories">Categorías de productos específicas</SelectItem>
+                                            <SelectItem value="product_subcategories">Subcategorías de productos específicas</SelectItem>
+                                            <SelectItem value="service_categories">Categorías de servicios específicas</SelectItem>
+                                            <SelectItem value="products">Productos específicos</SelectItem>
+                                            <SelectItem value="services">Servicios específicos</SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
+
+                                {['product_categories', 'product_subcategories', 'service_categories'].includes(applyToType) && (
+                                    <MultiSelect
+                                        placeholder={`Seleccionar ${applyToType === 'product_categories' ? 'categorías de producto' : applyToType === 'product_subcategories' ? 'subcategorías' : 'categorías de servicio'}...`}
+                                        options={
+                                            applyToType === 'product_categories' ? productCategories.map(c => ({ value: c, label: c })) :
+                                            applyToType === 'product_subcategories' ? productSubcategories.map(s => ({ value: s, label: s })) :
+                                            serviceCategories.map(c => ({ value: c, label: c }))
+                                        }
+                                        selected={selectedApplyToIds}
+                                        onToggle={handleMultiSelectToggle}
+                                    />
+                                )}
+
+                                {['products', 'services'].includes(applyToType) && (
+                                    <ItemSelector
+                                        items={applyToType === 'products' ? products : services}
+                                        selectedIds={selectedApplyToIds}
+                                        onToggle={handleMultiSelectToggle}
+                                        placeholder={`Buscar ${applyToType === 'products' ? 'productos' : 'servicios'}...`}
+                                    />
+                                )}
+
+                            </div>
+
+                            {/* Limits */}
+                            <div className="space-y-4 border-b pb-4">
                                 <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="period" id="limit-period" />
-                                    <Label htmlFor="limit-period">Definir período de la promoción</Label>
+                                    <Checkbox id="can_be_combined" name="can_be_combined" />
+                                    <Label htmlFor="can_be_combined">Permitir combinar con otras promociones.</Label>
                                 </div>
-                            </RadioGroup>
+                                <div className="space-y-2">
+                                    <Label>Límites de uso</Label>
+                                    <RadioGroup name="usage_limit_type" defaultValue="unlimited" onValueChange={setUsageLimitType}>
+                                        <div className="flex items-center space-x-2">
+                                            <RadioGroupItem value="unlimited" id="limit-unlimited" />
+                                            <Label htmlFor="limit-unlimited">Ilimitada</Label>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <RadioGroupItem value="period" id="limit-period" />
+                                            <Label htmlFor="limit-period">Definir período de la promoción</Label>
+                                        </div>
+                                    </RadioGroup>
+                                </div>
+                                {usageLimitType === 'period' && (
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                        <Button
+                                            id="date"
+                                            variant={"outline"}
+                                            className={cn("w-[300px] justify-start text-left font-normal", !date && "text-muted-foreground")}
+                                        >
+                                            <CalendarIcon className="mr-2 h-4 w-4" />
+                                            {date?.from ? (
+                                                date.to ? (<> {format(date.from, "LLL dd, y")} - {format(date.to, "LLL dd, y")} </>) 
+                                                : (format(date.from, "LLL dd, y"))
+                                            ) : (<span>Selecciona un rango</span>)}
+                                        </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start">
+                                            <Calendar mode="range" selected={date} onSelect={setDate} initialFocus/>
+                                        </PopoverContent>
+                                    </Popover>
+                                )}
+                            </div>
+                            {/* Custom Tag */}
+                            <div className="space-y-2">
+                                <Label htmlFor="custom_tag">Etiqueta personalizada (Opcional)</Label>
+                                <Input id="custom_tag" name="custom_tag" placeholder="Ej: ¡OFERTA!" value={customTag} onChange={(e) => setCustomTag(e.target.value)} />
+                                <p className="text-xs text-muted-foreground">Esta etiqueta aparecerá en los productos/servicios en promoción.</p>
+                            </div>
                         </div>
-                        {usageLimitType === 'period' && (
-                             <Popover>
-                                <PopoverTrigger asChild>
-                                <Button
-                                    id="date"
-                                    variant={"outline"}
-                                    className={cn("w-[300px] justify-start text-left font-normal", !date && "text-muted-foreground")}
-                                >
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {date?.from ? (
-                                        date.to ? (<> {format(date.from, "LLL dd, y")} - {format(date.to, "LLL dd, y")} </>) 
-                                        : (format(date.from, "LLL dd, y"))
-                                    ) : (<span>Selecciona un rango</span>)}
-                                </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0" align="start">
-                                    <Calendar mode="range" selected={date} onSelect={setDate} initialFocus/>
-                                </PopoverContent>
-                            </Popover>
-                        )}
-                    </div>
-                     {/* Custom Tag */}
-                     <div className="space-y-2">
-                        <Label htmlFor="custom_tag">Etiqueta personalizada (Opcional)</Label>
-                        <Input id="custom_tag" name="custom_tag" placeholder="Ej: ¡OFERTA!" value={customTag} onChange={(e) => setCustomTag(e.target.value)} />
-                        <p className="text-xs text-muted-foreground">Esta etiqueta aparecerá en los productos/servicios en promoción.</p>
-                    </div>
+                    </ScrollArea>
+                    <DialogFooter className="mt-auto shrink-0 border-t pt-4">
+                        <DialogClose asChild><Button variant="outline">Cancelar</Button></DialogClose>
+                        <SubmitButton />
+                    </DialogFooter>
                 </form>
-                <DialogFooter className="mt-4 shrink-0 border-t pt-4">
-                    <DialogClose asChild><Button variant="outline">Cancelar</Button></DialogClose>
-                    <SubmitButton />
-                </DialogFooter>
             </DialogContent>
         </Dialog>
     );
