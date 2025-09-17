@@ -120,7 +120,7 @@ export function AddPromotionForm({ products, services, productCategories, produc
 
     const handleTierChange = (index: number, field: keyof DiscountTier, value: string) => {
         const newTiers = [...progressiveTiers];
-        newTiers[index][field] = value ?? ''; // Ensure value is never undefined or null
+        newTiers[index][field] = value ?? '';
         setProgressiveTiers(newTiers);
     };
     
@@ -139,14 +139,14 @@ export function AddPromotionForm({ products, services, productCategories, produc
                         Completa los detalles para configurar una nueva promoción.
                     </DialogDescription>
                 </DialogHeader>
-                <form action={formAction} ref={formRef} className="flex-grow flex flex-col gap-4 overflow-hidden">
-                     <input type="hidden" name="start_date" value={date?.from?.toISOString() ?? ''} />
-                     <input type="hidden" name="end_date" value={date?.to?.toISOString() ?? ''} />
-                     <input type="hidden" name="progressive_tiers" value={JSON.stringify(progressiveTiers)} />
-                     <input type="hidden" name="apply_to_ids" value={Array.from(selectedApplyToIds).join(',')} />
-                    
+                <form action={formAction} ref={formRef} className="flex-grow overflow-hidden flex flex-col">
                     <ScrollArea className="flex-grow pr-6 -mr-6">
                         <div className="space-y-4">
+                            <input type="hidden" name="start_date" value={date?.from?.toISOString() ?? ''} />
+                            <input type="hidden" name="end_date" value={date?.to?.toISOString() ?? ''} />
+                            <input type="hidden" name="progressive_tiers" value={JSON.stringify(progressiveTiers)} />
+                            <input type="hidden" name="apply_to_ids" value={Array.from(selectedApplyToIds).join(',')} />
+                            
                             {/* General Info */}
                             <div className="space-y-4 border-b pb-4">
                                 <div className="space-y-2">
@@ -309,7 +309,7 @@ export function AddPromotionForm({ products, services, productCategories, produc
                             </div>
                         </div>
                     </ScrollArea>
-                    <DialogFooter className="shrink-0 border-t pt-4">
+                    <DialogFooter className="shrink-0 border-t pt-4 mt-4">
                         <DialogClose asChild><Button variant="outline">Cancelar</Button></DialogClose>
                         <SubmitButton />
                     </DialogFooter>
