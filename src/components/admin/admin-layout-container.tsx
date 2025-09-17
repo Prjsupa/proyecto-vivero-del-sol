@@ -1,10 +1,8 @@
-
-
 'use client';
 
 import { Header } from "@/components/vivero/header";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider } from "@/components/ui/sidebar";
-import { Briefcase, Package, Users, Receipt, BookUser, Wrench, ShoppingBag, BarChart3, Settings, ChevronRight, Building2, ConciergeBell, FileText, Database, Search, Ticket, Gift, Building } from "lucide-react";
+import { Briefcase, Package, Users, Receipt, BookUser, Wrench, ShoppingBag, BarChart3, Settings, ChevronRight, Building2, ConciergeBell, FileText, Database, Search, Ticket, Gift, Building, ClipboardList } from "lucide-react";
 import Link from 'next/link';
 import Image from "next/image";
 import { BranchSwitcher } from "@/components/admin/branch-switcher";
@@ -108,6 +106,14 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                                 <SidebarMenuButton variant="ghost" size="sm">
                                                     <ConciergeBell />
                                                     Listado Servicios
+                                                </SidebarMenuButton>
+                                            </Link>
+                                        </SidebarMenuItem>
+                                        <SidebarMenuItem>
+                                            <Link href="/admin/quotes" className="pl-6">
+                                                <SidebarMenuButton variant="ghost" size="sm">
+                                                    <ClipboardList />
+                                                    Armar Presupuesto
                                                 </SidebarMenuButton>
                                             </Link>
                                         </SidebarMenuItem>
