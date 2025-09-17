@@ -1,7 +1,7 @@
 
 'use client';
 import { useState } from 'react';
-import type { Product, Service, Provider, ProviderType, IncomeVoucher, ExpenseVoucher, UnitOfMeasure, UnitOfTime, UnitOfMass, UnitOfVolume, PointOfSale, AccountStatus, Currency } from "@/lib/definitions";
+import type { Product, Service, Provider, ProviderType, IncomeVoucher, ExpenseVoucher, UnitOfMeasure, UnitOfTime, UnitOfMass, UnitOfVolume, PointOfSale, AccountStatus, Currency, CashAccount } from "@/lib/definitions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CategoryProductManager } from './category-product-manager';
@@ -39,6 +39,8 @@ import { AccountStatusManager } from './account-status-manager';
 import { CreateAccountStatusForm } from './create-account-status-form';
 import { CurrencyManager } from './currency-manager';
 import { CreateCurrencyForm } from './create-currency-form';
+import { CashAccountManager } from './cash-account-manager';
+import { CreateCashAccountForm } from './create-cash-account-form';
 
 type AuxTableType = 
     | 'product_categories' 
@@ -57,7 +59,8 @@ type AuxTableType =
     | 'units_of_volume'
     | 'points_of_sale'
     | 'account_statuses'
-    | 'currencies';
+    | 'currencies'
+    | 'cash_accounts';
 
 interface AuxTablesManagerProps {
     products: Product[];
@@ -73,6 +76,7 @@ interface AuxTablesManagerProps {
     pointsOfSale: PointOfSale[];
     accountStatuses: AccountStatus[];
     currencies: Currency[];
+    cashAccounts: CashAccount[];
     productCategories: string[];
     productSubcategories: string[];
     serviceCategories: string[];
@@ -97,6 +101,7 @@ export function AuxTablesManager({
     pointsOfSale,
     accountStatuses,
     currencies,
+    cashAccounts,
     productCategories, 
     productSubcategories, 
     serviceCategories,
@@ -148,6 +153,8 @@ export function AuxTablesManager({
                 return <AccountStatusManager allUnits={accountStatuses} onActionCompleted={onActionCompleted} />;
             case 'currencies':
                 return <CurrencyManager allUnits={currencies} onActionCompleted={onActionCompleted} />;
+            case 'cash_accounts':
+                return <CashAccountManager allUnits={cashAccounts} onActionCompleted={onActionCompleted} />;
             default:
                 return null;
         }
@@ -189,6 +196,8 @@ export function AuxTablesManager({
                 return <CreateAccountStatusForm onActionCompleted={onActionCompleted} />;
             case 'currencies':
                 return <CreateCurrencyForm onActionCompleted={onActionCompleted} />;
+            case 'cash_accounts':
+                return <CreateCashAccountForm onActionCompleted={onActionCompleted} />;
             default:
                 return null;
         }
@@ -211,6 +220,7 @@ export function AuxTablesManager({
                                     <SelectItem value="provider_types">Tipos de Proveedor</SelectItem>
                                     <SelectItem value="income_vouchers">Comprobantes de Ingreso</SelectItem>
                                     <SelectItem value="expense_vouchers">Comprobantes de Egreso</SelectItem>
+                                    <SelectItem value="cash_accounts">Cuentas de Caja</SelectItem>
                                     <SelectItem value="units_of_measure">Unidades de Medida</SelectItem>
                                     <SelectItem value="units_of_time">Unidades de Tiempo</SelectItem>
                                     <SelectItem value="units_of_mass">Unidades de Masa</SelectItem>

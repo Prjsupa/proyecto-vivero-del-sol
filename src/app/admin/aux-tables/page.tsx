@@ -1,7 +1,7 @@
 
 
 import { createClient } from "@/lib/supabase/server";
-import type { Product, Service, Provider, ProviderType, IncomeVoucher, ExpenseVoucher, UnitOfMeasure, UnitOfTime, UnitOfMass, UnitOfVolume, PointOfSale, AccountStatus, Currency } from "@/lib/definitions";
+import type { Product, Service, Provider, ProviderType, IncomeVoucher, ExpenseVoucher, UnitOfMeasure, UnitOfTime, UnitOfMass, UnitOfVolume, PointOfSale, AccountStatus, Currency, CashAccount } from "@/lib/definitions";
 import { AuxTablesManager } from "@/components/admin/aux-tables-manager";
 
 async function getData() {
@@ -15,7 +15,7 @@ async function getData() {
 
     const { data: services, error: servicesError } = await supabase
         .from('services')
-        .select('*')
+        .select('*
         .order('name', { ascending: true });
     
     if (servicesError) console.error('Error fetching services:', servicesError);
@@ -69,6 +69,9 @@ async function getData() {
     const { data: currenciesData, error: currenciesError } = await supabase.from('currencies').select('*').order('code');
     if (currenciesError) console.error('Error fetching currencies:', currenciesError);
 
+    const { data: cashAccountsData, error: cashAccountsError } = await supabase.from('cash_accounts').select('*').order('code');
+    if (cashAccountsError) console.error('Error fetching cash accounts:', cashAccountsError);
+
     const uniqueProviderTypesMap = new Map<string, ProviderType>();
     (providerTypesData || []).forEach(item => {
         if (item.provider_type_code && !uniqueProviderTypesMap.has(item.provider_type_code)) {
@@ -104,6 +107,7 @@ async function getData() {
         pointsOfSale: (pointsOfSaleData as PointOfSale[]) || [],
         accountStatuses: (accountStatusesData as AccountStatus[]) || [],
         currencies: (currenciesData as Currency[]) || [],
+        cashAccounts: (cashAccountsData as CashAccount[]) || [],
         productCategories, 
         productSubcategories,
         serviceCategories,
@@ -140,6 +144,7 @@ export default async function AuxTablesPage() {
                 pointsOfSale={data.pointsOfSale}
                 accountStatuses={data.accountStatuses}
                 currencies={data.currencies}
+                cashAccounts={data.cashAccounts}
                 productCategories={data.productCategories}
                 productSubcategories={data.productSubcategories}
                 serviceCategories={data.serviceCategories}

@@ -2483,6 +2483,65 @@ export async function addCurrency(prevState: any, formData: FormData) { return a
 export async function updateCurrency(prevState: any, formData: FormData) { return await updateGenericUnit('currencies', formData); }
 export async function deleteCurrency(code: string) { return await deleteGenericUnit('currencies', code); }
 
+// Cash Account
+const cashAccountSchema = z.object({
+  code: z.string().min(1, 'El código es requerido.'),
+  description: z.string().min(1, 'La descripción es requerida.'),
+  account_type: z.string().optional().nullable(),
+});
+const updateCashAccountSchema = cashAccountSchema.extend({ old_code: z.string() });
+
+export async function addCashAccount(prevState: any, formData: FormData) {
+    const validatedFields = cashAccountSchema.safeParse(Object.fromEntries(formData.entries()));
+    if (!validatedFields.success) return { message: "Datos inválidos.", errors: validatedFields.error.flatten().fieldErrors };
+    
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { message: "No autorizado." };
+
+    const { error } = await supabase.from('cash_accounts').insert(validatedFields.data);
+    
+    if (error) {
+        if (error.code === '23505') return { message: `Error: El código '${validatedFields.data.code}' ya existe.` };
+        return { message: `Error creando la cuenta de caja: ${error.message}` };
+    }
+
+    revalidatePath('/admin/aux-tables');
+    return { message: 'success', data: `Cuenta de caja '${validatedFields.data.code}' creada exitosamente.` };
+}
+
+export async function updateCashAccount(prevState: any, formData: FormData) {
+    const validatedFields = updateCashAccountSchema.safeParse(Object.fromEntries(formData.entries()));
+    if (!validatedFields.success) return { message: "Datos inválidos.", errors: validatedFields.error.flatten().fieldErrors };
+
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { message: "No autorizado." };
+
+    const { old_code, ...updateData } = validatedFields.data;
+    const { error } = await supabase.from('cash_accounts').update(updateData).eq('code', old_code);
+
+    if (error) {
+         if (error.code === '23505') return { message: `Error: El código '${updateData.code}' ya existe.` };
+        return { message: `Error al actualizar la cuenta de caja: ${error.message}` };
+    }
+
+    revalidatePath('/admin/aux-tables');
+    return { message: 'success', data: `La cuenta de caja '${old_code}' ha sido actualizada.` };
+}
+
+export async function deleteCashAccount(code: string) {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { message: 'No autenticado' };
+
+    const { error } = await supabase.from('cash_accounts').delete().eq('code', code);
+    if (error) return { message: `Error al eliminar la cuenta de caja: ${error.message}` };
+    
+    revalidatePath('/admin/aux-tables');
+    return { message: 'success', data: '¡Cuenta de caja eliminada!' };
+}
+
 // ============== COMPANY DATA =================
 
 const companyDataSchema = z.object({

@@ -115,6 +115,12 @@ export type Currency = {
     description: string;
 }
 
+export type CashAccount = {
+    code: string;
+    description: string;
+    account_type?: string | null;
+}
+
 
 export type Product = {
   id: string;
