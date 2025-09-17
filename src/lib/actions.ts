@@ -475,19 +475,19 @@ export async function addUser(prevState: any, formData: FormData) {
 const clientSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido.'),
   last_name: z.string().min(1, 'El apellido es requerido.'),
-  razon_social: z.string().optional(),
-  nombre_fantasia: z.string().optional(),
-  iva_condition: z.string().optional(),
-  document_type: z.string().optional(),
-  document_number: z.string().optional(),
-  price_list: z.string().optional(),
-  province: z.string().optional(),
-  address: z.string().optional(),
-  city: z.string().optional(),
-  postal_code: z.string().optional(),
-  phone: z.string().optional(),
-  mobile_phone: z.string().optional(),
-  email: z.string().email('El email no es válido.').or(z.literal('')).optional(),
+  razon_social: z.string().optional().transform(val => val === '' ? null : val),
+  nombre_fantasia: z.string().optional().transform(val => val === '' ? null : val),
+  iva_condition: z.string().optional().transform(val => val === '' ? null : val),
+  document_type: z.string().optional().transform(val => val === '' ? null : val),
+  document_number: z.string().optional().transform(val => val === '' ? null : val),
+  price_list: z.string().optional().transform(val => val === '' ? null : val),
+  province: z.string().optional().transform(val => val === '' ? null : val),
+  address: z.string().optional().transform(val => val === '' ? null : val),
+  city: z.string().optional().transform(val => val === '' ? null : val),
+  postal_code: z.string().optional().transform(val => val === '' ? null : val),
+  phone: z.string().optional().transform(val => val === '' ? null : val),
+  mobile_phone: z.string().optional().transform(val => val === '' ? null : val),
+  email: z.string().email('El email no es válido.').or(z.literal('')).optional().transform(val => val === '' ? null : val),
   default_invoice_type: z.enum(['A', 'B', 'C', '']).optional().transform(val => val === '' ? null : val),
   birth_date: z.preprocess((arg) => {
     if (typeof arg == "string" || arg instanceof Date) return new Date(arg);
@@ -2693,3 +2693,4 @@ export async function updateCompanyData(prevState: any, formData: FormData) {
         data: `¡Datos de la empresa actualizados exitosamente!`,
     };
 }
+
