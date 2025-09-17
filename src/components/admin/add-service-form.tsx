@@ -148,7 +148,7 @@ export function AddServiceForm({ categories }: { categories: string[] }) {
                     </div>
                     
                     <div className="space-y-2">
-                        <Label htmlFor="precio_venta_display">Precio de Venta</Label>
+                        <Label htmlFor="precio_venta_display">Precio del servicio</Label>
                         <Input 
                             id="precio_venta_display"
                             type="text" 
