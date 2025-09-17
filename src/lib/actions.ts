@@ -2154,11 +2154,10 @@ export async function addPromotion(prevState: any, formData: FormData) {
 
     const { name, is_active, discount_type, apply_to_type, apply_to_ids, can_be_combined, usage_limit_type, start_date, end_date, custom_tag, x_for_y_take, x_for_y_pay, progressive_tiers } = validatedFields.data;
 
-    let discount_value = {};
+    let discount_value: object = {};
     if (discount_type === 'x_for_y' && x_for_y_take && x_for_y_pay) {
         discount_value = { take: Number(x_for_y_take), pay: Number(x_for_y_pay) };
-    }
-    if (discount_type === 'progressive_discount' && progressive_tiers) {
+    } else if (discount_type === 'progressive_discount' && progressive_tiers) {
         const sortedTiers = progressive_tiers.sort((a, b) => a.quantity - b.quantity);
         discount_value = { tiers: sortedTiers };
     }

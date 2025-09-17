@@ -135,11 +135,4 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export type jsonb =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: jsonb | undefined }
-  | jsonb[]
-
+export type jsonb = Json;
