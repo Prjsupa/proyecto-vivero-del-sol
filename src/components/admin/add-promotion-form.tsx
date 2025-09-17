@@ -117,7 +117,7 @@ export function AddPromotionForm({ products, services, productCategories, produc
 
     const handleTierChange = (index: number, field: keyof DiscountTier, value: string) => {
         const newTiers = [...progressiveTiers];
-        newTiers[index][field] = value ?? ''; // Ensure value is never undefined
+        newTiers[index][field] = value ?? ''; // Ensure value is never undefined or null
         setProgressiveTiers(newTiers);
     };
     
