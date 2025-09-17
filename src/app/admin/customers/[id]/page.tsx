@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowLeft, BookUser, Mail, Phone, User, FileText, Home, Birthday } from "lucide-react";
+import { ArrowLeft, BookUser, Mail, Phone, User, FileText, Home, Cake } from "lucide-react";
 import { format, parseISO, isValid } from "date-fns";
 import { InvoicesTable } from "@/components/admin/invoices-table";
 import { Separator } from "@/components/ui/separator";
@@ -112,7 +112,7 @@ export default async function CustomerDetailPage({ params }: { params: { id: str
                             </div>
                              {client.birth_date && isValid(parseISO(client.birth_date)) && (
                                 <div className="flex items-start gap-3">
-                                    <Birthday className="h-4 w-4 mt-1 text-muted-foreground" />
+                                    <Cake className="h-4 w-4 mt-1 text-muted-foreground" />
                                     <div>
                                         <p className="font-semibold">Fecha de Nacimiento</p>
                                         <p className="text-muted-foreground">{format(parseISO(client.birth_date), 'dd/MM/yyyy')}</p>
