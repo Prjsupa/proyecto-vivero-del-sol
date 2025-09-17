@@ -2449,21 +2449,21 @@ async function deleteGenericUnit(tableName: string, code: string) {
 }
 
 // Unit of Measure
-export const addUnitOfMeasure = (prevState: any, formData: FormData) => addGenericUnit('units_of_measure', formData);
-export const updateUnitOfMeasure = (prevState: any, formData: FormData) => updateGenericUnit('units_of_measure', formData);
-export const deleteUnitOfMeasure = (code: string) => deleteGenericUnit('units_of_measure', code);
+export async function addUnitOfMeasure(prevState: any, formData: FormData) { return addGenericUnit('units_of_measure', formData); }
+export async function updateUnitOfMeasure(prevState: any, formData: FormData) { return updateGenericUnit('units_of_measure', formData); }
+export async function deleteUnitOfMeasure(code: string) { return deleteGenericUnit('units_of_measure', code); }
 
 // Unit of Time
-export const addUnitOfTime = (prevState: any, formData: FormData) => addGenericUnit('units_of_time', formData);
-export const updateUnitOfTime = (prevState: any, formData: FormData) => updateGenericUnit('units_of_time', formData);
-export const deleteUnitOfTime = (code: string) => deleteGenericUnit('units_of_time', code);
+export async function addUnitOfTime(prevState: any, formData: FormData) { return addGenericUnit('units_of_time', formData); }
+export async function updateUnitOfTime(prevState: any, formData: FormData) { return updateGenericUnit('units_of_time', formData); }
+export async function deleteUnitOfTime(code: string) { return deleteGenericUnit('units_of_time', code); }
 
 // Unit of Mass
-export const addUnitOfMass = (prevState: any, formData: FormData) => addGenericUnit('units_of_mass', formData);
-export const updateUnitOfMass = (prevState: any, formData: FormData) => updateGenericUnit('units_of_mass', formData);
-export const deleteUnitOfMass = (code: string) => deleteGenericUnit('units_of_mass', code);
+export async function addUnitOfMass(prevState: any, formData: FormData) { return addGenericUnit('units_of_mass', formData); }
+export async function updateUnitOfMass(prevState: any, formData: FormData) { return updateGenericUnit('units_of_mass', formData); }
+export async function deleteUnitOfMass(code: string) { return deleteGenericUnit('units_of_mass', code); }
 
 // Unit of Volume
-export const addUnitOfVolume = (prevState: any, formData: FormData) => addGenericUnit('units_of_volume', formData);
-export const updateUnitOfVolume = (prevState: any, formData: FormData) => updateGenericUnit('units_of_volume', formData);
-export const deleteUnitOfVolume = (code: string) => deleteGenericUnit('units_of_volume', code);
+export async function addUnitOfVolume(prevState: any, formData: FormData) { return addGenericUnit('units_of_volume', formData); }
+export async function updateUnitOfVolume(prevState: any, formData: FormData) { return updateGenericUnit('units_of_volume', formData); }
+export async function deleteUnitOfVolume(code: string) { return deleteGenericUnit('units_of_volume', code); }
