@@ -56,6 +56,8 @@ export function AddPromotionForm({ products, services, productCategories, produc
     const [usageLimitType, setUsageLimitType] = useState<string>('unlimited');
     const [date, setDate] = useState<{from: Date | undefined, to: Date | undefined}>({ from: undefined, to: undefined });
     const [progressiveTiers, setProgressiveTiers] = useState<DiscountTier[]>([{ quantity: '', percentage: '' }]);
+    const [xForYTake, setXForYTake] = useState('');
+    const [xForYPay, setXForYPay] = useState('');
 
 
     useEffect(() => {
@@ -76,6 +78,8 @@ export function AddPromotionForm({ products, services, productCategories, produc
         setUsageLimitType('unlimited');
         setDate({ from: undefined, to: undefined });
         setProgressiveTiers([{ quantity: '', percentage: '' }]);
+        setXForYTake('');
+        setXForYPay('');
     };
 
     const onDialogChange = (open: boolean) => {
@@ -169,11 +173,11 @@ export function AddPromotionForm({ products, services, productCategories, produc
                             <div className="grid grid-cols-2 gap-4 p-4 border rounded-md bg-muted/50">
                                 <div className="space-y-2">
                                     <Label htmlFor="x_for_y_take">Llevando</Label>
-                                    <Input id="x_for_y_take" name="x_for_y_take" type="number" min="1" placeholder="Ej: 3" />
+                                    <Input id="x_for_y_take" name="x_for_y_take" type="number" min="1" placeholder="Ej: 3" value={xForYTake} onChange={(e) => setXForYTake(e.target.value)} />
                                 </div>
                                  <div className="space-y-2">
                                     <Label htmlFor="x_for_y_pay">Pagás</Label>
-                                    <Input id="x_for_y_pay" name="x_for_y_pay" type="number" min="1" placeholder="Ej: 2" />
+                                    <Input id="x_for_y_pay" name="x_for_y_pay" type="number" min="1" placeholder="Ej: 2" value={xForYPay} onChange={(e) => setXForYPay(e.target.value)} />
                                 </div>
                             </div>
                         )}
