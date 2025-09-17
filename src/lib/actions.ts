@@ -2286,3 +2286,101 @@ export async function deleteIncomeVoucher(code: string) {
     revalidatePath('/admin/aux-tables');
     return { message: 'success', data: '¡Comprobante de ingreso eliminado!' };
 }
+
+// ============== EXPENSE VOUCHERS =================
+
+const expenseVoucherSchema = z.object({
+  code: z.string().min(1, 'El código es requerido.'),
+  description: z.string().min(1, 'La descripción es requerida.'),
+});
+
+export async function addExpenseVoucher(prevState: any, formData: FormData) {
+    const validatedFields = expenseVoucherSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return {
+            message: "Datos de formulario inválidos.",
+            errors: validatedFields.error.flatten().fieldErrors,
+        };
+    }
+    
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { message: "No autorizado." };
+
+    const { code, description } = validatedFields.data;
+    
+    const { error } = await supabase
+        .from('expense_vouchers')
+        .insert({ code, description });
+    
+    if (error) {
+        if (error.code === '23505') { // Unique constraint violation for code
+            return { message: `Error: El código de comprobante '${code}' ya existe.` };
+        }
+        return { message: `Error creando el comprobante: ${error.message}` };
+    }
+
+    revalidatePath('/admin/aux-tables');
+    return {
+        message: 'success',
+        data: `Comprobante de egreso '${code}' creado exitosamente.`,
+    };
+}
+
+const updateExpenseVoucherSchema = expenseVoucherSchema.extend({
+    old_code: z.string(),
+});
+
+export async function updateExpenseVoucher(prevState: any, formData: FormData) {
+    const validatedFields = updateExpenseVoucherSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return {
+            message: "Datos de formulario inválidos.",
+            errors: validatedFields.error.flatten().fieldErrors,
+        };
+    }
+    
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { message: "No autorizado." };
+
+    const { old_code, code, description } = validatedFields.data;
+
+    const { error } = await supabase
+        .from('expense_vouchers')
+        .update({ code, description })
+        .eq('code', old_code);
+
+    if (error) {
+         if (error.code === '23505') {
+            return { message: `Error: El código de comprobante '${code}' ya existe.` };
+        }
+        return { message: `Error al actualizar el comprobante: ${error.message}` };
+    }
+
+    revalidatePath('/admin/aux-tables');
+    return {
+        message: 'success',
+        data: `El comprobante de egreso '${old_code}' ha sido actualizado a '${code}'.`,
+    };
+}
+
+export async function deleteExpenseVoucher(code: string) {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { message: 'No autenticado' };
+
+    const { error } = await supabase
+        .from('expense_vouchers')
+        .delete()
+        .eq('code', code);
+    
+    if (error) {
+        return { message: `Error al eliminar el comprobante: ${error.message}` };
+    }
+    
+    revalidatePath('/admin/aux-tables');
+    return { message: 'success', data: '¡Comprobante de egreso eliminado!' };
+}

@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import type { Product, Service, Provider, ProviderType, IncomeVoucher } from "@/lib/definitions";
+import type { Product, Service, Provider, ProviderType, IncomeVoucher, ExpenseVoucher } from "@/lib/definitions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CategoryProductManager } from './category-product-manager';
@@ -21,6 +21,8 @@ import { ProviderTypeManager } from './provider-type-manager';
 import { CreateProviderTypeForm } from './create-provider-type-form';
 import { IncomeVoucherManager } from './income-voucher-manager';
 import { CreateIncomeVoucherForm } from './create-income-voucher-form';
+import { ExpenseVoucherManager } from './expense-voucher-manager';
+import { CreateExpenseVoucherForm } from './create-expense-voucher-form';
 import { useRouter } from 'next/navigation';
 
 type AuxTableType = 
@@ -32,7 +34,8 @@ type AuxTableType =
     | 'product_descriptions'
     | 'service_descriptions'
     | 'provider_types'
-    | 'income_vouchers';
+    | 'income_vouchers'
+    | 'expense_vouchers';
 
 interface AuxTablesManagerProps {
     products: Product[];
@@ -40,6 +43,7 @@ interface AuxTablesManagerProps {
     providers: Provider[];
     providerTypes: ProviderType[];
     incomeVouchers: IncomeVoucher[];
+    expenseVouchers: ExpenseVoucher[];
     productCategories: string[];
     productSubcategories: string[];
     serviceCategories: string[];
@@ -56,6 +60,7 @@ export function AuxTablesManager({
     providers,
     providerTypes,
     incomeVouchers,
+    expenseVouchers,
     productCategories, 
     productSubcategories, 
     serviceCategories,
@@ -91,6 +96,8 @@ export function AuxTablesManager({
                 return <ProviderTypeManager allProviders={providers} allProviderTypes={providerTypes} onActionCompleted={onActionCompleted} />;
             case 'income_vouchers':
                 return <IncomeVoucherManager allVouchers={incomeVouchers} onActionCompleted={onActionCompleted} />;
+            case 'expense_vouchers':
+                return <ExpenseVoucherManager allVouchers={expenseVouchers} onActionCompleted={onActionCompleted} />;
             default:
                 return null;
         }
@@ -116,6 +123,8 @@ export function AuxTablesManager({
                 return <CreateProviderTypeForm onActionCompleted={onActionCompleted} />;
             case 'income_vouchers':
                 return <CreateIncomeVoucherForm onActionCompleted={onActionCompleted} />;
+            case 'expense_vouchers':
+                return <CreateExpenseVoucherForm onActionCompleted={onActionCompleted} />;
             default:
                 return null;
         }
@@ -137,6 +146,7 @@ export function AuxTablesManager({
                                     <SelectItem value="service_categories">Categorías de Servicios</SelectItem>
                                     <SelectItem value="provider_types">Tipos de Proveedor</SelectItem>
                                     <SelectItem value="income_vouchers">Comprobantes de Ingreso</SelectItem>
+                                    <SelectItem value="expense_vouchers">Comprobantes de Egreso</SelectItem>
                                     <SelectItem value="product_colors">Colores (Productos)</SelectItem>
                                     <SelectItem value="product_sizes">Tamaños (Productos)</SelectItem>
                                     <SelectItem value="product_descriptions">Descripciones (Productos)</SelectItem>

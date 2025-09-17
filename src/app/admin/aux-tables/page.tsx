@@ -1,6 +1,6 @@
 
 import { createClient } from "@/lib/supabase/server";
-import type { Product, Service, Provider, ProviderType, IncomeVoucher } from "@/lib/definitions";
+import type { Product, Service, Provider, ProviderType, IncomeVoucher, ExpenseVoucher } from "@/lib/definitions";
 import { AuxTablesManager } from "@/components/admin/aux-tables-manager";
 
 async function getData() {
@@ -40,6 +40,13 @@ async function getData() {
 
     if (incomeVouchersError) console.error('Error fetching income vouchers:', incomeVouchersError);
 
+    const { data: expenseVouchersData, error: expenseVouchersError } = await supabase
+        .from('expense_vouchers')
+        .select('code, description')
+        .order('code', { ascending: true });
+
+    if (expenseVouchersError) console.error('Error fetching expense vouchers:', expenseVouchersError);
+
 
     const uniqueProviderTypesMap = new Map<string, ProviderType>();
     (providerTypesData || []).forEach(item => {
@@ -68,6 +75,7 @@ async function getData() {
         providers: providers || [],
         providerTypes: providerTypes || [],
         incomeVouchers: (incomeVouchersData as IncomeVoucher[]) || [],
+        expenseVouchers: (expenseVouchersData as ExpenseVoucher[]) || [],
         productCategories, 
         productSubcategories,
         serviceCategories,
@@ -96,6 +104,7 @@ export default async function AuxTablesPage() {
                 providers={data.providers}
                 providerTypes={data.providerTypes}
                 incomeVouchers={data.incomeVouchers}
+                expenseVouchers={data.expenseVouchers}
                 productCategories={data.productCategories}
                 productSubcategories={data.productSubcategories}
                 serviceCategories={data.serviceCategories}

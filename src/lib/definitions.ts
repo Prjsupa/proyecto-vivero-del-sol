@@ -58,6 +58,11 @@ export type IncomeVoucher = {
     description: string;
 }
 
+export type ExpenseVoucher = {
+    code: string;
+    description: string;
+}
+
 
 export type Product = {
   id: string;
