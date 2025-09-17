@@ -1,6 +1,6 @@
 
 import { createClient } from "@/lib/supabase/server";
-import type { Product, Service, Provider, ProviderType, IncomeVoucher, ExpenseVoucher } from "@/lib/definitions";
+import type { Product, Service, Provider, ProviderType, IncomeVoucher, ExpenseVoucher, UnitOfMeasure, UnitOfTime, UnitOfMass, UnitOfVolume } from "@/lib/definitions";
 import { AuxTablesManager } from "@/components/admin/aux-tables-manager";
 
 async function getData() {
@@ -47,6 +47,17 @@ async function getData() {
 
     if (expenseVouchersError) console.error('Error fetching expense vouchers:', expenseVouchersError);
 
+    const { data: unitsOfMeasureData, error: unitsOfMeasureError } = await supabase.from('units_of_measure').select('*').order('code');
+    if (unitsOfMeasureError) console.error('Error fetching units of measure:', unitsOfMeasureError);
+
+    const { data: unitsOfTimeData, error: unitsOfTimeError } = await supabase.from('units_of_time').select('*').order('code');
+    if (unitsOfTimeError) console.error('Error fetching units of time:', unitsOfTimeError);
+
+    const { data: unitsOfMassData, error: unitsOfMassError } = await supabase.from('units_of_mass').select('*').order('code');
+    if (unitsOfMassError) console.error('Error fetching units of mass:', unitsOfMassError);
+
+    const { data: unitsOfVolumeData, error: unitsOfVolumeError } = await supabase.from('units_of_volume').select('*').order('code');
+    if (unitsOfVolumeError) console.error('Error fetching units of volume:', unitsOfVolumeError);
 
     const uniqueProviderTypesMap = new Map<string, ProviderType>();
     (providerTypesData || []).forEach(item => {
@@ -76,6 +87,10 @@ async function getData() {
         providerTypes: providerTypes || [],
         incomeVouchers: (incomeVouchersData as IncomeVoucher[]) || [],
         expenseVouchers: (expenseVouchersData as ExpenseVoucher[]) || [],
+        unitsOfMeasure: (unitsOfMeasureData as UnitOfMeasure[]) || [],
+        unitsOfTime: (unitsOfTimeData as UnitOfTime[]) || [],
+        unitsOfMass: (unitsOfMassData as UnitOfMass[]) || [],
+        unitsOfVolume: (unitsOfVolumeData as UnitOfVolume[]) || [],
         productCategories, 
         productSubcategories,
         serviceCategories,
@@ -105,6 +120,10 @@ export default async function AuxTablesPage() {
                 providerTypes={data.providerTypes}
                 incomeVouchers={data.incomeVouchers}
                 expenseVouchers={data.expenseVouchers}
+                unitsOfMeasure={data.unitsOfMeasure}
+                unitsOfTime={data.unitsOfTime}
+                unitsOfMass={data.unitsOfMass}
+                unitsOfVolume={data.unitsOfVolume}
                 productCategories={data.productCategories}
                 productSubcategories={data.productSubcategories}
                 serviceCategories={data.serviceCategories}

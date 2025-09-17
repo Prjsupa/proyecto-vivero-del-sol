@@ -2384,3 +2384,86 @@ export async function deleteExpenseVoucher(code: string) {
     revalidatePath('/admin/aux-tables');
     return { message: 'success', data: '¡Comprobante de egreso eliminado!' };
 }
+
+// ============== GENERIC UNIT HANDLERS =================
+
+const genericUnitSchema = z.object({
+  code: z.string().min(1, 'El código es requerido.'),
+  description: z.string().min(1, 'La descripción es requerida.'),
+});
+
+const updateGenericUnitSchema = genericUnitSchema.extend({
+    old_code: z.string(),
+});
+
+async function addGenericUnit(tableName: string, formData: FormData) {
+    const validatedFields = genericUnitSchema.safeParse(Object.fromEntries(formData.entries()));
+    if (!validatedFields.success) return { message: "Datos inválidos.", errors: validatedFields.error.flatten().fieldErrors };
+    
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { message: "No autorizado." };
+
+    const { code, description } = validatedFields.data;
+    const { error } = await supabase.from(tableName).insert({ code, description });
+    
+    if (error) {
+        if (error.code === '23505') return { message: `Error: El código '${code}' ya existe.` };
+        return { message: `Error creando la unidad: ${error.message}` };
+    }
+
+    revalidatePath('/admin/aux-tables');
+    return { message: 'success', data: `Unidad '${code}' creada exitosamente.` };
+}
+
+async function updateGenericUnit(tableName: string, formData: FormData) {
+    const validatedFields = updateGenericUnitSchema.safeParse(Object.fromEntries(formData.entries()));
+    if (!validatedFields.success) return { message: "Datos inválidos.", errors: validatedFields.error.flatten().fieldErrors };
+
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { message: "No autorizado." };
+
+    const { old_code, code, description } = validatedFields.data;
+    const { error } = await supabase.from(tableName).update({ code, description }).eq('code', old_code);
+
+    if (error) {
+         if (error.code === '23505') return { message: `Error: El código '${code}' ya existe.` };
+        return { message: `Error al actualizar la unidad: ${error.message}` };
+    }
+
+    revalidatePath('/admin/aux-tables');
+    return { message: 'success', data: `La unidad '${old_code}' ha sido actualizada.` };
+}
+
+async function deleteGenericUnit(tableName: string, code: string) {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { message: 'No autenticado' };
+
+    const { error } = await supabase.from(tableName).delete().eq('code', code);
+    if (error) return { message: `Error al eliminar la unidad: ${error.message}` };
+    
+    revalidatePath('/admin/aux-tables');
+    return { message: 'success', data: '¡Unidad eliminada!' };
+}
+
+// Unit of Measure
+export const addUnitOfMeasure = (prevState: any, formData: FormData) => addGenericUnit('units_of_measure', formData);
+export const updateUnitOfMeasure = (prevState: any, formData: FormData) => updateGenericUnit('units_of_measure', formData);
+export const deleteUnitOfMeasure = (code: string) => deleteGenericUnit('units_of_measure', code);
+
+// Unit of Time
+export const addUnitOfTime = (prevState: any, formData: FormData) => addGenericUnit('units_of_time', formData);
+export const updateUnitOfTime = (prevState: any, formData: FormData) => updateGenericUnit('units_of_time', formData);
+export const deleteUnitOfTime = (code: string) => deleteGenericUnit('units_of_time', code);
+
+// Unit of Mass
+export const addUnitOfMass = (prevState: any, formData: FormData) => addGenericUnit('units_of_mass', formData);
+export const updateUnitOfMass = (prevState: any, formData: FormData) => updateGenericUnit('units_of_mass', formData);
+export const deleteUnitOfMass = (code: string) => deleteGenericUnit('units_of_mass', code);
+
+// Unit of Volume
+export const addUnitOfVolume = (prevState: any, formData: FormData) => addGenericUnit('units_of_volume', formData);
+export const updateUnitOfVolume = (prevState: any, formData: FormData) => updateGenericUnit('units_of_volume', formData);
+export const deleteUnitOfVolume = (code: string) => deleteGenericUnit('units_of_volume', code);

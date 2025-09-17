@@ -63,6 +63,26 @@ export type ExpenseVoucher = {
     description: string;
 }
 
+export type UnitOfMeasure = {
+    code: string;
+    description: string;
+}
+
+export type UnitOfTime = {
+    code: string;
+    description: string;
+}
+
+export type UnitOfMass = {
+    code: string;
+    description: string;
+}
+
+export type UnitOfVolume = {
+    code: string;
+    description: string;
+}
+
 
 export type Product = {
   id: string;

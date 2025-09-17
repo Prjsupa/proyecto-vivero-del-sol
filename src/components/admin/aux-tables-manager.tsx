@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import type { Product, Service, Provider, ProviderType, IncomeVoucher, ExpenseVoucher } from "@/lib/definitions";
+import type { Product, Service, Provider, ProviderType, IncomeVoucher, ExpenseVoucher, UnitOfMeasure, UnitOfTime, UnitOfMass, UnitOfVolume } from "@/lib/definitions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CategoryProductManager } from './category-product-manager';
@@ -23,6 +23,14 @@ import { IncomeVoucherManager } from './income-voucher-manager';
 import { CreateIncomeVoucherForm } from './create-income-voucher-form';
 import { ExpenseVoucherManager } from './expense-voucher-manager';
 import { CreateExpenseVoucherForm } from './create-expense-voucher-form';
+import { UnitOfMeasureManager } from './unit-of-measure-manager';
+import { CreateUnitOfMeasureForm } from './create-unit-of-measure-form';
+import { UnitOfTimeManager } from './unit-of-time-manager';
+import { CreateUnitOfTimeForm } from './create-unit-of-time-form';
+import { UnitOfMassManager } from './unit-of-mass-manager';
+import { CreateUnitOfMassForm } from './create-unit-of-mass-form';
+import { UnitOfVolumeManager } from './unit-of-volume-manager';
+import { CreateUnitOfVolumeForm } from './create-unit-of-volume-form';
 import { useRouter } from 'next/navigation';
 
 type AuxTableType = 
@@ -35,7 +43,11 @@ type AuxTableType =
     | 'service_descriptions'
     | 'provider_types'
     | 'income_vouchers'
-    | 'expense_vouchers';
+    | 'expense_vouchers'
+    | 'units_of_measure'
+    | 'units_of_time'
+    | 'units_of_mass'
+    | 'units_of_volume';
 
 interface AuxTablesManagerProps {
     products: Product[];
@@ -44,6 +56,10 @@ interface AuxTablesManagerProps {
     providerTypes: ProviderType[];
     incomeVouchers: IncomeVoucher[];
     expenseVouchers: ExpenseVoucher[];
+    unitsOfMeasure: UnitOfMeasure[];
+    unitsOfTime: UnitOfTime[];
+    unitsOfMass: UnitOfMass[];
+    unitsOfVolume: UnitOfVolume[];
     productCategories: string[];
     productSubcategories: string[];
     serviceCategories: string[];
@@ -61,6 +77,10 @@ export function AuxTablesManager({
     providerTypes,
     incomeVouchers,
     expenseVouchers,
+    unitsOfMeasure,
+    unitsOfTime,
+    unitsOfMass,
+    unitsOfVolume,
     productCategories, 
     productSubcategories, 
     serviceCategories,
@@ -98,6 +118,14 @@ export function AuxTablesManager({
                 return <IncomeVoucherManager allVouchers={incomeVouchers} onActionCompleted={onActionCompleted} />;
             case 'expense_vouchers':
                 return <ExpenseVoucherManager allVouchers={expenseVouchers} onActionCompleted={onActionCompleted} />;
+            case 'units_of_measure':
+                return <UnitOfMeasureManager allUnits={unitsOfMeasure} onActionCompleted={onActionCompleted} />;
+            case 'units_of_time':
+                return <UnitOfTimeManager allUnits={unitsOfTime} onActionCompleted={onActionCompleted} />;
+            case 'units_of_mass':
+                return <UnitOfMassManager allUnits={unitsOfMass} onActionCompleted={onActionCompleted} />;
+            case 'units_of_volume':
+                return <UnitOfVolumeManager allUnits={unitsOfVolume} onActionCompleted={onActionCompleted} />;
             default:
                 return null;
         }
@@ -125,6 +153,14 @@ export function AuxTablesManager({
                 return <CreateIncomeVoucherForm onActionCompleted={onActionCompleted} />;
             case 'expense_vouchers':
                 return <CreateExpenseVoucherForm onActionCompleted={onActionCompleted} />;
+            case 'units_of_measure':
+                return <CreateUnitOfMeasureForm onActionCompleted={onActionCompleted} />;
+            case 'units_of_time':
+                return <CreateUnitOfTimeForm onActionCompleted={onActionCompleted} />;
+            case 'units_of_mass':
+                return <CreateUnitOfMassForm onActionCompleted={onActionCompleted} />;
+            case 'units_of_volume':
+                return <CreateUnitOfVolumeForm onActionCompleted={onActionCompleted} />;
             default:
                 return null;
         }
@@ -147,6 +183,10 @@ export function AuxTablesManager({
                                     <SelectItem value="provider_types">Tipos de Proveedor</SelectItem>
                                     <SelectItem value="income_vouchers">Comprobantes de Ingreso</SelectItem>
                                     <SelectItem value="expense_vouchers">Comprobantes de Egreso</SelectItem>
+                                    <SelectItem value="units_of_measure">Unidades de Medida</SelectItem>
+                                    <SelectItem value="units_of_time">Unidades de Tiempo</SelectItem>
+                                    <SelectItem value="units_of_mass">Unidades de Masa</SelectItem>
+                                    <SelectItem value="units_of_volume">Unidades de Volumen</SelectItem>
                                     <SelectItem value="product_colors">Colores (Productos)</SelectItem>
                                     <SelectItem value="product_sizes">Tamaños (Productos)</SelectItem>
                                     <SelectItem value="product_descriptions">Descripciones (Productos)</SelectItem>
