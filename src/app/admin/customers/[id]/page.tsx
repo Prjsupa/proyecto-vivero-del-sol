@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ArrowLeft, BookUser, Mail, Phone, User } from "lucide-react";
+import { ArrowLeft, BookUser, Mail, Phone, User, FileText } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { InvoicesTable } from "@/components/admin/invoices-table";
 
@@ -74,10 +74,11 @@ export default async function CustomerDetailPage({ params }: { params: { id: str
                         </CardHeader>
                         <CardContent className="text-sm space-y-4">
                              <div className="flex items-start gap-3">
-                                <User className="h-4 w-4 mt-1 text-muted-foreground" />
+                                <FileText className="h-4 w-4 mt-1 text-muted-foreground" />
                                 <div>
-                                    <p className="font-semibold">Información Personal</p>
-                                    <p className="text-muted-foreground">{client.cuit || 'CUIT/DNI no especificado'}</p>
+                                    <p className="font-semibold">Información Fiscal</p>
+                                    <p className="text-muted-foreground">{client.document_type || 'Documento'}: {client.document_number || 'No especificado'}</p>
+                                    <p className="text-muted-foreground">IVA: {client.iva_condition || 'No especificado'}</p>
                                 </div>
                             </div>
                             <div className="flex items-start gap-3">
@@ -91,7 +92,7 @@ export default async function CustomerDetailPage({ params }: { params: { id: str
                                 <Phone className="h-4 w-4 mt-1 text-muted-foreground" />
                                 <div>
                                     <p className="font-semibold">Teléfono</p>
-                                    <p className="text-muted-foreground">{client.phone || 'No especificado'}</p>
+                                    <p className="text-muted-foreground">{client.phone || client.mobile_phone || 'No especificado'}</p>
                                 </div>
                             </div>
                         </CardContent>

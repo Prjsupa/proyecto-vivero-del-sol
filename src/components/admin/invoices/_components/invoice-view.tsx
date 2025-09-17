@@ -67,7 +67,7 @@ export function InvoiceView({ invoice, client }: { invoice: Invoice, client: Cli
                             <>
                                 <p>{client.address || 'Dirección no especificada'}</p>
                                 <p>{client.city || ''} {client.province || ''}</p>
-                                <p>CUIT/DNI: {client.cuit || 'No especificado'}</p>
+                                <p>{client.document_type || 'Documento'}: {client.document_number || 'No especificado'}</p>
                                 <p>Cond. IVA: {client.iva_condition || 'Consumidor Final'}</p>
                             </>
                         )}

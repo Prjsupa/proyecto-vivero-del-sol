@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { Client, Product } from "@/lib/definitions";
@@ -25,7 +24,8 @@ export function CustomersTable({ customers, products }: { customers: Client[], p
             <TableHeader>
                 <TableRow>
                     <TableHead>Nombre</TableHead>
-                    <TableHead className="hidden md:table-cell">Fecha de registro</TableHead>
+                    <TableHead className="hidden sm:table-cell">Documento</TableHead>
+                    <TableHead className="hidden md:table-cell">Teléfono</TableHead>
                     <TableHead>
                         <span className="sr-only">Acciones</span>
                     </TableHead>
@@ -46,8 +46,14 @@ export function CustomersTable({ customers, products }: { customers: Client[], p
                                     </div>
                                 </div>
                             </TableCell>
+                            <TableCell className="hidden sm:table-cell">
+                                <div className="flex flex-col">
+                                    <span className="font-medium">{customer.document_number || 'N/A'}</span>
+                                    <span className="text-xs text-muted-foreground">{customer.document_type}</span>
+                                </div>
+                            </TableCell>
                             <TableCell className="hidden md:table-cell">
-                                {formatDate(customer.created_at)}
+                                {customer.phone || customer.mobile_phone || 'N/A'}
                             </TableCell>
                             <TableCell>
                                  <ClientActions client={customer} allClients={customers} allProducts={products} />
@@ -56,7 +62,7 @@ export function CustomersTable({ customers, products }: { customers: Client[], p
                     ))
                 ) : (
                     <TableRow>
-                        <TableCell colSpan={3} className="h-48 text-center">
+                        <TableCell colSpan={4} className="h-48 text-center">
                             <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
                                 <User className="h-12 w-12" />
                                 <p className="font-semibold">No se encontraron clientes.</p>
