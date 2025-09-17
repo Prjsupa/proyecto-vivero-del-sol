@@ -57,6 +57,7 @@ export function AddPromotionForm({ products, services, productCategories, produc
     const [progressiveTiers, setProgressiveTiers] = useState<DiscountTier[]>([{ quantity: '', percentage: '' }]);
     const [xForYTake, setXForYTake] = useState('');
     const [xForYPay, setXForYPay] = useState('');
+    const [customTag, setCustomTag] = useState('');
 
 
     useEffect(() => {
@@ -79,6 +80,7 @@ export function AddPromotionForm({ products, services, productCategories, produc
         setProgressiveTiers([{ quantity: '', percentage: '' }]);
         setXForYTake('');
         setXForYPay('');
+        setCustomTag('');
     };
 
     const onDialogChange = (open: boolean) => {
@@ -298,7 +300,7 @@ export function AddPromotionForm({ products, services, productCategories, produc
                      {/* Custom Tag */}
                      <div className="space-y-2">
                         <Label htmlFor="custom_tag">Etiqueta personalizada (Opcional)</Label>
-                        <Input id="custom_tag" name="custom_tag" placeholder="Ej: ¡OFERTA!" />
+                        <Input id="custom_tag" name="custom_tag" placeholder="Ej: ¡OFERTA!" value={customTag} onChange={(e) => setCustomTag(e.target.value)} />
                         <p className="text-xs text-muted-foreground">Esta etiqueta aparecerá en los productos/servicios en promoción.</p>
                     </div>
                 </form>
