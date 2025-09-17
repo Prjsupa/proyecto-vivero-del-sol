@@ -1,4 +1,3 @@
-
 'use client';
 import { useState, useEffect } from 'react';
 import type { IncomeVoucher } from "@/lib/definitions";
@@ -113,12 +112,7 @@ function DeleteIncomeVoucherAlert({ voucher, onActionCompleted }: { voucher: Inc
 }
 
 
-export function IncomeVoucherManager({ allVouchers }: { allVouchers: IncomeVoucher[] }) {
-
-    const onActionCompleted = () => {
-        window.location.reload();
-    }
-
+export function IncomeVoucherManager({ allVouchers, onActionCompleted }: { allVouchers: IncomeVoucher[], onActionCompleted: () => void }) {
     return (
         <Card>
              <CardHeader>

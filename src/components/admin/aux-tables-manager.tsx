@@ -1,4 +1,3 @@
-
 'use client';
 import { useState } from 'react';
 import type { Product, Service, Provider, ProviderType, IncomeVoucher } from "@/lib/definitions";
@@ -22,6 +21,7 @@ import { ProviderTypeManager } from './provider-type-manager';
 import { CreateProviderTypeForm } from './create-provider-type-form';
 import { IncomeVoucherManager } from './income-voucher-manager';
 import { CreateIncomeVoucherForm } from './create-income-voucher-form';
+import { useRouter } from 'next/navigation';
 
 type AuxTableType = 
     | 'product_categories' 
@@ -65,27 +65,32 @@ export function AuxTablesManager({
     serviceDescriptions,
 }: AuxTablesManagerProps) {
     const [selectedTable, setSelectedTable] = useState<AuxTableType>('product_categories');
+    const router = useRouter();
+
+    const onActionCompleted = () => {
+        router.refresh();
+    }
 
     const renderContent = () => {
         switch (selectedTable) {
             case 'product_categories':
-                return <CategoryProductManager allProducts={products} allCategories={productCategories} />;
+                return <CategoryProductManager allProducts={products} allCategories={productCategories} onActionCompleted={onActionCompleted} />;
             case 'product_subcategories':
-                return <SubcategoryProductManager allProducts={products} allSubcategories={productSubcategories} />;
+                return <SubcategoryProductManager allProducts={products} allSubcategories={productSubcategories} onActionCompleted={onActionCompleted} />;
             case 'service_categories':
-                return <ServiceCategoryManager allServices={services} allCategories={serviceCategories} />;
+                return <ServiceCategoryManager allServices={services} allCategories={serviceCategories} onActionCompleted={onActionCompleted} />;
             case 'product_colors':
-                return <ColorManager allProducts={products} allColors={productColors} />;
+                return <ColorManager allProducts={products} allColors={productColors} onActionCompleted={onActionCompleted} />;
             case 'product_sizes':
-                return <SizeManager allProducts={products} allSizes={productSizes} />;
+                return <SizeManager allProducts={products} allSizes={productSizes} onActionCompleted={onActionCompleted} />;
             case 'product_descriptions':
-                return <ProductDescriptionManager allProducts={products} allDescriptions={productDescriptions} />;
+                return <ProductDescriptionManager allProducts={products} allDescriptions={productDescriptions} onActionCompleted={onActionCompleted} />;
             case 'service_descriptions':
-                return <ServiceDescriptionManager allServices={services} allDescriptions={serviceDescriptions} />;
+                return <ServiceDescriptionManager allServices={services} allDescriptions={serviceDescriptions} onActionCompleted={onActionCompleted} />;
             case 'provider_types':
-                return <ProviderTypeManager allProviders={providers} allProviderTypes={providerTypes} />;
+                return <ProviderTypeManager allProviders={providers} allProviderTypes={providerTypes} onActionCompleted={onActionCompleted} />;
             case 'income_vouchers':
-                return <IncomeVoucherManager allVouchers={incomeVouchers} />;
+                return <IncomeVoucherManager allVouchers={incomeVouchers} onActionCompleted={onActionCompleted} />;
             default:
                 return null;
         }
@@ -94,23 +99,23 @@ export function AuxTablesManager({
     const renderCreateButton = () => {
         switch (selectedTable) {
             case 'product_categories':
-                return <CreateCategoryForm allProducts={products} allCategories={productCategories} />;
+                return <CreateCategoryForm allProducts={products} allCategories={productCategories} onActionCompleted={onActionCompleted}/>;
             case 'product_subcategories':
-                return <CreateSubcategoryForm allProducts={products} allSubcategories={productSubcategories} />;
+                return <CreateSubcategoryForm allProducts={products} allSubcategories={productSubcategories} onActionCompleted={onActionCompleted} />;
             case 'service_categories':
-                return <CreateServiceCategoryForm allServices={services} allCategories={serviceCategories} />;
+                return <CreateServiceCategoryForm allServices={services} allCategories={serviceCategories} onActionCompleted={onActionCompleted} />;
             case 'product_colors':
-                return <CreateColorForm allProducts={products} />;
+                return <CreateColorForm allProducts={products} onActionCompleted={onActionCompleted} />;
             case 'product_sizes':
-                return <CreateSizeForm allProducts={products} />;
+                return <CreateSizeForm allProducts={products} onActionCompleted={onActionCompleted} />;
             case 'product_descriptions':
-                return <CreateProductDescriptionForm allProducts={products} />;
+                return <CreateProductDescriptionForm allProducts={products} onActionCompleted={onActionCompleted} />;
             case 'service_descriptions':
-                return <CreateServiceDescriptionForm allServices={services} />;
+                return <CreateServiceDescriptionForm allServices={services} onActionCompleted={onActionCompleted} />;
             case 'provider_types':
-                return <CreateProviderTypeForm />;
+                return <CreateProviderTypeForm onActionCompleted={onActionCompleted} />;
             case 'income_vouchers':
-                return <CreateIncomeVoucherForm />;
+                return <CreateIncomeVoucherForm onActionCompleted={onActionCompleted} />;
             default:
                 return null;
         }

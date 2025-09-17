@@ -1,4 +1,3 @@
-
 'use client';
 import { useActionState, useEffect, useRef, useState, useMemo } from 'react';
 import { useFormStatus } from 'react-dom';
@@ -34,7 +33,7 @@ function FieldError({ errors }: { errors?: string[] }) {
     )
 }
 
-export function CreateCategoryForm({ allProducts, allCategories }: { allProducts: Product[], allCategories: string[] }) {
+export function CreateCategoryForm({ allProducts, allCategories, onActionCompleted }: { allProducts: Product[], allCategories: string[], onActionCompleted: () => void }) {
     const [state, formAction] = useActionState(createCategoryAndAssignProducts, { message: '' });
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const formRef = useRef<HTMLFormElement>(null);
@@ -52,7 +51,7 @@ export function CreateCategoryForm({ allProducts, allCategories }: { allProducts
             formRef.current?.reset();
             setSelectedProductIds([]);
             setSearchTerm('');
-            window.location.reload();
+            onActionCompleted();
         } else if (state?.message && state.message !== 'success' && !state.errors) {
              toast({
                 title: 'Error',
@@ -60,7 +59,7 @@ export function CreateCategoryForm({ allProducts, allCategories }: { allProducts
                 variant: 'destructive'
             });
         }
-    }, [state, toast]);
+    }, [state, toast, onActionCompleted]);
 
     const onDialogChange = (open: boolean) => {
         if (!open) {

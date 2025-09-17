@@ -1,6 +1,5 @@
-
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import type { Provider, ProviderType } from "@/lib/definitions";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -117,12 +116,8 @@ function DeleteProviderTypeAlert({ providerType, providerCount, onActionComplete
 }
 
 
-export function ProviderTypeManager({ allProviders, allProviderTypes }: { allProviders: Provider[], allProviderTypes: ProviderType[] }) {
+export function ProviderTypeManager({ allProviders, allProviderTypes, onActionCompleted }: { allProviders: Provider[], allProviderTypes: ProviderType[], onActionCompleted: () => void }) {
 
-    const onActionCompleted = () => {
-        window.location.reload();
-    }
-    
     const providerCounts = useMemo(() => {
         const counts: Record<string, number> = {};
         for (const type of allProviderTypes) {

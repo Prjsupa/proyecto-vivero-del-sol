@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -97,4 +96,3 @@ export function DeleteCategoryAlert({ categoryName, productCount, onCategoryDele
         </AlertDialog>
     );
 }
-

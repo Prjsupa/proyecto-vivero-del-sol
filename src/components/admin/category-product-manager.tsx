@@ -1,4 +1,3 @@
-
 'use client';
 import { useState, useMemo } from 'react';
 import type { Product } from "@/lib/definitions";
@@ -15,7 +14,7 @@ import { EditCategoryForm } from './edit-category-form';
 import { DeleteCategoryAlert } from './delete-category-alert';
 import { AddProductsToCategoryForm } from './add-products-to-category-form';
 
-export function CategoryProductManager({ allProducts, allCategories }: { allProducts: Product[], allCategories: string[] }) {
+export function CategoryProductManager({ allProducts, allCategories, onActionCompleted }: { allProducts: Product[], allCategories: string[], onActionCompleted: () => void }) {
     const [selectedCategory, setSelectedCategory] = useState<string | null>(allCategories[0] || null);
     const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
 
@@ -44,17 +43,15 @@ export function CategoryProductManager({ allProducts, allCategories }: { allProd
             setSelectedProductIds(prev => prev.filter(id => id !== productId));
         }
     };
-
-    const onActionCompleted = () => {
+    
+    const onSubActionCompleted = () => {
         setSelectedProductIds([]);
-        // Note: we would need to re-fetch data or manually update the state
-        // For simplicity, we can reload, but a better UX would be to update state.
-        window.location.reload(); 
+        onActionCompleted();
     }
 
     const onCategoryActionCompleted = () => {
         setSelectedCategory(null);
-        window.location.reload();
+        onActionCompleted();
     }
 
 
@@ -79,7 +76,7 @@ export function CategoryProductManager({ allProducts, allCategories }: { allProd
                             <AddProductsToCategoryForm 
                                 categoryName={selectedCategory} 
                                 allProducts={allProducts} 
-                                onActionCompleted={onActionCompleted}
+                                onActionCompleted={onSubActionCompleted}
                             />
                             <EditCategoryForm 
                                 categoryName={selectedCategory} 
@@ -106,7 +103,7 @@ export function CategoryProductManager({ allProducts, allCategories }: { allProd
                         <BatchActions 
                             selectedProductIds={selectedProductIds} 
                             allCategories={allCategories}
-                            onActionCompleted={onActionCompleted} 
+                            onActionCompleted={onSubActionCompleted} 
                         />
                     </div>
                 )}

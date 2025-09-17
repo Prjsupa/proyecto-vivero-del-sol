@@ -1,4 +1,3 @@
-
 'use client';
 import { useActionState, useEffect, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
@@ -29,7 +28,7 @@ function FieldError({ errors }: { errors?: string[] }) {
     )
 }
 
-export function CreateIncomeVoucherForm() {
+export function CreateIncomeVoucherForm({ onActionCompleted }: { onActionCompleted: () => void }) {
     const [state, formAction] = useActionState(addIncomeVoucher, { message: '' });
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const formRef = useRef<HTMLFormElement>(null);
@@ -40,11 +39,11 @@ export function CreateIncomeVoucherForm() {
             toast({ title: '¡Éxito!', description: state.data });
             setIsDialogOpen(false);
             formRef.current?.reset();
-            window.location.reload();
+            onActionCompleted();
         } else if (state?.message && state.message !== 'success' && !state.errors) {
              toast({ title: 'Error', description: state.message, variant: 'destructive' });
         }
-    }, [state, toast]);
+    }, [state, toast, onActionCompleted]);
 
     return (
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
