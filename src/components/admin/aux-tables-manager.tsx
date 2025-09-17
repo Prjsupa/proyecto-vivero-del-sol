@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import type { Product, Service, Provider, ProviderType, IncomeVoucher, ExpenseVoucher, UnitOfMeasure, UnitOfTime, UnitOfMass, UnitOfVolume } from "@/lib/definitions";
+import type { Product, Service, Provider, ProviderType, IncomeVoucher, ExpenseVoucher, UnitOfMeasure, UnitOfTime, UnitOfMass, UnitOfVolume, PointOfSale } from "@/lib/definitions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CategoryProductManager } from './category-product-manager';
@@ -31,6 +31,8 @@ import { UnitOfMassManager } from './unit-of-mass-manager';
 import { CreateUnitOfMassForm } from './create-unit-of-mass-form';
 import { UnitOfVolumeManager } from './unit-of-volume-manager';
 import { CreateUnitOfVolumeForm } from './create-unit-of-volume-form';
+import { PointOfSaleManager } from './point-of-sale-manager';
+import { CreatePointOfSaleForm } from './create-point-of-sale-form';
 import { useRouter } from 'next/navigation';
 
 type AuxTableType = 
@@ -47,7 +49,8 @@ type AuxTableType =
     | 'units_of_measure'
     | 'units_of_time'
     | 'units_of_mass'
-    | 'units_of_volume';
+    | 'units_of_volume'
+    | 'points_of_sale';
 
 interface AuxTablesManagerProps {
     products: Product[];
@@ -60,6 +63,7 @@ interface AuxTablesManagerProps {
     unitsOfTime: UnitOfTime[];
     unitsOfMass: UnitOfMass[];
     unitsOfVolume: UnitOfVolume[];
+    pointsOfSale: PointOfSale[];
     productCategories: string[];
     productSubcategories: string[];
     serviceCategories: string[];
@@ -81,6 +85,7 @@ export function AuxTablesManager({
     unitsOfTime,
     unitsOfMass,
     unitsOfVolume,
+    pointsOfSale,
     productCategories, 
     productSubcategories, 
     serviceCategories,
@@ -105,13 +110,13 @@ export function AuxTablesManager({
             case 'service_categories':
                 return <ServiceCategoryManager allServices={services} allCategories={serviceCategories} onActionCompleted={onActionCompleted} />;
             case 'product_colors':
-                return <ColorManager allProducts={products} allColors={productColors} onActionCompleted={onActionCompleted} />;
+                return <ColorManager allProducts={products} allColors={productColors} />;
             case 'product_sizes':
-                return <SizeManager allProducts={products} allSizes={productSizes} onActionCompleted={onActionCompleted} />;
+                return <SizeManager allProducts={products} allSizes={productSizes} />;
             case 'product_descriptions':
-                return <ProductDescriptionManager allProducts={products} allDescriptions={productDescriptions} onActionCompleted={onActionCompleted} />;
+                return <ProductDescriptionManager allProducts={products} allDescriptions={productDescriptions} />;
             case 'service_descriptions':
-                return <ServiceDescriptionManager allServices={services} allDescriptions={serviceDescriptions} onActionCompleted={onActionCompleted} />;
+                return <ServiceDescriptionManager allServices={services} allDescriptions={serviceDescriptions} />;
             case 'provider_types':
                 return <ProviderTypeManager allProviders={providers} allProviderTypes={providerTypes} onActionCompleted={onActionCompleted} />;
             case 'income_vouchers':
@@ -126,6 +131,8 @@ export function AuxTablesManager({
                 return <UnitOfMassManager allUnits={unitsOfMass} onActionCompleted={onActionCompleted} />;
             case 'units_of_volume':
                 return <UnitOfVolumeManager allUnits={unitsOfVolume} onActionCompleted={onActionCompleted} />;
+            case 'points_of_sale':
+                return <PointOfSaleManager allUnits={pointsOfSale} onActionCompleted={onActionCompleted} />;
             default:
                 return null;
         }
@@ -136,17 +143,17 @@ export function AuxTablesManager({
             case 'product_categories':
                 return <CreateCategoryForm allProducts={products} allCategories={productCategories} onActionCompleted={onActionCompleted}/>;
             case 'product_subcategories':
-                return <CreateSubcategoryForm allProducts={products} allSubcategories={productSubcategories} onActionCompleted={onActionCompleted} />;
+                return <CreateSubcategoryForm allProducts={products} allSubcategories={productSubcategories} />;
             case 'service_categories':
-                return <CreateServiceCategoryForm allServices={services} allCategories={serviceCategories} onActionCompleted={onActionCompleted} />;
+                return <CreateServiceCategoryForm allServices={services} allCategories={serviceCategories} />;
             case 'product_colors':
-                return <CreateColorForm allProducts={products} onActionCompleted={onActionCompleted} />;
+                return <CreateColorForm allProducts={products} />;
             case 'product_sizes':
-                return <CreateSizeForm allProducts={products} onActionCompleted={onActionCompleted} />;
+                return <CreateSizeForm allProducts={products} />;
             case 'product_descriptions':
-                return <CreateProductDescriptionForm allProducts={products} onActionCompleted={onActionCompleted} />;
+                return <CreateProductDescriptionForm allProducts={products} />;
             case 'service_descriptions':
-                return <CreateServiceDescriptionForm allServices={services} onActionCompleted={onActionCompleted} />;
+                return <CreateServiceDescriptionForm allServices={services} />;
             case 'provider_types':
                 return <CreateProviderTypeForm onActionCompleted={onActionCompleted} />;
             case 'income_vouchers':
@@ -161,6 +168,8 @@ export function AuxTablesManager({
                 return <CreateUnitOfMassForm onActionCompleted={onActionCompleted} />;
             case 'units_of_volume':
                 return <CreateUnitOfVolumeForm onActionCompleted={onActionCompleted} />;
+            case 'points_of_sale':
+                return <CreatePointOfSaleForm onActionCompleted={onActionCompleted} />;
             default:
                 return null;
         }
@@ -187,6 +196,7 @@ export function AuxTablesManager({
                                     <SelectItem value="units_of_time">Unidades de Tiempo</SelectItem>
                                     <SelectItem value="units_of_mass">Unidades de Masa</SelectItem>
                                     <SelectItem value="units_of_volume">Unidades de Volumen</SelectItem>
+                                    <SelectItem value="points_of_sale">Puntos de Venta</SelectItem>
                                     <SelectItem value="product_colors">Colores (Productos)</SelectItem>
                                     <SelectItem value="product_sizes">Tamaños (Productos)</SelectItem>
                                     <SelectItem value="product_descriptions">Descripciones (Productos)</SelectItem>

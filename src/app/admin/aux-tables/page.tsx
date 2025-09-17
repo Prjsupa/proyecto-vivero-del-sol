@@ -1,6 +1,7 @@
 
+
 import { createClient } from "@/lib/supabase/server";
-import type { Product, Service, Provider, ProviderType, IncomeVoucher, ExpenseVoucher, UnitOfMeasure, UnitOfTime, UnitOfMass, UnitOfVolume } from "@/lib/definitions";
+import type { Product, Service, Provider, ProviderType, IncomeVoucher, ExpenseVoucher, UnitOfMeasure, UnitOfTime, UnitOfMass, UnitOfVolume, PointOfSale } from "@/lib/definitions";
 import { AuxTablesManager } from "@/components/admin/aux-tables-manager";
 
 async function getData() {
@@ -59,6 +60,9 @@ async function getData() {
     const { data: unitsOfVolumeData, error: unitsOfVolumeError } = await supabase.from('units_of_volume').select('*').order('code');
     if (unitsOfVolumeError) console.error('Error fetching units of volume:', unitsOfVolumeError);
 
+    const { data: pointsOfSaleData, error: pointsOfSaleError } = await supabase.from('points_of_sale').select('*').order('code');
+    if (pointsOfSaleError) console.error('Error fetching points of sale:', pointsOfSaleError);
+
     const uniqueProviderTypesMap = new Map<string, ProviderType>();
     (providerTypesData || []).forEach(item => {
         if (item.provider_type_code && !uniqueProviderTypesMap.has(item.provider_type_code)) {
@@ -91,6 +95,7 @@ async function getData() {
         unitsOfTime: (unitsOfTimeData as UnitOfTime[]) || [],
         unitsOfMass: (unitsOfMassData as UnitOfMass[]) || [],
         unitsOfVolume: (unitsOfVolumeData as UnitOfVolume[]) || [],
+        pointsOfSale: (pointsOfSaleData as PointOfSale[]) || [],
         productCategories, 
         productSubcategories,
         serviceCategories,
@@ -124,6 +129,7 @@ export default async function AuxTablesPage() {
                 unitsOfTime={data.unitsOfTime}
                 unitsOfMass={data.unitsOfMass}
                 unitsOfVolume={data.unitsOfVolume}
+                pointsOfSale={data.pointsOfSale}
                 productCategories={data.productCategories}
                 productSubcategories={data.productSubcategories}
                 serviceCategories={data.serviceCategories}

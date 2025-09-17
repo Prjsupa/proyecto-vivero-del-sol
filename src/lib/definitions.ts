@@ -83,6 +83,11 @@ export type UnitOfVolume = {
     description: string;
 }
 
+export type PointOfSale = {
+    code: string;
+    description: string;
+}
+
 
 export type Product = {
   id: string;
