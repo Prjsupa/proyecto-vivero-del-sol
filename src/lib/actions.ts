@@ -1,5 +1,3 @@
-
-
 'use server';
 
 import { z } from 'zod';
@@ -2104,8 +2102,8 @@ const basePromotionSchema = z.object({
   name: z.string().min(3, "El nombre debe tener al menos 3 caracteres."),
   is_active: z.coerce.boolean(),
   discount_type: z.enum(['x_for_y', 'price_discount', 'cross_selling', 'progressive_discount'], { required_error: "Debes seleccionar un tipo de descuento." }),
-  x_for_y_take: z.coerce.number({invalid_type_error: "Debe ser un número"}).optional(),
-  x_for_y_pay: z.coerce.number({invalid_type_error: "Debe ser un número"}).optional(),
+  x_for_y_take: z.string().optional(),
+  x_for_y_pay: z.string().optional(),
   progressive_tiers: z.string().transform((val) => val ? JSON.parse(val) : []).pipe(z.array(progressiveTierSchema).optional()),
   apply_to_type: z.enum(['all_store', 'all_products', 'all_services', 'product_categories', 'product_subcategories', 'service_categories', 'products', 'services'], { required_error: "Debes seleccionar a qué aplica la promoción." }),
   apply_to_ids: z.string().transform(val => val ? val.split(',') : []),
@@ -2118,11 +2116,13 @@ const basePromotionSchema = z.object({
 
 const promotionSchema = basePromotionSchema.superRefine((data, ctx) => {
     if (data.discount_type === 'x_for_y') {
-        if (!data.x_for_y_take) {
-            ctx.addIssue({ code: z.ZodIssueCode.custom, message: "El campo 'Llevando' es requerido.", path: ['x_for_y_take'] });
+        const take = Number(data.x_for_y_take);
+        const pay = Number(data.x_for_y_pay);
+        if (isNaN(take) || take <= 0) {
+            ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Debe ser un número mayor a 0.", path: ['x_for_y_take'] });
         }
-        if (!data.x_for_y_pay) {
-            ctx.addIssue({ code: z.ZodIssueCode.custom, message: "El campo 'Pagás' es requerido.", path: ['x_for_y_pay'] });
+         if (isNaN(pay) || pay <= 0) {
+            ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Debe ser un número mayor a 0.", path: ['x_for_y_pay'] });
         }
     }
     if (data.discount_type === 'progressive_discount') {
@@ -2152,7 +2152,7 @@ export async function addPromotion(prevState: any, formData: FormData) {
 
     let discount_value = {};
     if (discount_type === 'x_for_y' && x_for_y_take && x_for_y_pay) {
-        discount_value = { take: x_for_y_take, pay: x_for_y_pay };
+        discount_value = { take: Number(x_for_y_take), pay: Number(x_for_y_pay) };
     }
     if (discount_type === 'progressive_discount' && progressive_tiers) {
         const sortedTiers = progressive_tiers.sort((a, b) => a.quantity - b.quantity);
