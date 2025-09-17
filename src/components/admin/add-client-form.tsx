@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useActionState, useEffect, useRef, useState } from 'react';
@@ -9,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { AlertCircle, PlusCircle, Loader2 } from 'lucide-react';
 import { addClient } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
-import { Tabs, TabsList, TabsTrigger } from '../ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Calendar } from '../ui/calendar';
@@ -124,7 +125,7 @@ export function AddClientForm() {
                             <TabsTrigger value="contact">Contacto y Dirección</TabsTrigger>
                         </TabsList>
                         <div className="flex-grow overflow-y-auto p-1 pt-4 space-y-4">
-                            <div className={cn("space-y-4", activeTab !== 'personal' && 'hidden')}>
+                            <TabsContent value="personal" forceMount className={cn("space-y-4", activeTab !== 'personal' && 'hidden')}>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="name">Nombre</Label>
@@ -168,8 +169,8 @@ export function AddClientForm() {
                                     </Popover>
                                      <input type="hidden" name="birth_date" value={birthDate?.toISOString()} />
                                 </div>
-                            </div>
-                            <div className={cn("space-y-4", activeTab !== 'fiscal' && 'hidden')}>
+                            </TabsContent>
+                            <TabsContent value="fiscal" forceMount className={cn("space-y-4", activeTab !== 'fiscal' && 'hidden')}>
                                  <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="document_type">Tipo de Documento</Label>
@@ -222,8 +223,8 @@ export function AddClientForm() {
                                         <Input id="price_list" name="price_list" />
                                     </div>
                                  </div>
-                            </div>
-                            <div className={cn("space-y-4", activeTab !== 'contact' && 'hidden')}>
+                            </TabsContent>
+                            <TabsContent value="contact" forceMount className={cn("space-y-4", activeTab !== 'contact' && 'hidden')}>
                                <div className="space-y-2">
                                     <Label htmlFor="address">Dirección</Label>
                                     <Input id="address" name="address" />
@@ -262,7 +263,7 @@ export function AddClientForm() {
                                     <Input id="email" name="email" type="email" />
                                     <FieldError errors={state.errors?.email} />
                                 </div>
-                            </div>
+                            </TabsContent>
                         </div>
                     </Tabs>
                     <DialogFooter className="mt-4 pt-4 border-t shrink-0">
