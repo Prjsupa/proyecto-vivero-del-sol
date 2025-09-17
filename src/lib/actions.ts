@@ -1,4 +1,5 @@
 
+
 'use server';
 
 import { z } from 'zod';
@@ -681,6 +682,28 @@ export async function updateClient(prevState: any, formData: FormData) {
         message: 'success',
         data: `Cliente ${clientData.name} ${clientData.last_name} actualizado exitosamente.`,
     };
+}
+
+
+export async function deleteClient(clientId: number) {
+    if (!clientId) {
+        return { message: "ID de cliente inválido." };
+    }
+
+    const supabase = createClient();
+    
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { message: 'No autenticado' };
+    
+    const { error } = await supabase.from('clients').delete().eq('id', clientId);
+
+    if (error) {
+        return { message: `Error al eliminar el cliente: ${error.message}` };
+    }
+    
+    revalidatePath('/admin/customers');
+    
+    return { message: 'success', data: '¡Cliente eliminado exitosamente!' };
 }
 
 
