@@ -88,6 +88,16 @@ export type PointOfSale = {
     description: string;
 }
 
+export type AccountStatus = {
+    code: string;
+    description: string;
+}
+
+export type Currency = {
+    code: string;
+    description: string;
+}
+
 
 export type Product = {
   id: string;

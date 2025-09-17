@@ -2472,3 +2472,13 @@ export async function deleteUnitOfVolume(code: string) { return await deleteGene
 export async function addPointOfSale(prevState: any, formData: FormData) { return await addGenericUnit('points_of_sale', formData); }
 export async function updatePointOfSale(prevState: any, formData: FormData) { return await updateGenericUnit('points_of_sale', formData); }
 export async function deletePointOfSale(code: string) { return await deleteGenericUnit('points_of_sale', code); }
+
+// Account Status
+export async function addAccountStatus(prevState: any, formData: FormData) { return await addGenericUnit('account_statuses', formData); }
+export async function updateAccountStatus(prevState: any, formData: FormData) { return await updateGenericUnit('account_statuses', formData); }
+export async function deleteAccountStatus(code: string) { return await deleteGenericUnit('account_statuses', code); }
+
+// Currency
+export async function addCurrency(prevState: any, formData: FormData) { return await addGenericUnit('currencies', formData); }
+export async function updateCurrency(prevState: any, formData: FormData) { return await updateGenericUnit('currencies', formData); }
+export async function deleteCurrency(code: string) { return await deleteGenericUnit('currencies', code); }

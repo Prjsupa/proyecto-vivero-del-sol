@@ -1,6 +1,7 @@
+
 'use client';
 import { useState } from 'react';
-import type { Product, Service, Provider, ProviderType, IncomeVoucher, ExpenseVoucher, UnitOfMeasure, UnitOfTime, UnitOfMass, UnitOfVolume, PointOfSale } from "@/lib/definitions";
+import type { Product, Service, Provider, ProviderType, IncomeVoucher, ExpenseVoucher, UnitOfMeasure, UnitOfTime, UnitOfMass, UnitOfVolume, PointOfSale, AccountStatus, Currency } from "@/lib/definitions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CategoryProductManager } from './category-product-manager';
@@ -34,6 +35,10 @@ import { CreateUnitOfVolumeForm } from './create-unit-of-volume-form';
 import { PointOfSaleManager } from './point-of-sale-manager';
 import { CreatePointOfSaleForm } from './create-point-of-sale-form';
 import { useRouter } from 'next/navigation';
+import { AccountStatusManager } from './account-status-manager';
+import { CreateAccountStatusForm } from './create-account-status-form';
+import { CurrencyManager } from './currency-manager';
+import { CreateCurrencyForm } from './create-currency-form';
 
 type AuxTableType = 
     | 'product_categories' 
@@ -50,7 +55,9 @@ type AuxTableType =
     | 'units_of_time'
     | 'units_of_mass'
     | 'units_of_volume'
-    | 'points_of_sale';
+    | 'points_of_sale'
+    | 'account_statuses'
+    | 'currencies';
 
 interface AuxTablesManagerProps {
     products: Product[];
@@ -64,6 +71,8 @@ interface AuxTablesManagerProps {
     unitsOfMass: UnitOfMass[];
     unitsOfVolume: UnitOfVolume[];
     pointsOfSale: PointOfSale[];
+    accountStatuses: AccountStatus[];
+    currencies: Currency[];
     productCategories: string[];
     productSubcategories: string[];
     serviceCategories: string[];
@@ -86,6 +95,8 @@ export function AuxTablesManager({
     unitsOfMass,
     unitsOfVolume,
     pointsOfSale,
+    accountStatuses,
+    currencies,
     productCategories, 
     productSubcategories, 
     serviceCategories,
@@ -133,6 +144,10 @@ export function AuxTablesManager({
                 return <UnitOfVolumeManager allUnits={unitsOfVolume} onActionCompleted={onActionCompleted} />;
             case 'points_of_sale':
                 return <PointOfSaleManager allUnits={pointsOfSale} onActionCompleted={onActionCompleted} />;
+            case 'account_statuses':
+                return <AccountStatusManager allUnits={accountStatuses} onActionCompleted={onActionCompleted} />;
+            case 'currencies':
+                return <CurrencyManager allUnits={currencies} onActionCompleted={onActionCompleted} />;
             default:
                 return null;
         }
@@ -143,9 +158,9 @@ export function AuxTablesManager({
             case 'product_categories':
                 return <CreateCategoryForm allProducts={products} allCategories={productCategories} onActionCompleted={onActionCompleted}/>;
             case 'product_subcategories':
-                return <CreateSubcategoryForm allProducts={products} allSubcategories={productSubcategories} />;
+                return <CreateSubcategoryForm allProducts={products} allSubcategories={productSubcategories} onActionCompleted={onActionCompleted} />;
             case 'service_categories':
-                return <CreateServiceCategoryForm allServices={services} allCategories={serviceCategories} />;
+                return <CreateServiceCategoryForm allServices={services} allCategories={serviceCategories} onActionCompleted={onActionCompleted}/>;
             case 'product_colors':
                 return <CreateColorForm allProducts={products} />;
             case 'product_sizes':
@@ -170,6 +185,10 @@ export function AuxTablesManager({
                 return <CreateUnitOfVolumeForm onActionCompleted={onActionCompleted} />;
             case 'points_of_sale':
                 return <CreatePointOfSaleForm onActionCompleted={onActionCompleted} />;
+            case 'account_statuses':
+                return <CreateAccountStatusForm onActionCompleted={onActionCompleted} />;
+            case 'currencies':
+                return <CreateCurrencyForm onActionCompleted={onActionCompleted} />;
             default:
                 return null;
         }
@@ -197,6 +216,8 @@ export function AuxTablesManager({
                                     <SelectItem value="units_of_mass">Unidades de Masa</SelectItem>
                                     <SelectItem value="units_of_volume">Unidades de Volumen</SelectItem>
                                     <SelectItem value="points_of_sale">Puntos de Venta</SelectItem>
+                                    <SelectItem value="account_statuses">Estados de Cuentas</SelectItem>
+                                    <SelectItem value="currencies">Monedas</SelectItem>
                                     <SelectItem value="product_colors">Colores (Productos)</SelectItem>
                                     <SelectItem value="product_sizes">Tamaños (Productos)</SelectItem>
                                     <SelectItem value="product_descriptions">Descripciones (Productos)</SelectItem>

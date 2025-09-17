@@ -1,7 +1,7 @@
 
 
 import { createClient } from "@/lib/supabase/server";
-import type { Product, Service, Provider, ProviderType, IncomeVoucher, ExpenseVoucher, UnitOfMeasure, UnitOfTime, UnitOfMass, UnitOfVolume, PointOfSale } from "@/lib/definitions";
+import type { Product, Service, Provider, ProviderType, IncomeVoucher, ExpenseVoucher, UnitOfMeasure, UnitOfTime, UnitOfMass, UnitOfVolume, PointOfSale, AccountStatus, Currency } from "@/lib/definitions";
 import { AuxTablesManager } from "@/components/admin/aux-tables-manager";
 
 async function getData() {
@@ -62,6 +62,12 @@ async function getData() {
 
     const { data: pointsOfSaleData, error: pointsOfSaleError } = await supabase.from('points_of_sale').select('*').order('code');
     if (pointsOfSaleError) console.error('Error fetching points of sale:', pointsOfSaleError);
+    
+    const { data: accountStatusesData, error: accountStatusesError } = await supabase.from('account_statuses').select('*').order('code');
+    if (accountStatusesError) console.error('Error fetching account statuses:', accountStatusesError);
+
+    const { data: currenciesData, error: currenciesError } = await supabase.from('currencies').select('*').order('code');
+    if (currenciesError) console.error('Error fetching currencies:', currenciesError);
 
     const uniqueProviderTypesMap = new Map<string, ProviderType>();
     (providerTypesData || []).forEach(item => {
@@ -96,6 +102,8 @@ async function getData() {
         unitsOfMass: (unitsOfMassData as UnitOfMass[]) || [],
         unitsOfVolume: (unitsOfVolumeData as UnitOfVolume[]) || [],
         pointsOfSale: (pointsOfSaleData as PointOfSale[]) || [],
+        accountStatuses: (accountStatusesData as AccountStatus[]) || [],
+        currencies: (currenciesData as Currency[]) || [],
         productCategories, 
         productSubcategories,
         serviceCategories,
@@ -130,6 +138,8 @@ export default async function AuxTablesPage() {
                 unitsOfMass={data.unitsOfMass}
                 unitsOfVolume={data.unitsOfVolume}
                 pointsOfSale={data.pointsOfSale}
+                accountStatuses={data.accountStatuses}
+                currencies={data.currencies}
                 productCategories={data.productCategories}
                 productSubcategories={data.productSubcategories}
                 serviceCategories={data.serviceCategories}
