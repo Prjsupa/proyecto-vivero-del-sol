@@ -20,6 +20,7 @@ import { cn } from '@/lib/utils';
 import { format } from "date-fns"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '../ui/command';
 import { Badge } from '../ui/badge';
+import type { DateRange } from 'react-day-picker';
 
 function SubmitButton() {
     const { pending } = useFormStatus();
@@ -53,7 +54,7 @@ export function AddPromotionForm({ products, services, productCategories, produc
     const [applyToType, setApplyToType] = useState<string>('');
     const [selectedApplyToIds, setSelectedApplyToIds] = useState<Set<string>>(new Set());
     const [usageLimitType, setUsageLimitType] = useState<string>('unlimited');
-    const [date, setDate] = useState<{from: Date | undefined, to: Date | undefined}>({ from: undefined, to: undefined });
+    const [date, setDate] = useState<DateRange | undefined>();
     const [progressiveTiers, setProgressiveTiers] = useState<DiscountTier[]>([{ quantity: '', percentage: '' }]);
     const [xForYTake, setXForYTake] = useState('');
     const [xForYPay, setXForYPay] = useState('');
@@ -76,7 +77,7 @@ export function AddPromotionForm({ products, services, productCategories, produc
         setApplyToType('');
         setSelectedApplyToIds(new Set());
         setUsageLimitType('unlimited');
-        setDate({ from: undefined, to: undefined });
+        setDate(undefined);
         setProgressiveTiers([{ quantity: '', percentage: '' }]);
         setXForYTake('');
         setXForYPay('');
@@ -136,8 +137,8 @@ export function AddPromotionForm({ products, services, productCategories, produc
                     </DialogDescription>
                 </DialogHeader>
                 <form action={formAction} ref={formRef} className="flex-grow grid gap-4 py-4 overflow-y-auto pr-4">
-                     <input type="hidden" name="start_date" value={date.from?.toISOString()} />
-                     <input type="hidden" name="end_date" value={date.to?.toISOString()} />
+                     <input type="hidden" name="start_date" value={date?.from?.toISOString()} />
+                     <input type="hidden" name="end_date" value={date?.to?.toISOString()} />
                      <input type="hidden" name="progressive_tiers" value={JSON.stringify(progressiveTiers)} />
                      <input type="hidden" name="apply_to_ids" value={Array.from(selectedApplyToIds).join(',')} />
                     
@@ -282,10 +283,10 @@ export function AddPromotionForm({ products, services, productCategories, produc
                                 <Button
                                     id="date"
                                     variant={"outline"}
-                                    className={cn("w-[300px] justify-start text-left font-normal", !date.from && "text-muted-foreground")}
+                                    className={cn("w-[300px] justify-start text-left font-normal", !date && "text-muted-foreground")}
                                 >
                                     <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {date.from ? (
+                                    {date?.from ? (
                                         date.to ? (<> {format(date.from, "LLL dd, y")} - {format(date.to, "LLL dd, y")} </>) 
                                         : (format(date.from, "LLL dd, y"))
                                     ) : (<span>Selecciona un rango</span>)}
