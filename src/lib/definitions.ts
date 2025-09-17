@@ -10,6 +10,23 @@ export type Profile = {
   // rol has been removed
 };
 
+export type CompanyData = {
+    id: number;
+    razon_social?: string | null;
+    nombre_fantasia?: string | null;
+    domicilio?: string | null;
+    localidad?: string | null;
+    provincia?: string | null;
+    telefono?: string | null;
+    cuit?: string | null;
+    tipo_resp?: string | null;
+    ing_brutos?: string | null;
+    inicio_activ?: string | null;
+    web?: string | null;
+    whatsapp?: string | null;
+    updated_at?: string | null;
+};
+
 export type Client = {
   id: number;
   created_at: string;

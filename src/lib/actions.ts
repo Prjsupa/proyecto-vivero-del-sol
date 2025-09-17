@@ -2482,3 +2482,55 @@ export async function deleteAccountStatus(code: string) { return await deleteGen
 export async function addCurrency(prevState: any, formData: FormData) { return await addGenericUnit('currencies', formData); }
 export async function updateCurrency(prevState: any, formData: FormData) { return await updateGenericUnit('currencies', formData); }
 export async function deleteCurrency(code: string) { return await deleteGenericUnit('currencies', code); }
+
+// ============== COMPANY DATA =================
+
+const companyDataSchema = z.object({
+    razon_social: z.string().optional().nullable(),
+    nombre_fantasia: z.string().optional().nullable(),
+    domicilio: z.string().optional().nullable(),
+    localidad: z.string().optional().nullable(),
+    provincia: z.string().optional().nullable(),
+    telefono: z.string().optional().nullable(),
+    cuit: z.string().optional().nullable(),
+    tipo_resp: z.string().optional().nullable(),
+    ing_brutos: z.string().optional().nullable(),
+    inicio_activ: z.string().optional().nullable(),
+    web: z.string().optional().nullable(),
+    whatsapp: z.string().optional().nullable(),
+});
+
+export async function updateCompanyData(prevState: any, formData: FormData) {
+    const validatedFields = companyDataSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return {
+            message: "Datos de formulario inválidos.",
+            errors: validatedFields.error.flatten().fieldErrors,
+        };
+    }
+    
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { message: "No autorizado." };
+
+    const companyData = {
+        ...validatedFields.data,
+        updated_at: new Date().toISOString(),
+    };
+    
+    const { error } = await supabase
+        .from('company_data')
+        .update(companyData)
+        .eq('id', 1);
+
+    if (error) {
+        return { message: `Error al actualizar los datos de la empresa: ${error.message}` };
+    }
+
+    revalidatePath('/admin/company-data');
+    return {
+        message: 'success',
+        data: `¡Datos de la empresa actualizados exitosamente!`,
+    };
+}
