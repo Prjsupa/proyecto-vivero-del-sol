@@ -142,3 +142,4 @@ export type jsonb =
   | null
   | { [key: string]: jsonb | undefined }
   | jsonb[]
+

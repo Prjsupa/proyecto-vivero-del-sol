@@ -1,4 +1,3 @@
-
 'use client';
 import { useActionState, useEffect, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
@@ -10,7 +9,6 @@ import { Switch } from '@/components/ui/switch';
 import { AlertCircle, PlusCircle, Loader2, Trash2, Calendar as CalendarIcon, Search, X, ChevronsUpDown } from 'lucide-react';
 import { addPromotion } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
-import { Textarea } from '../ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { Checkbox } from '../ui/checkbox';
@@ -69,6 +67,7 @@ export function AddPromotionForm({ products, services, productCategories, produc
             toast({ title: '¡Éxito!', description: state.data });
             setIsDialogOpen(false);
             resetFormState();
+            window.location.reload();
         } else if (state?.message && state.message !== 'success' && state.message !== '') {
              toast({ title: 'Error', description: state.message, variant: 'destructive' });
         }
@@ -165,9 +164,7 @@ export function AddPromotionForm({ products, services, productCategories, produc
                                 <div className="space-y-2">
                                     <Label htmlFor="discount_type">Tipo de descuento</Label>
                                     <Select name="discount_type" onValueChange={setDiscountType}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Selecciona un tipo" />
-                                        </SelectTrigger>
+                                        <SelectTrigger><SelectValue placeholder="Selecciona un tipo" /></SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="x_for_y">Llevá X y pagá Y (2x1, 3x2, etc.)</SelectItem>
                                             <SelectItem value="progressive_discount">Descuento progresivo por cantidad</SelectItem>
