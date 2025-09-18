@@ -385,20 +385,22 @@ function ItemSelector({ items, selectedIds, onToggle, placeholder }: { items: (P
                     </Command>
                 </PopoverContent>
             </Popover>
-             <div className="space-y-2 rounded-md border p-2 h-32 overflow-y-auto">
-                 {selectedItems.length > 0 ? (
-                    selectedItems.map(item => (
-                        <Badge key={item.id} variant="secondary" className='mr-1 mb-1'>
-                            {item.name}
-                            <button type="button" onClick={() => onToggle(item.id)} className="ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2">
-                                <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
-                            </button>
-                        </Badge>
-                    ))
-                 ) : (
-                    <p className='text-sm text-muted-foreground text-center py-4'>No hay items seleccionados.</p>
-                 )}
-            </div>
+             <ScrollArea className="h-32 rounded-md border p-2">
+                <div className="space-y-1">
+                    {selectedItems.length > 0 ? (
+                        selectedItems.map(item => (
+                            <Badge key={item.id} variant="secondary" className='mr-1 mb-1'>
+                                {item.name}
+                                <button type="button" onClick={() => onToggle(item.id)} className="ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2">
+                                    <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                                </button>
+                            </Badge>
+                        ))
+                    ) : (
+                        <p className='text-sm text-muted-foreground text-center py-4'>No hay items seleccionados.</p>
+                    )}
+                </div>
+            </ScrollArea>
         </div>
     );
 }
