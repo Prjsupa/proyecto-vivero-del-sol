@@ -385,7 +385,7 @@ function ItemSelector({ items, selectedIds, onToggle, placeholder }: { items: (P
                     </Command>
                 </PopoverContent>
             </Popover>
-             <ScrollArea className="h-32 rounded-md border p-2">
+             <div className="rounded-md border p-2 h-32 overflow-y-auto">
                 <div className="space-y-1">
                     {selectedItems.length > 0 ? (
                         selectedItems.map(item => (
@@ -400,8 +400,9 @@ function ItemSelector({ items, selectedIds, onToggle, placeholder }: { items: (P
                         <p className='text-sm text-muted-foreground text-center py-4'>No hay items seleccionados.</p>
                     )}
                 </div>
-            </ScrollArea>
+            </div>
         </div>
     );
 }
 
+    
