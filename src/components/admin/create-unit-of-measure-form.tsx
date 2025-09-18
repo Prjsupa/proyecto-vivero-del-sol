@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AlertCircle, PlusCircle, Loader2 } from 'lucide-react';
-import { addUnitOfMeasure } from '@/lib/actions';
+import { addUnitOfMeasure } from '@/lib/aux-actions';
 import { useToast } from '@/hooks/use-toast';
 
 function SubmitButton() {

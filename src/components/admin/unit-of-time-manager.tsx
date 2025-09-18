@@ -7,7 +7,7 @@ import { Clock, Trash, Edit, Loader2 } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from '../ui/button';
-import { deleteUnitOfTime, updateUnitOfTime } from '@/lib/actions';
+import { deleteUnitOfTime, updateUnitOfTime } from '@/lib/aux-actions';
 import { useActionState } from 'react';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';

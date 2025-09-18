@@ -17,7 +17,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from '../ui/button';
-import { deleteExpenseVoucher, updateExpenseVoucher } from '@/lib/actions';
+import { deleteExpenseVoucher, updateExpenseVoucher } from '@/lib/aux-actions';
 import { useActionState } from 'react';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';

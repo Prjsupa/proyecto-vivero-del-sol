@@ -7,7 +7,7 @@ import { Store, Trash, Edit, Loader2 } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from '../ui/button';
-import { deletePointOfSale, updatePointOfSale } from '@/lib/actions';
+import { deletePointOfSale, updatePointOfSale } from '@/lib/aux-actions';
 import { useActionState } from 'react';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';

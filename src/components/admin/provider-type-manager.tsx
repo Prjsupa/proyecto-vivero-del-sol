@@ -17,7 +17,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from '../ui/button';
-import { deleteProviderType, updateProviderType } from '@/lib/actions';
+import { deleteProviderType, updateProviderType } from '@/lib/aux-actions';
 import { useActionState } from 'react';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
