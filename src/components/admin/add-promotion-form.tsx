@@ -51,7 +51,6 @@ export function AddPromotionForm({ products, services, productCategories, produc
     const formRef = useRef<HTMLFormElement>(null);
     const { toast } = useToast();
     
-    const [name, setName] = useState('');
     const [discountType, setDiscountType] = useState<string>('');
     const [applyToType, setApplyToType] = useState<string>('');
     const [selectedApplyToIds, setSelectedApplyToIds] = useState<Set<string>>(new Set());
@@ -60,7 +59,6 @@ export function AddPromotionForm({ products, services, productCategories, produc
     const [progressiveTiers, setProgressiveTiers] = useState<DiscountTier[]>([{ quantity: '', percentage: '' }]);
     const [xForYTake, setXForYTake] = useState('');
     const [xForYPay, setXForYPay] = useState('');
-    const [customTag, setCustomTag] = useState('');
 
 
     useEffect(() => {
@@ -76,7 +74,6 @@ export function AddPromotionForm({ products, services, productCategories, produc
 
     const resetFormState = () => {
         formRef.current?.reset();
-        setName('');
         setDiscountType('');
         setApplyToType('');
         setSelectedApplyToIds(new Set());
@@ -85,7 +82,6 @@ export function AddPromotionForm({ products, services, productCategories, produc
         setProgressiveTiers([{ quantity: '', percentage: '' }]);
         setXForYTake('');
         setXForYPay('');
-        setCustomTag('');
     };
 
     const onDialogChange = (open: boolean) => {
@@ -152,7 +148,7 @@ export function AddPromotionForm({ products, services, productCategories, produc
                             <div className="space-y-4 border-b pb-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="name">Nombre de la Promoción</Label>
-                                    <Input id="name" name="name" placeholder="Ej: Promo Día de la Madre" value={name} onChange={e => setName(e.target.value)} />
+                                    <Input id="name" name="name" placeholder="Ej: Promo Día de la Madre"/>
                                 </div>
                                 <div className="flex items-center space-x-2">
                                     <Switch id="is_active" name="is_active" defaultChecked />
@@ -305,7 +301,7 @@ export function AddPromotionForm({ products, services, productCategories, produc
                             {/* Custom Tag */}
                             <div className="space-y-2">
                                 <Label htmlFor="custom_tag">Etiqueta personalizada (Opcional)</Label>
-                                <Input id="custom_tag" name="custom_tag" placeholder="Ej: ¡OFERTA!" value={customTag} onChange={(e) => setCustomTag(e.target.value)} />
+                                <Input id="custom_tag" name="custom_tag" placeholder="Ej: ¡OFERTA!" />
                                 <p className="text-xs text-muted-foreground">Esta etiqueta aparecerá en los productos/servicios en promoción.</p>
                             </div>
                         </div>
@@ -385,7 +381,7 @@ function ItemSelector({ items, selectedIds, onToggle, placeholder }: { items: (P
                     </Command>
                 </PopoverContent>
             </Popover>
-             <div className="rounded-md border p-2 h-32 overflow-y-auto">
+             <ScrollArea className="rounded-md border p-2 h-32">
                 <div className="space-y-1">
                     {selectedItems.length > 0 ? (
                         selectedItems.map(item => (
@@ -400,7 +396,7 @@ function ItemSelector({ items, selectedIds, onToggle, placeholder }: { items: (P
                         <p className='text-sm text-muted-foreground text-center py-4'>No hay items seleccionados.</p>
                     )}
                 </div>
-            </div>
+            </ScrollArea>
         </div>
     );
 }

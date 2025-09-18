@@ -475,20 +475,20 @@ export async function addUser(prevState: any, formData: FormData) {
 const clientSchema = z.object({
   name: z.string({ required_error: "El nombre es requerido." }).min(1, 'El nombre es requerido.'),
   last_name: z.string({ required_error: "El apellido es requerido." }).min(1, 'El apellido es requerido.'),
-  razon_social: z.string().optional().transform(e => e === '' ? null : e),
-  nombre_fantasia: z.string().optional().transform(e => e === '' ? null : e),
-  iva_condition: z.string().optional().transform(e => e === '' ? null : e),
-  document_type: z.string().optional().transform(e => e === '' ? null : e),
-  document_number: z.string().optional().transform(e => e === '' ? null : e),
-  price_list: z.string().optional().transform(e => e === '' ? null : e),
-  province: z.string().optional().transform(e => e === '' ? null : e),
-  address: z.string().optional().transform(e => e === '' ? null : e),
-  city: z.string().optional().transform(e => e === '' ? null : e),
-  postal_code: z.string().optional().transform(e => e === '' ? null : e),
-  phone: z.string().optional().transform(e => e === '' ? null : e),
-  mobile_phone: z.string().optional().transform(e => e === '' ? null : e),
-  email: z.string().email('El email no es válido.').optional().or(z.literal('')).transform(e => e === '' ? null : e),
-  default_invoice_type: z.enum(['A', 'B', 'C']).or(z.literal('')).optional().transform(e => e === '' ? null : e),
+  razon_social: z.string().transform(e => e === '' ? null : e).optional().nullable(),
+  nombre_fantasia: z.string().transform(e => e === '' ? null : e).optional().nullable(),
+  iva_condition: z.string().transform(e => e === '' ? null : e).optional().nullable(),
+  document_type: z.string().transform(e => e === '' ? null : e).optional().nullable(),
+  document_number: z.string().transform(e => e === '' ? null : e).optional().nullable(),
+  price_list: z.string().transform(e => e === '' ? null : e).optional().nullable(),
+  province: z.string().transform(e => e === '' ? null : e).optional().nullable(),
+  address: z.string().transform(e => e === '' ? null : e).optional().nullable(),
+  city: z.string().transform(e => e === '' ? null : e).optional().nullable(),
+  postal_code: z.string().transform(e => e === '' ? null : e).optional().nullable(),
+  phone: z.string().transform(e => e === '' ? null : e).optional().nullable(),
+  mobile_phone: z.string().transform(e => e === '' ? null : e).optional().nullable(),
+  email: z.string().email('El email no es válido.').or(z.literal('')).transform(e => e === '' ? null : e).optional().nullable(),
+  default_invoice_type: z.enum(['A', 'B', 'C']).or(z.literal('')).transform(e => e === '' ? null : e).optional().nullable(),
   birth_date: z.preprocess((arg) => {
     if (!arg || arg === '') return null;
     if (typeof arg == "string" || arg instanceof Date) return new Date(arg);
@@ -2141,6 +2141,9 @@ const promotionSchema = basePromotionSchema.superRefine((data, ctx) => {
             ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Debe añadir al menos un tramo de descuento.", path: ['progressive_tiers'] });
         }
     }
+     if (data.apply_to_type !== 'all_store' && data.apply_to_type !== 'all_products' && data.apply_to_type !== 'all_services' && data.apply_to_ids.length === 0) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Debes seleccionar al menos un ítem o categoría.", path: ['apply_to_ids'] });
+    }
 });
 
 
@@ -2247,3 +2250,4 @@ export async function updateCompanyData(prevState: any, formData: FormData) {
         data: `¡Datos de la empresa actualizados exitosamente!`,
     };
 }
+
