@@ -79,9 +79,6 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
     const [vatType, setVatType] = useState<'consumidor_final' | 'exento' | 'monotributo' | 'responsable_inscripto'>('consumidor_final');
     const [vatRate, setVatRate] = useState<number>(0); // % IVA
     const [promotionsApplied, setPromotionsApplied] = useState<{ name: string; amount: number; source: 'auto' | 'manual' }[]>([]);
-    const [sellers, setSellers] = useState<Seller[]>([]);
-    const [selectedSellerId, setSelectedSellerId] = useState<number | null>(null);
-    const [commissionPercentage, setCommissionPercentage] = useState<number>(0);
     const [paymentCondition, setPaymentCondition] = useState<string>('');
     const [selectedCashAccount, setSelectedCashAccount] = useState<string>('');
 
@@ -166,7 +163,7 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
         } else {
             setPromotionsApplied(p => p.filter(promo => promo.source === 'manual'));
         }
-    }, [selectedProducts, supabase]);
+    }, [selectedProducts.map(p => p.quantity).join()]); // Depend on quantity changes
 
 
     // Totales para vista previa
@@ -283,51 +280,16 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
         }
     }, [state, toast, router, setOpen]);
 
-    // Cargar vendedores al montar el componente
-    useEffect(() => {
-        const loadSellers = async () => {
-            const { data, error } = await supabase
-                .from('sellers')
-                .select('*')
-                .order('last_name', { ascending: true });
-            
-            if (error) {
-                console.error('Error al cargar vendedores:', error);
-                toast({
-                    title: 'Error',
-                    description: 'No se pudieron cargar los vendedores',
-                    variant: 'destructive'
-                });
-            } else {
-                setSellers(data || []);
-            }
-        };
-        
-        loadSellers();
-    }, [supabase, toast]);
     
     useEffect(() => {
-        const client = customers.find(c => String(c.id) === selectedClientId);
         if (vatType === 'consumidor_final') {
             setInvoiceTypeState('B');
         } else {
-            setInvoiceTypeState(client?.default_invoice_type || 'B');
+             const client = customers.find(c => String(c.id) === selectedClientId);
+             setInvoiceTypeState(client?.default_invoice_type || 'B');
         }
     }, [vatType, selectedClientId, customers]);
 
-    // Actualizar el porcentaje de comisión cuando cambia el vendedor seleccionado
-    useEffect(() => {
-        if (selectedSellerId) {
-            const seller = sellers.find(s => s.id === selectedSellerId);
-            if (seller && seller.cash_sale_commission) {
-                setCommissionPercentage(seller.cash_sale_commission);
-            } else {
-                setCommissionPercentage(0);
-            }
-        } else {
-            setCommissionPercentage(0);
-        }
-    }, [selectedSellerId, sellers]);
 
     // Autocompletar datos del cliente al seleccionar
     useEffect(() => {
@@ -398,8 +360,6 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                     <input type="hidden" name="client_document_number" value={clientDocNumber} />
                     <input type="hidden" name="vat_type" value={vatType} />
                     <input type="hidden" name="vat_rate" value={String(vatRate)} />
-                    <input type="hidden" name="seller_id" value={selectedSellerId || ''} />
-                    <input type="hidden" name="commission_percentage" value={String(commissionPercentage)} />
                     <input type="hidden" name="promotions_applied" value={JSON.stringify(promotionsApplied)} />
                     <input type="hidden" name="discounts_total" value={String(discountsTotal)} />
                     <input type="hidden" name="payment_condition" value={paymentCondition} />
@@ -600,43 +560,7 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                             <FieldError errors={state?.errors?.invoiceType} />
                         </div>
                     </div>
-
                     
-                    <div className="space-y-2 rounded-md border p-4">
-                        <div className="flex items-center justify-between">
-                            <Label>Vendedor</Label>
-                        </div>
-                        <Select 
-                            value={selectedSellerId ? String(selectedSellerId) : ''} 
-                            onValueChange={(value) => setSelectedSellerId(value ? parseInt(value, 10) : null)}
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="Seleccionar vendedor" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {sellers.map(seller => (
-                                    <SelectItem key={seller.id} value={String(seller.id)}>
-                                        {seller.last_name}, {seller.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        
-                        {selectedSellerId && (
-                            <div className="mt-2">
-                                <Label>% Comisión</Label>
-                                <Input 
-                                    type="number" 
-                                    value={String(commissionPercentage)} 
-                                    onChange={(e) => setCommissionPercentage(Number(e.target.value) || 0)}
-                                    className="w-24"
-                                    min="0"
-                                    max="100"
-                                    step="0.1"
-                                />
-                            </div>
-                        )}
-                    </div>
                     
                     <div className="space-y-4 rounded-md border p-4">
                         <div className="space-y-2">
@@ -685,10 +609,7 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                                 <span>Descuentos</span>
                                 <span>- {formatPrice(discountsTotal)}</span>
                             </div>
-                            <div className="flex justify-between items-center text-sm">
-                                <span>IVA ({vatRate}%)</span>
-                                <span>{formatPrice(vatAmount)}</span>
-                            </div>
+                            
                             <div className="flex justify-between items-center text-lg font-bold">
                                 <span>Total</span>
                                 <span>{formatPrice(grandTotal)}</span>

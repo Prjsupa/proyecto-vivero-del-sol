@@ -97,7 +97,12 @@ export async function applyPromotions(input: ApplyPromotionsInput): Promise<Engi
       const discount = freeUnits * item.unitPrice;
       if (discount > 0) {
         lineDiscounts[item.productId] = (lineDiscounts[item.productId] || 0) + discount;
-        appliedPromos.push({ name: promo.name || 'Promo x_for_y', amount: discount, source: 'auto' });
+        const existingPromo = appliedPromos.find(p => p.name === promo.name);
+        if (existingPromo) {
+          existingPromo.amount += discount;
+        } else {
+          appliedPromos.push({ name: promo.name || 'Promo x_for_y', amount: discount, source: 'auto' });
+        }
       }
     }
   }
@@ -119,7 +124,12 @@ export async function applyPromotions(input: ApplyPromotionsInput): Promise<Engi
       const discount = item.quantity * item.unitPrice * pct;
       if (discount > 0) {
         lineDiscounts[item.productId] = (lineDiscounts[item.productId] || 0) + discount;
-        appliedPromos.push({ name: promo.name || 'Promo progresiva', amount: discount, source: 'auto' });
+        const existingPromo = appliedPromos.find(p => p.name === promo.name);
+        if (existingPromo) {
+          existingPromo.amount += discount;
+        } else {
+          appliedPromos.push({ name: promo.name || 'Promo progresiva', amount: discount, source: 'auto' });
+        }
       }
     }
   }
