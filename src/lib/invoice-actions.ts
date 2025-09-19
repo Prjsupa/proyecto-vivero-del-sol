@@ -1,8 +1,10 @@
+
 'use server';
 
 import { z } from 'zod';
 import { createClient } from './supabase/server';
 import { revalidatePath } from 'next/cache';
+import { cookies } from 'next/headers';
 
 const createInvoiceSchema = z.object({
     clientId: z.coerce.number().optional(), // Optional because a new client can be created
@@ -24,7 +26,8 @@ const createInvoiceSchema = z.object({
 });
 
 export async function createInvoice(prevState: any, formData: FormData) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const validatedFields = createInvoiceSchema.safeParse(Object.fromEntries(formData.entries()));
     
     if (!validatedFields.success) {
