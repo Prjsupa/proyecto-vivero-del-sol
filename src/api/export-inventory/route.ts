@@ -1,87 +1,158 @@
 
-// src/app/api/export-inventory/route.ts
 
-import { NextResponse } from 'next/server';
-import ExcelJS from 'exceljs';
-import { createClient } from '@/lib/supabase/server';
-import type { Product } from '@/lib/definitions';
+import { createClient } from "@/lib/supabase/server";
+import type { Product, Service, Provider, ProviderType, IncomeVoucher, ExpenseVoucher, UnitOfMeasure, UnitOfTime, UnitOfMass, UnitOfVolume, PointOfSale, AccountStatus, Currency, CashAccount } from "@/lib/definitions";
+import { AuxTablesManager } from "@/components/admin/aux-tables-manager";
 
-async function getProducts(): Promise<Product[]> {
+async function getData() {
     const supabase = createClient();
-    const { data, error } = await supabase.from('products').select('*').order('name', { ascending: true });
+    const { data: products, error: productsError } = await supabase
+        .from('products')
+        .select('*')
+        .order('name', { ascending: true });
 
-    if (error) {
-        console.error('Error fetching products:', error);
-        return [];
-    }
+    if (productsError) console.error('Error fetching products:', productsError);
 
-    return data;
+    const { data: services, error: servicesError } = await supabase
+        .from('services')
+        .select('*')
+        .order('name', { ascending: true });
+    
+    if (servicesError) console.error('Error fetching services:', servicesError);
+
+    const { data: providers, error: providersError } = await supabase
+        .from('providers')
+        .select('*')
+        .order('name', { ascending: true });
+
+    if (providersError) console.error('Error fetching providers:', providersError);
+    
+    const { data: providerTypesData, error: providerTypesError } = await supabase
+        .from('providers')
+        .select('provider_type_code, provider_type_description')
+        .not('provider_type_code', 'is', null);
+
+    if (providerTypesError) console.error('Error fetching provider types:', providerTypesError);
+    
+    const { data: incomeVouchersData, error: incomeVouchersError } = await supabase
+        .from('income_vouchers')
+        .select('code, description')
+        .order('code', { ascending: true });
+
+    if (incomeVouchersError) console.error('Error fetching income vouchers:', incomeVouchersError);
+
+    const { data: expenseVouchersData, error: expenseVouchersError } = await supabase
+        .from('expense_vouchers')
+        .select('code, description')
+        .order('code', { ascending: true });
+
+    if (expenseVouchersError) console.error('Error fetching expense vouchers:', expenseVouchersError);
+
+    const { data: unitsOfMeasureData, error: unitsOfMeasureError } = await supabase.from('units_of_measure').select('*').order('code');
+    if (unitsOfMeasureError) console.error('Error fetching units of measure:', unitsOfMeasureError);
+
+    const { data: unitsOfTimeData, error: unitsOfTimeError } = await supabase.from('units_of_time').select('*').order('code');
+    if (unitsOfTimeError) console.error('Error fetching units of time:', unitsOfTimeError);
+
+    const { data: unitsOfMassData, error: unitsOfMassError } = await supabase.from('units_of_mass').select('*').order('code');
+    if (unitsOfMassError) console.error('Error fetching units of mass:', unitsOfMassError);
+
+    const { data: unitsOfVolumeData, error: unitsOfVolumeError } = await supabase.from('units_of_volume').select('*').order('code');
+    if (unitsOfVolumeError) console.error('Error fetching units of volume:', unitsOfVolumeError);
+
+    const { data: pointsOfSaleData, error: pointsOfSaleError } = await supabase.from('points_of_sale').select('*').order('code');
+    if (pointsOfSaleError) console.error('Error fetching points of sale:', pointsOfSaleError);
+    
+    const { data: accountStatusesData, error: accountStatusesError } = await supabase.from('account_statuses').select('*').order('code');
+    if (accountStatusesError) console.error('Error fetching account statuses:', accountStatusesError);
+
+    const { data: currenciesData, error: currenciesError } = await supabase.from('currencies').select('*').order('code');
+    if (currenciesError) console.error('Error fetching currencies:', currenciesError);
+
+    const { data: cashAccountsData, error: cashAccountsError } = await supabase.from('cash_accounts').select('*').order('code');
+    if (cashAccountsError) console.error('Error fetching cash accounts:', cashAccountsError);
+
+    const uniqueProviderTypesMap = new Map<string, ProviderType>();
+    (providerTypesData || []).forEach(item => {
+        if (item.provider_type_code && !uniqueProviderTypesMap.has(item.provider_type_code)) {
+            uniqueProviderTypesMap.set(item.provider_type_code, {
+                code: item.provider_type_code,
+                description: item.provider_type_description || ''
+            });
+        }
+    });
+    const providerTypes = Array.from(uniqueProviderTypesMap.values()).sort((a, b) => a.code.localeCompare(b.code));
+
+    const productCategories = Array.from(new Set((products || []).map(item => item.category))).sort();
+    const productSubcategories = Array.from(new Set((products || []).map(item => item.subcategory).filter(Boolean) as string[])).sort();
+    const serviceCategories = Array.from(new Set((services || []).map(item => item.category))).sort();
+    
+    const productColors = Array.from(new Set((products || []).map(item => item.color).filter(Boolean) as string[])).sort();
+    const productSizes = Array.from(new Set((products || []).map(item => item.tamaño).filter(Boolean) as string[])).sort();
+    const productDescriptions = Array.from(new Set((products || []).map(item => item.description).filter(Boolean) as string[])).sort();
+    const serviceDescriptions = Array.from(new Set((services || []).map(item => item.description).filter(Boolean) as string[])).sort();
+
+
+    return { 
+        products: products || [], 
+        services: services || [],
+        providers: providers || [],
+        providerTypes: providerTypes || [],
+        incomeVouchers: (incomeVouchersData as IncomeVoucher[]) || [],
+        expenseVouchers: (expenseVouchersData as ExpenseVoucher[]) || [],
+        unitsOfMeasure: (unitsOfMeasureData as UnitOfMeasure[]) || [],
+        unitsOfTime: (unitsOfTimeData as UnitOfTime[]) || [],
+        unitsOfMass: (unitsOfMassData as UnitOfMass[]) || [],
+        unitsOfVolume: (unitsOfVolumeData as UnitOfVolume[]) || [],
+        pointsOfSale: (pointsOfSaleData as PointOfSale[]) || [],
+        accountStatuses: (accountStatusesData as AccountStatus[]) || [],
+        currencies: (currenciesData as Currency[]) || [],
+        cashAccounts: (cashAccountsData as CashAccount[]) || [],
+        productCategories, 
+        productSubcategories,
+        serviceCategories,
+        productColors,
+        productSizes,
+        productDescriptions,
+        serviceDescriptions
+    };
 }
 
-export async function GET() {
-  const products = await getProducts();
 
-  const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet('Inventario');
+export default async function AuxTablesPage() {
+    const data = await getData();
 
-  // Define headers
-  worksheet.columns = [
-    { header: 'SKU', key: 'sku', width: 20 },
-    { header: 'Nombre', key: 'name', width: 35 },
-    { header: 'Categoría', key: 'category', width: 20 },
-    { header: 'Subcategoría', key: 'subcategory', width: 20 },
-    { header: 'Color', key: 'color', width: 15 },
-    { header: 'Tamaño', key: 'tamaño', width: 15 },
-    { header: 'Proveedor', key: 'proveedor', width: 20 },
-    { header: 'Precio Costo', key: 'precio_costo', width: 15, style: { numFmt: '$#,##0.00' } },
-    { header: 'Precio Venta', key: 'precio_venta', width: 15, style: { numFmt: '$#,##0.00' } },
-    { header: 'Rentabilidad', key: 'rentabilidad', width: 15, style: { numFmt: '0.00%' } },
-    { header: 'Stock', key: 'stock', width: 10 },
-    { header: 'Disponible', key: 'available', width: 12 },
-    { header: 'Descripción', key: 'description', width: 50 },
-  ];
-
-  // Style header
-  worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
-  worksheet.getRow(1).fill = {
-    type: 'pattern',
-    pattern: 'solid',
-    fgColor: { argb: 'FF4F46E5' }
-  };
-  worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
-
-
-  // Add data
-  products.forEach(product => {
-    let rentabilidad = 0;
-    if (product.precio_costo > 0) {
-      rentabilidad = (product.precio_venta - product.precio_costo) / product.precio_costo;
-    }
-
-    worksheet.addRow({
-      name: product.name,
-      sku: product.sku,
-      category: product.category,
-      subcategory: product.subcategory,
-      color: product.color,
-      tamaño: product.tamaño,
-      proveedor: product.proveedor,
-      precio_costo: product.precio_costo,
-      precio_venta: product.precio_venta,
-      rentabilidad: rentabilidad,
-      stock: product.stock,
-      available: product.available ? 'Sí' : 'No',
-      description: product.description,
-    });
-  });
-
-  const buffer = await workbook.xlsx.writeBuffer();
-
-  return new NextResponse(buffer, {
-    status: 200,
-    headers: {
-      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'Content-Disposition': 'attachment; filename="inventario-vivero.xlsx"',
-    },
-  });
+    return (
+        <div className="space-y-8">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-2xl font-semibold">Gestión de Tablas Auxiliares</h1>
+                    <p className="text-muted-foreground">Administra las categorías y otros atributos para tus productos y servicios.</p>
+                </div>
+            </div>
+            <AuxTablesManager 
+                products={data.products}
+                services={data.services}
+                providers={data.providers}
+                providerTypes={data.providerTypes}
+                incomeVouchers={data.incomeVouchers}
+                expenseVouchers={data.expenseVouchers}
+                unitsOfMeasure={data.unitsOfMeasure}
+                unitsOfTime={data.unitsOfTime}
+                unitsOfMass={data.unitsOfMass}
+                unitsOfVolume={data.unitsOfVolume}
+                pointsOfSale={data.pointsOfSale}
+                accountStatuses={data.accountStatuses}
+                currencies={data.currencies}
+                cashAccounts={data.cashAccounts}
+                productCategories={data.productCategories}
+                productSubcategories={data.productSubcategories}
+                serviceCategories={data.serviceCategories}
+                productColors={data.productColors}
+                productSizes={data.productSizes}
+                productDescriptions={data.productDescriptions}
+                serviceDescriptions={data.serviceDescriptions}
+            />
+        </div>
+    )
 }

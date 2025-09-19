@@ -22,6 +22,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Badge } from '../ui/badge';
 import type { DateRange } from 'react-day-picker';
 import { ScrollArea } from '../ui/scroll-area';
+import { Alert, AlertDescription } from '../ui/alert';
 
 function SubmitButton() {
     const { pending } = useFormStatus();
@@ -51,6 +52,7 @@ export function AddPromotionForm({ products, services, productCategories, produc
     const formRef = useRef<HTMLFormElement>(null);
     const { toast } = useToast();
     
+    const [name, setName] = useState('');
     const [discountType, setDiscountType] = useState<string>('');
     const [applyToType, setApplyToType] = useState<string>('');
     const [selectedApplyToIds, setSelectedApplyToIds] = useState<Set<string>>(new Set());
@@ -59,6 +61,10 @@ export function AddPromotionForm({ products, services, productCategories, produc
     const [progressiveTiers, setProgressiveTiers] = useState<DiscountTier[]>([{ quantity: '', percentage: '' }]);
     const [xForYTake, setXForYTake] = useState('');
     const [xForYPay, setXForYPay] = useState('');
+    const [customTag, setCustomTag] = useState('');
+    const [errors, setErrors] = useState<Record<string, string[]>>({});
+    const [isActive, setIsActive] = useState<boolean>(true);
+    const [canBeCombined, setCanBeCombined] = useState<boolean>(false);
 
 
     useEffect(() => {
@@ -68,12 +74,16 @@ export function AddPromotionForm({ products, services, productCategories, produc
             resetFormState();
             window.location.reload();
         } else if (state?.message && state.message !== 'success' && state.message !== '') {
-             toast({ title: 'Error', description: state.message, variant: 'destructive' });
+            toast({ title: 'Error', description: state.message, variant: 'destructive' });
+            if (state?.errors) {
+                setErrors(state.errors);
+            }
         }
     }, [state, toast]);
 
     const resetFormState = () => {
         formRef.current?.reset();
+        setName('');
         setDiscountType('');
         setApplyToType('');
         setSelectedApplyToIds(new Set());
@@ -82,6 +92,10 @@ export function AddPromotionForm({ products, services, productCategories, produc
         setProgressiveTiers([{ quantity: '', percentage: '' }]);
         setXForYTake('');
         setXForYPay('');
+        setCustomTag('');
+        setErrors({});
+        setIsActive(true);
+        setCanBeCombined(false);
     };
 
     const onDialogChange = (open: boolean) => {
@@ -129,29 +143,69 @@ export function AddPromotionForm({ products, services, productCategories, produc
                     Crear Promoción
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-3xl max-h-[90vh] flex flex-col">
+            <DialogContent className="sm:max-w-3xl h-[90vh] flex flex-col overflow-hidden">
                 <DialogHeader className="shrink-0">
                     <DialogTitle>Crear Nueva Promoción</DialogTitle>
                     <DialogDescription>
                         Completa los detalles para configurar una nueva promoción.
                     </DialogDescription>
                 </DialogHeader>
-                <form action={formAction} ref={formRef} className="flex-grow overflow-hidden flex flex-col gap-4">
-                    <ScrollArea className="flex-grow pr-6 -mr-6">
-                        <div className="space-y-4">
+                <form action={formAction} ref={formRef} className="flex-1 min-h-0 overflow-hidden flex flex-col gap-4">
+                    <ScrollArea className="flex-1 pr-6 -mr-6">
+                        <div className="space-y-4 pb-28">
+                            {Object.keys(errors).length > 0 && (
+                                <Alert variant="destructive">
+                                    <AlertCircle className="h-4 w-4" />
+                                    <AlertDescription>
+                                        Por favor, corrige los errores marcados en el formulario.
+                                    </AlertDescription>
+                                </Alert>
+                            )}
                             <input type="hidden" name="start_date" value={date?.from?.toISOString() ?? ''} />
                             <input type="hidden" name="end_date" value={date?.to?.toISOString() ?? ''} />
-                            <input type="hidden" name="progressive_tiers" value={JSON.stringify(progressiveTiers)} />
+                            <input
+                                type="hidden"
+                                name="progressive_tiers"
+                                value={
+                                    discountType === 'progressive_discount'
+                                        ? JSON.stringify(
+                                            progressiveTiers.filter(t => t.quantity !== '' && t.percentage !== '')
+                                          )
+                                        : '[]'
+                                }
+                            />
                             <input type="hidden" name="apply_to_ids" value={Array.from(selectedApplyToIds).join(',')} />
+                            {/* Hidden fields to sync non-native controls */}
+                            <input type="hidden" name="discount_type" value={discountType} />
+                            <input type="hidden" name="apply_to_type" value={applyToType} />
+                            <input type="hidden" name="usage_limit_type" value={usageLimitType} />
+                            <input type="hidden" name="is_active" value={isActive ? 'true' : 'false'} />
+                            <input type="hidden" name="can_be_combined" value={canBeCombined ? 'true' : 'false'} />
                             
                             {/* General Info */}
                             <div className="space-y-4 border-b pb-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="name">Nombre de la Promoción</Label>
-                                    <Input id="name" name="name" placeholder="Ej: Promo Día de la Madre"/>
+                                    <Label htmlFor="name" className="flex items-center gap-1">
+                                        Nombre de la Promoción
+                                        <span className="text-red-500">*</span>
+                                    </Label>
+                                    <Input 
+                                        id="name" 
+                                        name="name" 
+                                        placeholder="Ej: Promo Día de la Madre" 
+                                        value={name} 
+                                        onChange={e => setName(e.target.value)}
+                                        className={errors.name ? "border-red-500" : ""}
+                                    />
+                                    {errors.name && (
+                                        <p className="text-sm text-red-500 flex items-center gap-1">
+                                            <AlertCircle className="h-3 w-3" />
+                                            {errors.name[0]}
+                                        </p>
+                                    )}
                                 </div>
                                 <div className="flex items-center space-x-2">
-                                    <Switch id="is_active" name="is_active" defaultChecked />
+                                    <Switch id="is_active" checked={isActive} onCheckedChange={setIsActive} />
                                     <Label htmlFor="is_active">Activa</Label>
                                 </div>
                             </div>
@@ -159,9 +213,14 @@ export function AddPromotionForm({ products, services, productCategories, produc
                             {/* Discount Type */}
                             <div className="space-y-4 border-b pb-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="discount_type">Tipo de descuento</Label>
-                                    <Select name="discount_type" onValueChange={setDiscountType} value={discountType}>
-                                        <SelectTrigger><SelectValue placeholder="Selecciona un tipo" /></SelectTrigger>
+                                    <Label htmlFor="discount_type" className="flex items-center gap-1">
+                                        Tipo de descuento
+                                        <span className="text-red-500">*</span>
+                                    </Label>
+                                    <Select onValueChange={setDiscountType} value={discountType}>
+                                        <SelectTrigger className={errors.discount_type ? "border-red-500" : ""}>
+                                            <SelectValue placeholder="Selecciona un tipo" />
+                                        </SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="x_for_y">Llevá X y pagá Y (2x1, 3x2, etc.)</SelectItem>
                                             <SelectItem value="progressive_discount">Descuento progresivo por cantidad</SelectItem>
@@ -169,17 +228,53 @@ export function AddPromotionForm({ products, services, productCategories, produc
                                             <SelectItem value="cross_selling" disabled>Cross selling</SelectItem>
                                         </SelectContent>
                                     </Select>
+                                    {errors.discount_type && (
+                                        <p className="text-sm text-red-500 flex items-center gap-1">
+                                            <AlertCircle className="h-3 w-3" />
+                                            {errors.discount_type[0]}
+                                        </p>
+                                    )}
                                 </div>
 
                                 {discountType === 'x_for_y' && (
                                     <div className="grid grid-cols-2 gap-4 p-4 border rounded-md bg-muted/50">
                                         <div className="space-y-2">
                                             <Label htmlFor="x_for_y_take">Llevando</Label>
-                                            <Input id="x_for_y_take" name="x_for_y_take" type="number" min="1" placeholder="Ej: 3" value={xForYTake} onChange={(e) => setXForYTake(e.target.value)} />
+                                            <Input 
+                                                id="x_for_y_take" 
+                                                name="x_for_y_take" 
+                                                type="number" 
+                                                min="1" 
+                                                placeholder="Ej: 3" 
+                                                value={xForYTake} 
+                                                onChange={(e) => setXForYTake(e.target.value)}
+                                                className={errors.x_for_y_take ? "border-red-500" : ""}
+                                            />
+                                            {errors.x_for_y_take && (
+                                                <p className="text-sm text-red-500 flex items-center gap-1">
+                                                    <AlertCircle className="h-3 w-3" />
+                                                    {errors.x_for_y_take[0]}
+                                                </p>
+                                            )}
                                         </div>
                                         <div className="space-y-2">
                                             <Label htmlFor="x_for_y_pay">Pagás</Label>
-                                            <Input id="x_for_y_pay" name="x_for_y_pay" type="number" min="1" placeholder="Ej: 2" value={xForYPay} onChange={(e) => setXForYPay(e.target.value)} />
+                                            <Input 
+                                                id="x_for_y_pay" 
+                                                name="x_for_y_pay" 
+                                                type="number" 
+                                                min="1" 
+                                                placeholder="Ej: 2" 
+                                                value={xForYPay} 
+                                                onChange={(e) => setXForYPay(e.target.value)}
+                                                className={errors.x_for_y_pay ? "border-red-500" : ""}
+                                            />
+                                            {errors.x_for_y_pay && (
+                                                <p className="text-sm text-red-500 flex items-center gap-1">
+                                                    <AlertCircle className="h-3 w-3" />
+                                                    {errors.x_for_y_pay[0]}
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
                                 )}
@@ -190,6 +285,12 @@ export function AddPromotionForm({ products, services, productCategories, produc
                                             <p>Descuento</p>
                                             <p>Al comprar por lo menos</p>
                                         </div>
+                                        {errors.progressive_tiers && (
+                                            <p className="text-sm text-red-500 flex items-center gap-1">
+                                                <AlertCircle className="h-3 w-3" />
+                                                {errors.progressive_tiers[0]}
+                                            </p>
+                                        )}
                                         {progressiveTiers.map((tier, index) => (
                                             <div key={index} className="grid grid-cols-[1fr_1fr_auto] items-center gap-2">
                                                 <div className="flex items-center w-full">
@@ -218,9 +319,14 @@ export function AddPromotionForm({ products, services, productCategories, produc
                             {/* Apply To */}
                             <div className="space-y-4 border-b pb-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="apply_to_type">Aplicar a</Label>
-                                    <Select name="apply_to_type" onValueChange={handleApplyToTypeChange} value={applyToType}>
-                                        <SelectTrigger><SelectValue placeholder="Selecciona dónde aplicar" /></SelectTrigger>
+                                    <Label htmlFor="apply_to_type" className="flex items-center gap-1">
+                                        Aplicar a
+                                        <span className="text-red-500">*</span>
+                                    </Label>
+                                    <Select onValueChange={handleApplyToTypeChange} value={applyToType}>
+                                        <SelectTrigger className={errors.apply_to_type ? "border-red-500" : ""}>
+                                            <SelectValue placeholder="Selecciona dónde aplicar" />
+                                        </SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="all_store">Toda la tienda</SelectItem>
                                             <SelectItem value="all_products">Todos los productos</SelectItem>
@@ -232,6 +338,12 @@ export function AddPromotionForm({ products, services, productCategories, produc
                                             <SelectItem value="services">Servicios específicos</SelectItem>
                                         </SelectContent>
                                     </Select>
+                                    {errors.apply_to_type && (
+                                        <p className="text-sm text-red-500 flex items-center gap-1">
+                                            <AlertCircle className="h-3 w-3" />
+                                            {errors.apply_to_type[0]}
+                                        </p>
+                                    )}
                                 </div>
 
                                 {['product_categories', 'product_subcategories', 'service_categories'].includes(applyToType) && (
@@ -261,12 +373,12 @@ export function AddPromotionForm({ products, services, productCategories, produc
                             {/* Limits */}
                             <div className="space-y-4 border-b pb-4">
                                 <div className="flex items-center space-x-2">
-                                    <Checkbox id="can_be_combined" name="can_be_combined" />
+                                    <Checkbox id="can_be_combined" checked={canBeCombined} onCheckedChange={(v) => setCanBeCombined(!!v)} />
                                     <Label htmlFor="can_be_combined">Permitir combinar con otras promociones.</Label>
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Límites de uso</Label>
-                                    <RadioGroup name="usage_limit_type" defaultValue="unlimited" onValueChange={setUsageLimitType} value={usageLimitType}>
+                                    <RadioGroup defaultValue="unlimited" onValueChange={setUsageLimitType} value={usageLimitType}>
                                         <div className="flex items-center space-x-2">
                                             <RadioGroupItem value="unlimited" id="limit-unlimited" />
                                             <Label htmlFor="limit-unlimited">Ilimitada</Label>
@@ -301,7 +413,7 @@ export function AddPromotionForm({ products, services, productCategories, produc
                             {/* Custom Tag */}
                             <div className="space-y-2">
                                 <Label htmlFor="custom_tag">Etiqueta personalizada (Opcional)</Label>
-                                <Input id="custom_tag" name="custom_tag" placeholder="Ej: ¡OFERTA!" />
+                                <Input id="custom_tag" name="custom_tag" placeholder="Ej: ¡OFERTA!" value={customTag} onChange={(e) => setCustomTag(e.target.value)} />
                                 <p className="text-xs text-muted-foreground">Esta etiqueta aparecerá en los productos/servicios en promoción.</p>
                             </div>
                         </div>
@@ -381,7 +493,7 @@ function ItemSelector({ items, selectedIds, onToggle, placeholder }: { items: (P
                     </Command>
                 </PopoverContent>
             </Popover>
-             <ScrollArea className="rounded-md border p-2 h-32">
+             <div className="rounded-md border p-2 h-32 overflow-y-auto">
                 <div className="space-y-1">
                     {selectedItems.length > 0 ? (
                         selectedItems.map(item => (
@@ -396,7 +508,7 @@ function ItemSelector({ items, selectedIds, onToggle, placeholder }: { items: (P
                         <p className='text-sm text-muted-foreground text-center py-4'>No hay items seleccionados.</p>
                     )}
                 </div>
-            </ScrollArea>
+            </div>
         </div>
     );
 }

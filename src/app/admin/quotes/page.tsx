@@ -2,9 +2,11 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Product, Service, Client, Currency } from "@/lib/definitions";
 import { QuoteBuilder } from "@/components/admin/quote-builder";
+import { cookies } from "next/headers";
 
 async function getData() {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const { data: products, error: productsError } = await supabase.from('products').select('*');
     if (productsError) console.error('Error fetching products:', productsError);
 

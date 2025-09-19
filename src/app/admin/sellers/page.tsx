@@ -5,9 +5,11 @@ import { SellersTable } from "@/components/admin/sellers-table";
 import { AddSellerForm } from "@/components/admin/add-seller-form";
 import { createClient } from "@/lib/supabase/server";
 import { PlusCircle } from "lucide-react";
+import { cookies } from "next/headers";
 
 async function getSellers(): Promise<Seller[]> {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const { data, error } = await supabase
         .from('sellers')
         .select('*')

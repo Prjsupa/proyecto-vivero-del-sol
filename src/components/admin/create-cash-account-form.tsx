@@ -33,17 +33,28 @@ export function CreateCashAccountForm({ onActionCompleted }: { onActionCompleted
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const formRef = useRef<HTMLFormElement>(null);
     const { toast } = useToast();
+    const handledRef = useRef(false);
 
     useEffect(() => {
-        if (state?.message === 'success') {
+        if (!state) return;
+        if (state.message === 'success' && !handledRef.current) {
+            handledRef.current = true;
             toast({ title: '¡Éxito!', description: state.data });
             setIsDialogOpen(false);
             formRef.current?.reset();
             onActionCompleted();
-        } else if (state?.message && state.message !== 'success' && !state.errors) {
-             toast({ title: 'Error', description: state.message, variant: 'destructive' });
+        } else if (state.message && state.message !== 'success' && !state.errors && !handledRef.current) {
+            handledRef.current = true;
+            toast({ title: 'Error', description: state.message, variant: 'destructive' });
         }
     }, [state, toast, onActionCompleted]);
+
+    // Reset the handled flag when dialog opens to allow new submission to toast once
+    useEffect(() => {
+        if (isDialogOpen) {
+            handledRef.current = false;
+        }
+    }, [isDialogOpen]);
 
     return (
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

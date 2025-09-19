@@ -2,9 +2,11 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Invoice, Client } from "@/lib/definitions";
 import { CurrentAccountsView } from "@/components/admin/current-accounts-view";
+import { cookies } from "next/headers";
 
 async function getInvoices(): Promise<Invoice[]> {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const { data, error } = await supabase
         .from('invoices')
         .select('*')
@@ -18,7 +20,8 @@ async function getInvoices(): Promise<Invoice[]> {
 }
 
 async function getClients(): Promise<Client[]> {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const { data, error } = await supabase
         .from('clients')
         .select('*')

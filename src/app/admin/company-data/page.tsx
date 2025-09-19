@@ -2,9 +2,11 @@
 import { createClient } from "@/lib/supabase/server";
 import type { CompanyData } from "@/lib/definitions";
 import { CompanyDataForm } from "@/components/admin/company-data-form";
+import { cookies } from "next/headers";
 
 async function getCompanyData(): Promise<CompanyData | null> {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const { data, error } = await supabase
         .from('company_data')
         .select('*')

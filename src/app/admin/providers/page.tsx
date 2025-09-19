@@ -4,9 +4,11 @@ import type { Provider, ProviderType } from "@/lib/definitions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AddProviderForm } from "@/components/admin/add-provider-form";
 import { ProvidersTable } from "@/components/admin/providers-table";
+import { cookies } from "next/headers";
 
 async function getProviders(): Promise<Provider[]> {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const { data, error } = await supabase
         .from('providers')
         .select('*')
@@ -20,7 +22,8 @@ async function getProviders(): Promise<Provider[]> {
 }
 
 async function getProviderTypes(): Promise<ProviderType[]> {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const { data, error } = await supabase
         .from('providers')
         .select('provider_type_code, provider_type_description')

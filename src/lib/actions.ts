@@ -1,5 +1,4 @@
 
-
 'use server';
 
 import { z } from 'zod';
@@ -77,7 +76,8 @@ export async function addProduct(prevState: any, formData: FormData) {
         };
     }
     
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const { name, sku, precio_costo, precio_venta, stock, available, description, subcategory, color, tamaño, proveedor, image } = validatedFields.data;
     const category = validatedFields.data.new_category || validatedFields.data.category;
     
@@ -148,7 +148,8 @@ export async function updateProduct(prevState: any, formData: FormData) {
         };
     }
 
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const { id, name, sku, precio_costo, precio_venta, stock, available, description, subcategory, color, tamaño, proveedor, image } = validatedFields.data;
     const category = validatedFields.data.new_category || validatedFields.data.category;
 
@@ -241,7 +242,8 @@ export async function addService(prevState: any, formData: FormData) {
         };
     }
     
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const { name, sku, precio_venta, available, description } = validatedFields.data;
     const category = validatedFields.data.new_category || validatedFields.data.category;
 
@@ -290,7 +292,8 @@ export async function updateService(prevState: any, formData: FormData) {
         };
     }
 
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const { id, name, sku, precio_venta, available, description } = validatedFields.data;
     const category = validatedFields.data.new_category || validatedFields.data.category;
 
@@ -321,7 +324,8 @@ export async function deleteService(serviceId: string) {
         return { message: "ID de servicio inválido." };
     }
 
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { message: 'No autenticado' };
@@ -347,7 +351,8 @@ const profileSchema = z.object({
 });
 
 export async function updateProfile(prevState: any, formData: FormData) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -507,7 +512,8 @@ export async function addClient(prevState: any, formData: FormData) {
         };
     }
     
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
      const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
         return { message: "No autorizado. Debes ser un administrador." }
@@ -555,7 +561,8 @@ export async function addSeller(prevState: any, formData: FormData) {
         };
     }
     
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
      const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
         return { message: "No autorizado. Debes ser un administrador." }
@@ -596,7 +603,8 @@ export async function updateSeller(prevState: any, formData: FormData) {
         };
     }
     
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
         return { message: "No autorizado. Debes ser un administrador." }
@@ -628,7 +636,8 @@ export async function deleteSeller(sellerId: number) {
         return { message: "ID de vendedor inválido." };
     }
 
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { message: 'No autenticado' };
@@ -660,7 +669,8 @@ export async function updateClient(prevState: any, formData: FormData) {
         };
     }
     
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
         return { message: "No autorizado. Debes ser un administrador." }
@@ -694,7 +704,8 @@ export async function deleteClient(clientId: number) {
         return { message: "ID de cliente inválido." };
     }
 
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { message: 'No autenticado' };
@@ -721,7 +732,8 @@ const updatePasswordSchema = z.object({
 });
 
 export async function updatePassword(prevState: any, formData: FormData) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user || !user.email) {
@@ -834,7 +846,8 @@ async function parseXlsx(buffer: ArrayBuffer): Promise<z.infer<typeof csvProduct
 
 
 export async function uploadProductsFromCsv(prevState: any, formData: FormData) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { message: 'Not authenticated' };
 
@@ -901,7 +914,8 @@ export async function deleteProduct(productId: string) {
         return { message: "ID de producto inválido." };
     }
 
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { message: 'No autenticado' };
@@ -924,7 +938,8 @@ export async function deleteSelectedProducts(productIds: string[]) {
         return { message: "No se seleccionaron productos." };
     }
 
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { message: 'No autenticado' };
@@ -947,7 +962,8 @@ export async function deleteSelectedServices(serviceIds: string[]) {
         return { message: "No se seleccionaron servicios." };
     }
 
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { message: 'No autenticado' };
@@ -972,7 +988,8 @@ const updateCategorySchema = z.object({
 
 
 export async function updateCategoryName(prevState: any, formData: FormData) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const validatedFields = updateCategorySchema.safeParse(Object.fromEntries(formData.entries()));
 
     if (!validatedFields.success) {
@@ -1012,7 +1029,8 @@ export async function updateCategoryName(prevState: any, formData: FormData) {
 }
 
 export async function deleteCategory(categoryName: string) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
 
     const { count, error: checkError } = await supabase
         .from('products')
@@ -1041,7 +1059,8 @@ const updateProductsCategorySchema = z.object({
 });
 
 export async function updateProductsCategory(prevState: any, formData: FormData) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const validatedFields = updateProductsCategorySchema.safeParse(Object.fromEntries(formData.entries()));
 
     if (!validatedFields.success) {
@@ -1078,7 +1097,8 @@ const updateProductsSubcategorySchema = z.object({
 });
 
 export async function updateProductsSubcategory(prevState: any, formData: FormData) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const validatedFields = updateProductsSubcategorySchema.safeParse(Object.fromEntries(formData.entries()));
 
     if (!validatedFields.success) {
@@ -1122,7 +1142,8 @@ const updateSubcategorySchema = z.object({
 });
 
 export async function updateSubcategoryName(prevState: any, formData: FormData) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const validatedFields = updateSubcategorySchema.safeParse(Object.fromEntries(formData.entries()));
 
     if (!validatedFields.success) {
@@ -1150,7 +1171,8 @@ export async function updateSubcategoryName(prevState: any, formData: FormData) 
 }
 
 export async function deleteSubcategory(subcategoryName: string) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
 
     const { count, error: checkError } = await supabase
         .from('products')
@@ -1176,7 +1198,8 @@ const createCategoryAndAssignProductsSchema = z.object({
 });
 
 export async function createCategoryAndAssignProducts(prevState: any, formData: FormData) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const validatedFields = createCategoryAndAssignProductsSchema.safeParse(Object.fromEntries(formData.entries()));
 
     if (!validatedFields.success) {
@@ -1223,7 +1246,8 @@ const createSubcategoryAndAssignProductsSchema = z.object({
 });
 
 export async function createSubcategoryAndAssignProducts(prevState: any, formData: FormData) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const validatedFields = createSubcategoryAndAssignProductsSchema.safeParse(Object.fromEntries(formData.entries()));
 
     if (!validatedFields.success) {
@@ -1265,7 +1289,8 @@ const createInvoiceSchema = z.object({
 });
 
 export async function createInvoice(prevState: any, formData: FormData) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const validatedFields = createInvoiceSchema.safeParse(Object.fromEntries(formData.entries()));
     
     if (!validatedFields.success) {
@@ -1338,7 +1363,8 @@ const quoteSchema = z.object({
 });
 
 export async function saveQuote(prevState: any, formData: FormData) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const validatedFields = quoteSchema.safeParse(Object.fromEntries(formData.entries()));
 
     if (!validatedFields.success) {
@@ -1394,7 +1420,8 @@ const updateServiceCategorySchema = z.object({
 
 
 export async function updateServiceCategoryName(prevState: any, formData: FormData) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const validatedFields = updateServiceCategorySchema.safeParse(Object.fromEntries(formData.entries()));
 
     if (!validatedFields.success) {
@@ -1434,7 +1461,8 @@ export async function updateServiceCategoryName(prevState: any, formData: FormDa
 }
 
 export async function deleteServiceCategory(categoryName: string) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
 
     const { count, error: checkError } = await supabase
         .from('services')
@@ -1460,7 +1488,8 @@ const updateServicesCategorySchema = z.object({
 });
 
 export async function updateServicesCategory(prevState: any, formData: FormData) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const validatedFields = updateServicesCategorySchema.safeParse(Object.fromEntries(formData.entries()));
 
     if (!validatedFields.success) {
@@ -1497,7 +1526,8 @@ const createServiceCategoryAndAssignServicesSchema = z.object({
 });
 
 export async function createServiceCategoryAndAssignServices(prevState: any, formData: FormData) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const validatedFields = createServiceCategoryAndAssignServicesSchema.safeParse(Object.fromEntries(formData.entries()));
 
     if (!validatedFields.success) {
@@ -1546,7 +1576,8 @@ const updateProductsColorSchema = z.object({
 });
 
 export async function updateProductsColor(prevState: any, formData: FormData) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const validatedFields = updateProductsColorSchema.safeParse(Object.fromEntries(formData.entries()));
 
     if (!validatedFields.success) {
@@ -1585,7 +1616,8 @@ const updateColorNameSchema = z.object({
 });
 
 export async function updateColorName(prevState: any, formData: FormData) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const validatedFields = updateColorNameSchema.safeParse(Object.fromEntries(formData.entries()));
 
     if (!validatedFields.success) {
@@ -1612,7 +1644,8 @@ export async function updateColorName(prevState: any, formData: FormData) {
 }
 
 export async function deleteColor(colorName: string) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
 
     const { count, error: checkError } = await supabase
         .from('products')
@@ -1637,7 +1670,8 @@ const createColorAndAssignProductsSchema = z.object({
 });
 
 export async function createColorAndAssignProducts(prevState: any, formData: FormData) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const validatedFields = createColorAndAssignProductsSchema.safeParse(Object.fromEntries(formData.entries()));
 
     if (!validatedFields.success) {
@@ -1673,7 +1707,8 @@ const updateProductsSizeSchema = z.object({
 });
 
 export async function updateProductsSize(prevState: any, formData: FormData) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const validatedFields = updateProductsSizeSchema.safeParse(Object.fromEntries(formData.entries()));
 
     if (!validatedFields.success) {
@@ -1713,7 +1748,8 @@ const updateSizeNameSchema = z.object({
 });
 
 export async function updateSizeName(prevState: any, formData: FormData) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const validatedFields = updateSizeNameSchema.safeParse(Object.fromEntries(formData.entries()));
 
     if (!validatedFields.success) {
@@ -1740,7 +1776,8 @@ export async function updateSizeName(prevState: any, formData: FormData) {
 }
 
 export async function deleteSize(sizeName: string) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
 
     const { count, error: checkError } = await supabase
         .from('products')
@@ -1765,7 +1802,8 @@ const createSizeAndAssignProductsSchema = z.object({
 });
 
 export async function createSizeAndAssignProducts(prevState: any, formData: FormData) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const validatedFields = createSizeAndAssignProductsSchema.safeParse(Object.fromEntries(formData.entries()));
 
     if (!validatedFields.success) {
@@ -1801,7 +1839,8 @@ const updateProductsDescriptionSchema = z.object({
 });
 
 export async function updateProductsDescription(prevState: any, formData: FormData) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const validatedFields = updateProductsDescriptionSchema.safeParse(Object.fromEntries(formData.entries()));
     if (!validatedFields.success) return { message: 'Datos inválidos.', errors: validatedFields.error.flatten().fieldErrors };
     
@@ -1824,7 +1863,8 @@ const updateDescriptionTextSchema = z.object({
 });
 
 export async function updateProductDescriptionText(prevState: any, formData: FormData) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const validatedFields = updateDescriptionTextSchema.safeParse(Object.fromEntries(formData.entries()));
     if (!validatedFields.success) return { message: 'Datos inválidos.', errors: validatedFields.error.flatten().fieldErrors };
 
@@ -1839,7 +1879,8 @@ export async function updateProductDescriptionText(prevState: any, formData: For
 }
 
 export async function deleteProductDescription(description: string) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const { count, error: checkError } = await supabase.from('products').select('*', { count: 'exact', head: true }).eq('description', description);
 
     if (checkError) return { message: `Error al verificar productos: ${checkError.message}` };
@@ -1855,9 +1896,10 @@ const createDescriptionAndAssignSchema = z.object({
 });
 
 export async function createProductDescriptionAndAssign(prevState: any, formData: FormData) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const validatedFields = createDescriptionAndAssignSchema.safeParse({ ...Object.fromEntries(formData.entries()), itemIds: formData.get('productIds') });
-    if (!validatedFields.success) return { message: "Datos inválidos.", errors: validatedFields.error.flatten().fieldErrors };
+    if (!validatedFields.success) return { message: "Datos de formulario inválidos.", errors: validatedFields.error.flatten().fieldErrors };
 
     const { newDescription, itemIds } = validatedFields.data;
 
@@ -1878,7 +1920,8 @@ const updateServicesDescriptionSchema = z.object({
 });
 
 export async function updateServicesDescription(prevState: any, formData: FormData) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const validatedFields = updateServicesDescriptionSchema.safeParse(Object.fromEntries(formData.entries()));
     if (!validatedFields.success) return { message: 'Datos inválidos.', errors: validatedFields.error.flatten().fieldErrors };
     
@@ -1896,7 +1939,8 @@ export async function updateServicesDescription(prevState: any, formData: FormDa
 }
 
 export async function updateServiceDescriptionText(prevState: any, formData: FormData) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const validatedFields = updateDescriptionTextSchema.safeParse(Object.fromEntries(formData.entries()));
     if (!validatedFields.success) return { message: 'Datos inválidos.', errors: validatedFields.error.flatten().fieldErrors };
 
@@ -1911,7 +1955,8 @@ export async function updateServiceDescriptionText(prevState: any, formData: For
 }
 
 export async function deleteServiceDescription(description: string) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const { count, error: checkError } = await supabase.from('services').select('*', { count: 'exact', head: true }).eq('description', description);
 
     if (checkError) return { message: `Error al verificar servicios: ${checkError.message}` };
@@ -1922,9 +1967,10 @@ export async function deleteServiceDescription(description: string) {
 }
 
 export async function createServiceDescriptionAndAssign(prevState: any, formData: FormData) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const validatedFields = createDescriptionAndAssignSchema.safeParse({ ...Object.fromEntries(formData.entries()), itemIds: formData.get('serviceIds') });
-    if (!validatedFields.success) return { message: "Datos inválidos.", errors: validatedFields.error.flatten().fieldErrors };
+    if (!validatedFields.success) return { message: "Datos de formulario inválidos.", errors: validatedFields.error.flatten().fieldErrors };
 
     const { newDescription, itemIds } = validatedFields.data;
 
@@ -1969,7 +2015,8 @@ export async function addProvider(prevState: any, formData: FormData) {
         };
     }
     
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { message: "No autorizado." };
 
@@ -2038,7 +2085,8 @@ export async function updateProvider(prevState: any, formData: FormData) {
         };
     }
     
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { message: "No autorizado." };
 
@@ -2085,7 +2133,8 @@ export async function deleteProvider(providerId: number) {
         return { message: "ID de proveedor inválido." };
     }
 
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { message: 'No autenticado' };
@@ -2158,7 +2207,8 @@ export async function addPromotion(prevState: any, formData: FormData) {
         };
     }
     
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { message: "No autorizado." };
 
@@ -2226,7 +2276,8 @@ export async function updateCompanyData(prevState: any, formData: FormData) {
         };
     }
     
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { message: "No autorizado." };
 
@@ -2250,4 +2301,3 @@ export async function updateCompanyData(prevState: any, formData: FormData) {
         data: `¡Datos de la empresa actualizados exitosamente!`,
     };
 }
-

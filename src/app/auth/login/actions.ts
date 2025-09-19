@@ -1,8 +1,10 @@
+
 'use server';
 
 import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -10,7 +12,8 @@ const loginSchema = z.object({
 });
 
 export async function login(prevState: { message: string, success?: boolean } | undefined, formData: FormData) {
-  const supabase = createClient();
+  const cookieStore = cookies();
+  const supabase = createClient(cookieStore);
   const validatedFields = loginSchema.safeParse(
     Object.fromEntries(formData.entries())
   );

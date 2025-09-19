@@ -10,13 +10,15 @@ import { ArrowLeft, BookUser, Mail, Phone, User, FileText, Home, Cake } from "lu
 import { format, parseISO, isValid } from "date-fns";
 import { InvoicesTable } from "@/components/admin/invoices-table";
 import { Separator } from "@/components/ui/separator";
+import { cookies } from "next/headers";
 
 function getInitials(name: string, lastName: string) {
     return `${name?.charAt(0) ?? ''}${lastName?.charAt(0) ?? ''}`.toUpperCase();
 }
 
 async function getClientDetails(clientId: string): Promise<{ client: Client, invoices: Invoice[] }> {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     
     const { data: client, error: clientError } = await supabase
         .from('clients')
@@ -43,7 +45,8 @@ async function getClientDetails(clientId: string): Promise<{ client: Client, inv
 
 
 export default async function CustomerDetailPage({ params }: { params: { id: string } }) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
         redirect('/auth/login');

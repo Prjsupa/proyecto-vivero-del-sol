@@ -8,6 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import useBranchStore from '@/hooks/use-branch-store';
 import { cn } from '@/lib/utils';
+import { useRouter } from 'next/navigation';
 
 const branches = [
     { value: 'vivero-del-sol', label: 'Vivero del Sol' },
@@ -17,6 +18,7 @@ const branches = [
 export function BranchSwitcher() {
     const [open, setOpen] = useState(false);
     const { activeBranch, setActiveBranch } = useBranchStore();
+    const router = useRouter();
     
     const selectedBranch = branches.find(branch => branch.value === activeBranch);
 
@@ -48,8 +50,15 @@ export function BranchSwitcher() {
                                         key={branch.value}
                                         value={branch.value}
                                         onSelect={(currentValue) => {
-                                            setActiveBranch(currentValue as 'vivero-del-sol' | 'prueba');
+                                            const value = currentValue as 'vivero-del-sol' | 'prueba';
+                                            setActiveBranch(value);
+                                            // Persist in cookies for server access
+                                            const label = branches.find(b => b.value === value)?.label ?? '';
+                                            // Cookies (non-HTTPOnly) for server-side reading via next/headers cookies if proxied
+                                            document.cookie = `active_branch_id=${value}; path=/; SameSite=Lax;`;
+                                            document.cookie = `active_branch_name=${encodeURIComponent(label)}; path=/; SameSite=Lax;`;
                                             setOpen(false);
+                                            router.refresh();
                                         }}
                                     >
                                         <Check

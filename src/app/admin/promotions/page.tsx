@@ -3,9 +3,11 @@ import { createClient } from "@/lib/supabase/server";
 import { PromotionsTable } from "@/components/admin/promotions-table";
 import { AddPromotionForm } from "@/components/admin/add-promotion-form";
 import type { Product, Service } from "@/lib/definitions";
+import { cookies } from "next/headers";
 
 async function getData() {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const { data: products, error: productsError } = await supabase.from('products').select('*');
     if (productsError) console.error('Error fetching products:', productsError);
 

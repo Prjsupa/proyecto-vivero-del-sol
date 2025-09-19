@@ -204,15 +204,28 @@ export type Invoice = {
   invoice_number: string;
   client_id: number;
   client_name: string;
+  branch_id?: string | null;
+  branch_name?: string | null;
+  seller_id?: number | null;
+  seller_name?: string | null;
   products: Json;
   total_amount: number;
-  invoice_type: 'A' | 'B';
+  invoice_type: 'A' | 'B' | 'C';
   payment_method?: string | null;
   card_type?: string | null;
   has_secondary_payment?: boolean;
   secondary_payment_method?: string | null;
   secondary_card_type?: string | null;
   notes?: string | null;
+  client_first_name?: string | null;
+  client_last_name?: string | null;
+  client_document_type?: string | null;
+  client_document_number?: string | null;
+  subtotal?: number | null;
+  vat_rate?: number | null;
+  vat_amount?: number | null;
+  discounts_total?: number | null;
+  promotions_applied?: Json | null; // e.g., [{ name: string, amount: number }]
 }
 
 export type Json =

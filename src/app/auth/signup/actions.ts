@@ -1,7 +1,9 @@
+
 'use server';
 
 import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
+import { cookies } from 'next/headers';
 
 const signupSchema = z.object({
   name: z.string().min(1, 'Name is required.'),
@@ -11,7 +13,8 @@ const signupSchema = z.object({
 });
 
 export async function signup(prevState: { message: string, success?: boolean } | undefined, formData: FormData) {
-  const supabase = createClient();
+  const cookieStore = cookies();
+  const supabase = createClient(cookieStore);
   const validatedFields = signupSchema.safeParse(
     Object.fromEntries(formData.entries())
   );

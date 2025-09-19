@@ -1,27 +1,30 @@
 
 'use client';
+'use client';
 import { useActionState, useEffect, useRef, useState, useMemo } from 'react';
 import { useFormStatus } from 'react-dom';
 import { Button } from "@/components/ui/button";
 import { DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Label } from '@/components/ui/label';
-import { AlertCircle, Loader2, Search, Trash2 } from 'lucide-react';
+import { AlertCircle, Loader2, Search, Trash2, User } from 'lucide-react';
 import { createInvoice } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
-import type { Client, Product } from '@/lib/definitions';
+import type { Client, Product, CashAccount, Service, Seller } from '@/lib/definitions';
+import { formatPrice } from '@/lib/utils';
+import { Input } from '../ui/input';
+import { applyPromotions } from '@/lib/promotions-engine';
+import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
+import { ScrollArea } from '../ui/scroll-area';
 import { Textarea } from '../ui/textarea';
 import { Checkbox } from '../ui/checkbox';
-import { Input } from '../ui/input';
-import { ScrollArea } from '../ui/scroll-area';
-import { formatPrice } from '@/lib/utils';
-import { useRouter } from 'next/navigation';
-
 
 type SelectedProduct = {
     product: Product;
     quantity: number;
+    discountAmount: number; // $ por línea
     total: number;
 }
 
@@ -50,17 +53,39 @@ function FieldError({ errors }: { errors?: string[] }) {
 interface CreateInvoiceFormProps {
     customers: Client[];
     products: Product[];
+    services?: Service[];
+    cashAccounts?: CashAccount[];
     selectedCustomerId?: string;
-    setOpen: (open: boolean) => void;
+    setOpen?: (open: boolean) => void;
+    asPage?: boolean;
+}
+
+interface SelectedProduct {
+    product: Product | Service;
+    quantity: number;
+    discountAmount: number;
+    total: number;
 }
 
 
-export function CreateInvoiceForm({ customers, products, selectedCustomerId, setOpen }: CreateInvoiceFormProps) {
+export function CreateInvoiceForm({ customers, products, services = [], cashAccounts = [], selectedCustomerId, setOpen, asPage = false }: CreateInvoiceFormProps) {
     const [state, formAction] = useActionState(createInvoice, { message: '' });
     const formRef = useRef<HTMLFormElement>(null);
     const { toast } = useToast();
     const router = useRouter();
     const [showSecondaryPayment, setShowSecondaryPayment] = useState(false);
+    const [selectedClientId, setSelectedClientId] = useState<string | undefined>(selectedCustomerId);
+    const [invoiceTypeState, setInvoiceTypeState] = useState<'A' | 'B' | 'C'>('B');
+    const [clientFirstName, setClientFirstName] = useState<string>('');
+    const [clientLastName, setClientLastName] = useState<string>('');
+    const [clientDocType, setClientDocType] = useState<'DNI' | 'CUIT' | 'CUIL' | 'NN'>('DNI');
+    const [clientDocNumber, setClientDocNumber] = useState<string>('');
+    const [vatType, setVatType] = useState<'consumidor_final' | 'exento' | 'monotributo' | 'responsable_inscripto'>('consumidor_final');
+    const [vatRate, setVatRate] = useState<number>(0); // % IVA
+    const [promotionsApplied, setPromotionsApplied] = useState<{ name: string; amount: number; source: 'auto' | 'manual' }[]>([]);
+    const [sellers, setSellers] = useState<Seller[]>([]);
+    const [selectedSellerId, setSelectedSellerId] = useState<number | null>(null);
+    const [commissionPercentage, setCommissionPercentage] = useState<number>(0);
 
     // State to manage payment method selection
     const [primaryPaymentMethod, setPrimaryPaymentMethod] = useState<string | undefined>();
@@ -68,7 +93,9 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, set
 
     // POS State
     const [searchTerm, setSearchTerm] = useState('');
+    const [serviceSearch, setServiceSearch] = useState('');
     const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([]);
+    const [selectedServices, setSelectedServices] = useState<SelectedProduct[]>([]);
     
     const filteredProducts = useMemo(() => {
         if (!searchTerm) return [];
@@ -81,6 +108,87 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, set
         );
     }, [products, searchTerm, selectedProducts]);
 
+    const filteredServices = useMemo(() => {
+        if (!serviceSearch) return [];
+        const inCartIds = selectedServices.map(s => s.product.id);
+        return services.filter(s => 
+            s.name.toLowerCase().includes(serviceSearch.toLowerCase()) &&
+            s.available &&
+            !inCartIds.includes(s.id)
+        );
+    }, [services, serviceSearch, selectedServices]);
+
+    // Aplicar promociones automáticas cuando cambian los productos
+    useEffect(() => {
+        const applyAutoPromotions = async () => {
+            // Preparar los ítems para el motor de promociones
+            const cartItems = selectedProducts.map(item => ({
+                productId: item.product.id.toString(),
+                quantity: item.quantity,
+                unitPrice: Number(item.product.precio_venta),
+                categoryId: item.product.category_id,
+                subcategoryId: item.product.subcategory_id
+            }));
+
+            try {
+                // Aplicar promociones usando el motor
+                const { lineDiscounts, appliedPromos } = await applyPromotions({
+                    items: cartItems,
+                    branchId: '1' // Ajusta según sea necesario
+                });
+
+                // Actualizar descuentos en los productos
+                setSelectedProducts(prev => 
+                    prev.map(item => {
+                        const discount = lineDiscounts[item.product.id.toString()] || 0;
+                        return {
+                            ...item,
+                            discountAmount: discount
+                        };
+                    })
+                );
+
+                // Actualizar lista de promociones aplicadas
+                const updatedPromos = appliedPromos.map(promo => ({
+                    name: promo.name,
+                    amount: promo.amount,
+                    source: 'auto'
+                }));
+
+                // Agregar promociones manuales que ya existían (si las hay)
+                const manualPromos = promotionsApplied.filter(p => p.source === 'manual');
+                setPromotionsApplied([...updatedPromos, ...manualPromos]);
+
+            } catch (error) {
+                console.error('Error al aplicar promociones:', error);
+            }
+        };
+        
+        applyAutoPromotions();
+    }, [selectedProducts]);
+
+    // Actualizar totales cuando cambian las promociones
+    useEffect(() => {
+        // Los totales ya se actualizan automáticamente por el useMemo
+        // Esta función está aquí por si necesitas lógica adicional
+    }, [promotionsApplied]);
+
+    // Totales para vista previa
+    const lineDiscounts = useMemo(() => {
+        const lp = selectedProducts.reduce((acc, p) => acc + (Number(p.discountAmount) || 0), 0);
+        const ls = selectedServices.reduce((acc, p) => acc + (Number(p.discountAmount) || 0), 0);
+        return lp + ls;
+    }, [selectedProducts, selectedServices]);
+    const subtotal = useMemo(() => {
+        const sp = selectedProducts.reduce((acc, p) => acc + (p.product.precio_venta * p.quantity), 0);
+        const ss = selectedServices.reduce((acc, p) => acc + (p.product.precio_venta * p.quantity), 0);
+        return sp + ss;
+    }, [selectedProducts, selectedServices]);
+    const promoDiscounts = useMemo(() => promotionsApplied.reduce((acc, p) => acc + (Number(p.amount) || 0), 0), [promotionsApplied]);
+    const discountsTotal = promoDiscounts + lineDiscounts;
+    const vatAmount = useMemo(() => Number(((subtotal - discountsTotal) * (vatRate / 100)).toFixed(2)), [subtotal, discountsTotal, vatRate]);
+    const grandTotal = useMemo(() => Number((subtotal - discountsTotal + vatAmount).toFixed(2)), [subtotal, discountsTotal, vatAmount]);
+
     const addProductToInvoice = (product: Product) => {
         setSelectedProducts(currentProducts => {
             const existingProduct = currentProducts.find(p => p.product.id === product.id);
@@ -90,15 +198,27 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, set
                     toast({ title: "Stock insuficiente", description: `Solo quedan ${product.stock} unidades de ${product.name}.`, variant: "destructive" });
                     return currentProducts;
                 }
-                return currentProducts.map(p => p.product.id === product.id ? { ...p, quantity: newQuantity, total: newQuantity * p.product.precio_venta } : p);
+                return currentProducts.map(p => p.product.id === product.id ? { ...p, quantity: newQuantity, total: Math.max(0, newQuantity * p.product.precio_venta - (p.discountAmount || 0)) } : p);
             }
             if (product.stock < 1) {
                  toast({ title: "Stock insuficiente", description: `${product.name} no tiene stock disponible.`, variant: "destructive" });
                  return currentProducts;
             }
-            return [...currentProducts, { product, quantity: 1, total: product.precio_venta }];
+            return [...currentProducts, { product, quantity: 1, discountAmount: 0, total: product.precio_venta }];
         });
         setSearchTerm('');
+    }
+
+    const addServiceToInvoice = (service: Service) => {
+        setSelectedServices(current => {
+            const existing = current.find(s => s.product.id === service.id);
+            if (existing) {
+                const newQuantity = existing.quantity + 1;
+                return current.map(s => s.product.id === service.id ? { ...s, quantity: newQuantity, total: Math.max(0, newQuantity * service.precio_venta - (s.discountAmount || 0)) } : s);
+            }
+            return [...current, { product: { ...service, stock: 1, available: true } as any, quantity: 1, discountAmount: 0, total: service.precio_venta }];
+        });
+        setServiceSearch('');
     }
     
     const updateProductQuantity = (productId: string, newQuantity: number) => {
@@ -110,15 +230,41 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, set
             return currentProducts.map(p => {
                 if (p.product.id === productId) {
                     if (newQuantity > p.product.stock) {
-                        toast({ title: "Stock insuficiente", description: `Solo quedan ${p.product.stock} unidades de ${p.product.name}.`, variant: "destructive" });
-                        return { ...p, quantity: p.product.stock, total: p.product.stock * p.product.precio_venta };
+                        toast({
+                            title: "Stock insuficiente",
+                            description: `No hay suficiente stock de ${p.product.name}. Stock disponible: ${p.product.stock}`,
+                            variant: "destructive"
+                        });
+                        return p;
                     }
-                    return { ...p, quantity: newQuantity, total: newQuantity * p.product.precio_venta };
+                    return {
+                        ...p,
+                        quantity: newQuantity,
+                        total: Math.max(0, (newQuantity * p.product.precio_venta) - (p.discountAmount || 0))
+                    };
                 }
                 return p;
             });
         });
-    }
+    };
+
+    const updateServiceQuantity = (serviceId: string, newQuantity: number) => {
+        setSelectedServices(currentServices => {
+            if (newQuantity === 0) {
+                return currentServices.filter(s => s.product.id !== serviceId);
+            }
+            return currentServices.map(s => {
+                if (s.product.id === serviceId) {
+                    return {
+                        ...s,
+                        quantity: newQuantity,
+                        total: Math.max(0, (newQuantity * s.product.precio_venta) - (s.discountAmount || 0))
+                    };
+                }
+                return s;
+            });
+        });
+    };
 
     useEffect(() => {
         if (state?.message === 'success' && state.data) {
@@ -126,7 +272,7 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, set
                 title: '¡Factura Creada!',
                 description: "La factura ha sido generada exitosamente.",
             });
-            setOpen(false);
+            if (setOpen) setOpen(false);
             router.push(`/admin/invoices/${state.data}`);
         } else if (state?.message && state.message !== 'success' && state.message !== '') {
              toast({
@@ -136,6 +282,77 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, set
             });
         }
     }, [state, toast, router, setOpen]);
+
+    // Cargar vendedores al montar el componente
+    useEffect(() => {
+        const loadSellers = async () => {
+            const supabase = createClient();
+            const { data, error } = await supabase
+                .from('sellers')
+                .select('*')
+                .order('last_name', { ascending: true });
+            
+            if (error) {
+                console.error('Error al cargar vendedores:', error);
+                toast({
+                    title: 'Error',
+                    description: 'No se pudieron cargar los vendedores',
+                    variant: 'destructive'
+                });
+            } else {
+                setSellers(data || []);
+            }
+        };
+        
+        loadSellers();
+    }, [toast]);
+
+    // Actualizar el tipo de factura cuando cambia el tipo de IVA
+    useEffect(() => {
+        if (vatType === 'consumidor_final') {
+            setInvoiceTypeState('B');
+            setVatRate(0);
+        } else if (vatType === 'exento') {
+            setVatRate(0);
+        } else if (vatType === 'monotributo') {
+            setVatRate(0);
+        } else if (vatType === 'responsable_inscripto') {
+            setVatRate(21); // Valor por defecto para RI
+        }
+    }, [vatType]);
+
+    // Actualizar el porcentaje de comisión cuando cambia el vendedor seleccionado
+    useEffect(() => {
+        if (selectedSellerId) {
+            const seller = sellers.find(s => s.id === selectedSellerId);
+            if (seller && seller.cash_sale_commission) {
+                setCommissionPercentage(seller.cash_sale_commission);
+            } else {
+                setCommissionPercentage(0);
+            }
+        } else {
+            setCommissionPercentage(0);
+        }
+    }, [selectedSellerId, sellers]);
+
+    // Autocompletar datos del cliente al seleccionar
+    useEffect(() => {
+        if (!selectedClientId) return;
+        const c = customers.find(c => String(c.id) === String(selectedClientId));
+        if (!c) return;
+        setClientFirstName(c.name || '');
+        setClientLastName(c.last_name || '');
+        // Documentos según modal de clientes
+        if (c.document_type) {
+            setClientDocType((c.document_type as any) || 'DNI');
+        }
+        if (c.document_number) {
+            setClientDocNumber(c.document_number);
+        }
+        if (c.default_invoice_type) {
+            setInvoiceTypeState(c.default_invoice_type);
+        }
+    }, [selectedClientId, customers]);
     
     const QuantityControl = ({ item }: { item: SelectedProduct }) => {
         const handleQuantityChange = (newQuantity: number) => {
@@ -164,17 +381,23 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, set
         );
     };
 
-    return (
-        <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col">
-            <DialogHeader>
-                <DialogTitle>Crear Nueva Factura</DialogTitle>
-                <DialogDescription>
-                    Completa los detalles para generar una nueva factura.
-                </DialogDescription>
-            </DialogHeader>
+    const formEl = (
                 <form id="invoice-form" action={formAction} ref={formRef} className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-8 overflow-hidden">
                 <div className="flex flex-col gap-4 overflow-y-hidden pr-2">
-                    <input type="hidden" name="products" value={JSON.stringify(selectedProducts.map(p => ({ productId: p.product.id, name: p.product.name, quantity: p.quantity, unitPrice: p.product.precio_venta, total: p.total })))} />
+                    <input type="hidden" name="products" value={JSON.stringify([
+                        ...selectedProducts.map(p => ({ productId: p.product.id, name: p.product.name, quantity: p.quantity, unitPrice: p.product.precio_venta, total: p.total, categoryId: p.product.category, subcategoryId: p.product.subcategory, discounts: (p.discountAmount && p.discountAmount > 0) ? [{ label: 'Desc. línea', amount: p.discountAmount }] : [] })),
+                        ...selectedServices.map(s => ({ productId: s.product.id, name: s.product.name, quantity: s.quantity, unitPrice: (s.product as any).precio_venta, total: s.total, isService: true, discounts: (s.discountAmount && s.discountAmount > 0) ? [{ label: 'Desc. servicio', amount: s.discountAmount }] : [] }))
+                    ])} />
+                    <input type="hidden" name="client_first_name" value={clientFirstName} />
+                    <input type="hidden" name="client_last_name" value={clientLastName} />
+                    <input type="hidden" name="client_document_type" value={clientDocType} />
+                    <input type="hidden" name="client_document_number" value={clientDocNumber} />
+                    <input type="hidden" name="vat_type" value={vatType} />
+                    <input type="hidden" name="vat_rate" value={String(vatRate)} />
+                    <input type="hidden" name="seller_id" value={selectedSellerId || ''} />
+                    <input type="hidden" name="commission_percentage" value={String(commissionPercentage)} />
+                    <input type="hidden" name="promotions_applied" value={JSON.stringify(promotionsApplied)} />
+                    <input type="hidden" name="discounts_total" value={String(discountsTotal)} />
 
                     <div className="space-y-4 rounded-md border p-4">
                             <Label>Añadir Productos</Label>
@@ -204,39 +427,158 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, set
                             </div>
                     </div>
 
+                    <div className="space-y-4 rounded-md border p-4">
+                            <Label>Añadir Servicios</Label>
+                            <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input 
+                                placeholder="Buscar servicio por nombre..."
+                                className="pl-10"
+                                value={serviceSearch}
+                                onChange={e => setServiceSearch(e.target.value)}
+                            />
+                            {serviceSearch && (
+                                <div className="absolute z-10 w-full mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-y-auto">
+                                    {filteredServices.length > 0 ? filteredServices.map(s => (
+                                        <div key={s.id} onClick={() => addServiceToInvoice(s)} className="px-4 py-2 hover:bg-accent cursor-pointer flex justify-between">
+                                            <div>
+                                                <p>{s.name}</p>
+                                            </div>
+                                            <span className="text-muted-foreground">{formatPrice(s.precio_venta)}</span>
+                                        </div>
+                                    )) : (
+                                        <div className="px-4 py-2 text-muted-foreground">No se encontraron servicios o ya están en la factura.</div>
+                                    )}
+                                </div>
+                            )}
+                            </div>
+                    </div>
+
                     <div className="space-y-4 rounded-md border p-4 flex-grow flex flex-col">
-                            <Label>Productos en la Factura</Label>
+                            <Label>Productos y Servicios en la Factura</Label>
                             <ScrollArea className="flex-grow">
-                            {selectedProducts.length === 0 ? (
+                            {selectedProducts.length === 0 && selectedServices.length === 0 ? (
                                 <div className="text-center text-muted-foreground py-10 flex flex-col items-center justify-center h-full">
-                                    <p>Aún no se han añadido productos.</p>
+                                    <p>Aún no se han añadido productos ni servicios.</p>
                                 </div>
                             ) : (
                                 <div className="space-y-2">
+                                    {/* Productos */}
                                     {selectedProducts.map(item => (
-                                        <div key={item.product.id} className="flex items-center justify-between p-2 rounded-md bg-muted/50">
-                                            <div className="flex-grow">
-                                                <p className="font-medium">{item.product.name}</p>
-                                                <p className="text-sm text-muted-foreground">
-                                                    {formatPrice(item.product.precio_venta)} c/u
-                                                </p>
-                                            </div>
-                                            <div className="flex items-center gap-4">
-                                                <QuantityControl item={item} />
-                                                <p className="font-semibold w-24 text-right">{formatPrice(item.total)}</p>
-                                            </div>
+                                    <div key={item.product.id} className="flex items-center justify-between p-2 rounded-md bg-muted/50">
+                                        <div className="flex-grow">
+                                            <p className="font-medium">{item.product.name}</p>
+                                            <p className="text-sm text-muted-foreground">
+                                                {formatPrice(item.product.precio_venta)} c/u
+                                            </p>
                                         </div>
-                                    ))}
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-sm text-muted-foreground">Desc. $</span>
+                                                <Input
+                                                    type="number"
+                                                    className="h-8 w-24"
+                                                    step="0.01"
+                                                    min="0"
+                                                    value={String(item.discountAmount ?? 0)}
+                                                    onChange={(e) => {
+                                                        const val = Math.max(0, Number(e.target.value) || 0);
+                                                        setSelectedProducts(curr => curr.map(p => p.product.id === item.product.id ? {
+                                                            ...p,
+                                                            discountAmount: val,
+                                                            total: Math.max(0, p.quantity * p.product.precio_venta - val)
+                                                        } : p));
+                                                    }}
+                                                />
+                                            </div>
+                                            <QuantityControl item={item} />
+                                            <p className="font-semibold w-24 text-right">{formatPrice(item.total)}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                                {/* Servicios */}
+                                {selectedServices.map(service => (
+                                    <div key={`service-${service.product.id}`} className="flex items-center justify-between p-2 border rounded-md bg-blue-50">
+                                        <div className="flex-1">
+                                            <p className="font-medium">{service.product.name} <span className="text-xs text-muted-foreground">(Servicio)</span></p>
+                                            <p className="text-sm text-muted-foreground">{service.quantity} x {formatPrice(service.product.precio_venta)}</p>
+                                            {service.discountAmount > 0 && (
+                                                <p className="text-xs text-red-500">
+                                                    -{formatPrice(service.discountAmount)} (Descuento)
+                                                </p>
+                                            )}
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <p className="font-medium">{formatPrice(service.total)}</p>
+                                            <Button 
+                                                type="button"
+                                                variant="ghost" 
+                                                size="sm" 
+                                                className="text-red-500 hover:text-red-700"
+                                                onClick={() => updateServiceQuantity(service.product.id, 0)}
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ))}
                                 </div>
                             )}
                             </ScrollArea>
+                    </div>
+                    <div className="space-y-2 rounded-md border p-4">
+                        <div className="flex items-center justify-between">
+                            <Label>Promociones aplicadas</Label>
+                            <div className="flex gap-2">
+                                <Button 
+                                    type="button" 
+                                    variant="outline" 
+                                    size="sm" 
+                                    onClick={() => setPromotionsApplied(arr => [...arr, { name: '', amount: 0 }])}
+                                >
+                                    Agregar manual
+                                </Button>
+                            </div>
+                        </div>
+                        {promotionsApplied.length === 0 ? (
+                            <p className="text-sm text-muted-foreground">No hay promociones aplicadas.</p>
+                        ) : (
+                            <div className="space-y-2">
+                                {promotionsApplied.map((p, idx) => (
+                                    <div key={idx} className="grid grid-cols-12 gap-2 items-center">
+                                        <Input className="col-span-7" placeholder="Nombre de la promo" value={p.name} onChange={e => setPromotionsApplied(list => list.map((it, i) => i===idx ? { ...it, name: e.target.value } : it))} />
+                                        <Input className="col-span-4" type="number" step="0.01" min="0" placeholder="Monto" value={String(p.amount)} onChange={e => setPromotionsApplied(list => list.map((it, i) => i===idx ? { ...it, amount: Number(e.target.value) || 0 } : it))} />
+                                        <Button type="button" variant="ghost" size="sm" className="col-span-1" onClick={() => setPromotionsApplied(list => list.filter((_, i) => i!==idx))}>X</Button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        <p className="text-xs text-muted-foreground mt-2">
+                            Nota: Los ajustes manuales (como los descuentos aplicados manualmente) se reflejan en la UI y en el PDF de la factura.
+                        </p>
                     </div>
                 </div>
                 
                 <div className="flex flex-col gap-4 overflow-y-auto pr-2">
                     <div className="space-y-2">
+                        <Label>Datos del Cliente</Label>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <Input placeholder="Nombre" value={clientFirstName} onChange={e => setClientFirstName(e.target.value)} />
+                            <Input placeholder="Apellido" value={clientLastName} onChange={e => setClientLastName(e.target.value)} />
+                        </div>
+                        <div className="grid grid-cols-[160px_1fr] gap-3">
+                            <RadioGroup className="grid grid-cols-2 gap-2" value={clientDocType} onValueChange={(v) => setClientDocType(v as any)}>
+                                <div className="flex items-center space-x-2"><RadioGroupItem value="DNI" id="doc-dni" /><Label htmlFor="doc-dni">DNI</Label></div>
+                                <div className="flex items-center space-x-2"><RadioGroupItem value="CUIT" id="doc-cuit" /><Label htmlFor="doc-cuit">CUIT</Label></div>
+                                <div className="flex items-center space-x-2"><RadioGroupItem value="CUIL" id="doc-cuil" /><Label htmlFor="doc-cuil">CUIL</Label></div>
+                                <div className="flex items-center space-x-2"><RadioGroupItem value="NN" id="doc-nn" /><Label htmlFor="doc-nn">NN</Label></div>
+                            </RadioGroup>
+                            <Input placeholder="Número de documento" value={clientDocNumber} onChange={e => setClientDocNumber(e.target.value)} />
+                        </div>
+                    </div>
+                    <div className="space-y-2">
                         <Label htmlFor="clientId">Cliente</Label>
-                        <Select name="clientId" defaultValue={selectedCustomerId}>
+                        <Select name="clientId" value={selectedClientId} onValueChange={(val) => setSelectedClientId(val)}>
                             <SelectTrigger>
                                 <SelectValue placeholder="Selecciona un cliente" />
                             </SelectTrigger>
@@ -248,46 +590,132 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, set
                         </Select>
                         <FieldError errors={state.errors?.clientId} />
                     </div>
+                    
                     <div className="space-y-2">
-                        <Label>Tipo de Factura</Label>
-                        <RadioGroup name="invoiceType" defaultValue="B">
+                        <Label>Tipo IVA</Label>
+                        <Select 
+                            value={vatType} 
+                            onValueChange={(value: 'consumidor_final' | 'exento' | 'monotributo' | 'responsable_inscripto') => {
+                                setVatType(value);
+                            }}
+                            name="vat_type"
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Seleccionar tipo de IVA" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="consumidor_final">Consumidor Final (Factura B)</SelectItem>
+                                <SelectItem value="exento">Exento</SelectItem>
+                                <SelectItem value="monotributo">Monotributo</SelectItem>
+                                <SelectItem value="responsable_inscripto">Responsable Inscripto</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        {vatType === 'responsable_inscripto' && (
+                            <div className="mt-2">
+                                <Label>% IVA</Label>
+                                <Input 
+                                    type="number" 
+                                    value={String(vatRate)} 
+                                    onChange={(e) => setVatRate(Number(e.target.value) || 0)}
+                                    className="w-24"
+                                    min="0"
+                                    step="0.1"
+                                />
+                            </div>
+                        )}
+                    </div>
+                    
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                            <Label>Tipo de Factura</Label>
+                            {vatType === 'consumidor_final' && (
+                                <span className="text-xs text-muted-foreground">Automático para Consumidor Final</span>
+                            )}
+                        </div>
+                        <RadioGroup 
+                            name="invoiceType" 
+                            value={invoiceTypeState} 
+                            onValueChange={(v) => setInvoiceTypeState(v as 'A'|'B'|'C')}
+                            disabled={vatType === 'consumidor_final'}
+                            className={vatType === 'consumidor_final' ? 'opacity-70' : ''}
+                        >
                             <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="A" id="type-a" />
-                                <Label htmlFor="type-a">Factura A</Label>
+                                <RadioGroupItem value="A" id="type-a" disabled={vatType === 'consumidor_final'} />
+                                <Label htmlFor="type-a" className={vatType === 'consumidor_final' ? 'text-muted-foreground' : ''}>
+                                    Factura A
+                                </Label>
                             </div>
                             <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="B" id="type-b" />
-                                <Label htmlFor="type-b">Factura B</Label>
+                                <RadioGroupItem value="B" id="type-b" disabled={vatType === 'consumidor_final'} />
+                                <Label htmlFor="type-b" className={vatType === 'consumidor_final' ? 'text-muted-foreground' : ''}>
+                                    Factura B
+                                </Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="C" id="type-c" disabled={vatType === 'consumidor_final'} />
+                                <Label htmlFor="type-c" className={vatType === 'consumidor_final' ? 'text-muted-foreground' : ''}>
+                                    Factura C
+                                </Label>
                             </div>
                         </RadioGroup>
                         <FieldError errors={state.errors?.invoiceType} />
+                    </div>
+                    
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                            <Label>Vendedor</Label>
+                        </div>
+                        <Select 
+                            value={selectedSellerId ? String(selectedSellerId) : ''} 
+                            onValueChange={(value) => setSelectedSellerId(value ? parseInt(value, 10) : null)}
+                            name="seller_id"
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Seleccionar vendedor" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {sellers.map(seller => (
+                                    <SelectItem key={seller.id} value={String(seller.id)}>
+                                        {seller.last_name}, {seller.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        
+                        {selectedSellerId && (
+                            <div className="mt-2">
+                                <Label>% Comisión</Label>
+                                <Input 
+                                    type="number" 
+                                    value={String(commissionPercentage)} 
+                                    onChange={(e) => setCommissionPercentage(Number(e.target.value) || 0)}
+                                    className="w-24"
+                                    min="0"
+                                    max="100"
+                                    step="0.1"
+                                    name="commission_percentage"
+                                />
+                            </div>
+                        )}
                     </div>
                     
                     <div className="space-y-4 rounded-md border p-4">
                         <h4 className="font-semibold text-sm">Detalles del Pago</h4>
                         <div className="space-y-2">
                             <Label>Método de Pago Principal</Label>
-                            <RadioGroup name="payment_method" defaultValue="Efectivo" onValueChange={setPrimaryPaymentMethod}>
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="Efectivo" id="pay-efectivo" /><Label htmlFor="pay-efectivo">Efectivo</Label></div>
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="Transferencia" id="pay-transfer" /><Label htmlFor="pay-transfer">Transferencia</Label></div>
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="Tarjeta" id="pay-tarjeta" /><Label htmlFor="pay-tarjeta">Tarjeta</Label></div>
-                            </RadioGroup>
+                            <Select name="payment_method" value={primaryPaymentMethod} onValueChange={setPrimaryPaymentMethod}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Selecciona una cuenta de caja" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {cashAccounts.map(acc => (
+                                        <SelectItem key={acc.code} value={acc.code}>
+                                            {acc.code} - {acc.description}{acc.account_type ? ` (${acc.account_type})` : ''}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
-                        
-                        {primaryPaymentMethod === 'Tarjeta' && (
-                            <div className="space-y-2">
-                                <Label htmlFor="card_type">Tipo de Tarjeta</Label>
-                                <Select name="card_type">
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Selecciona tipo de tarjeta" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {cardTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        )}
-
 
                         <div className="flex items-center space-x-2">
                             <Checkbox id="has_secondary_payment" name="has_secondary_payment" onCheckedChange={(checked) => setShowSecondaryPayment(!!checked)} />
@@ -297,24 +725,18 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, set
                         {showSecondaryPayment && (
                             <div className="space-y-2 pt-2 border-t">
                                 <Label>Método de Pago Secundario</Label>
-                                <RadioGroup name="secondary_payment_method" onValueChange={setSecondaryPaymentMethod}>
-                                    <div className="flex items-center space-x-2"><RadioGroupItem value="Efectivo" id="sec-pay-efectivo" /><Label htmlFor="sec-pay-efectivo">Efectivo</Label></div>
-                                    <div className="flex items-center space-x-2"><RadioGroupItem value="Transferencia" id="sec-pay-transfer" /><Label htmlFor="sec-pay-transfer">Transferencia</Label></div>
-                                    <div className="flex items-center space-x-2"><RadioGroupItem value="Tarjeta" id="sec-pay-tarjeta" /><Label htmlFor="sec-pay-tarjeta">Tarjeta</Label></div>
-                                </RadioGroup>
-                                {secondaryPaymentMethod === 'Tarjeta' && (
-                                    <div className="space-y-2 pt-2">
-                                        <Label htmlFor="secondary_card_type">Tipo de Tarjeta (Secundaria)</Label>
-                                        <Select name="secondary_card_type">
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Selecciona tipo de tarjeta" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {cardTypes.map(type => <SelectItem key={type} value={type}>{type}</SelectItem>)}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                )}
+                                <Select name="secondary_payment_method" value={secondaryPaymentMethod} onValueChange={setSecondaryPaymentMethod}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Selecciona una cuenta de caja" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {cashAccounts.map(acc => (
+                                            <SelectItem key={acc.code} value={acc.code}>
+                                                {acc.code} - {acc.description}{acc.account_type ? ` (${acc.account_type})` : ''}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
                         )}
 
@@ -324,14 +746,51 @@ export function CreateInvoiceForm({ customers, products, selectedCustomerId, set
                         </div>
                     </div>
 
-                        <div className="mt-auto pt-4 border-t">
-                        <div className="flex justify-between items-center text-lg font-bold">
-                            <span>TOTAL:</span>
-                            <span>{formatPrice(selectedProducts.reduce((acc, p) => acc + p.total, 0))}</span>
-                        </div>
+                        <div className="mt-auto pt-4 border-t space-y-1">
+                            <div className="flex justify-between items-center text-sm">
+                                <span>Subtotal</span>
+                                <span>{formatPrice(subtotal)}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-sm">
+                                <span>IVA ({vatRate}%)</span>
+                                <span>{formatPrice(vatAmount)}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-lg font-bold">
+                                <span>Total</span>
+                                <span>{formatPrice(grandTotal)}</span>
+                            </div>
                         </div>
                 </div>
                 </form>
+    )
+
+    if (asPage) {
+        return (
+            <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+                <div className="mb-6">
+                    <h1 className="text-2xl font-semibold">Crear Nueva Factura</h1>
+                    <p className="text-muted-foreground">Completa los detalles para generar una nueva factura.</p>
+                </div>
+                <div className="bg-card rounded-lg border p-4 sm:p-6 flex flex-col max-h-[calc(100vh-12rem)]">
+                    {formEl}
+                    <div className="mt-4 border-t pt-4 flex gap-2 justify-end">
+                        <Button variant="outline" onClick={() => history.back()}>Cancelar</Button>
+                        <SubmitButton disabled={selectedProducts.length === 0} />
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <DialogContent className="sm:max-w-4xl max-h-[90vh] flex flex-col">
+            <DialogHeader>
+                <DialogTitle>Crear Nueva Factura</DialogTitle>
+                <DialogDescription>
+                    Completa los detalles para generar una nueva factura.
+                </DialogDescription>
+            </DialogHeader>
+            {formEl}
             <DialogFooter className="mt-4 border-t pt-4">
                 <DialogClose asChild>
                     <Button variant="outline">Cancelar</Button>

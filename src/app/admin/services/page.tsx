@@ -3,9 +3,11 @@ import { AddServiceForm } from "@/components/admin/add-service-form";
 import { ServiceList } from "@/components/admin/service-list";
 import type { Service } from "@/lib/definitions";
 import { createClient } from "@/lib/supabase/server";
+import { cookies } from "next/headers";
 
 async function getServices(): Promise<Service[]> {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const { data, error } = await supabase.from('services').select('*').order('created_at', { ascending: false });
 
     if (error) {
@@ -17,7 +19,8 @@ async function getServices(): Promise<Service[]> {
 }
 
 async function getCategories(): Promise<string[]> {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const { data, error } = await supabase.from('services').select('category');
 
     if (error) {

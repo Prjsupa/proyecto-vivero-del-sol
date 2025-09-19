@@ -6,9 +6,11 @@ import { InvoiceView, PrintButton } from "../_components/invoice-view";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { cookies } from "next/headers";
 
 async function getInvoiceAndClient(invoiceId: string): Promise<{ invoice: Invoice, client: Client | null }> {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     
     const { data: invoice, error: invoiceError } = await supabase
         .from('invoices')
@@ -34,7 +36,8 @@ async function getInvoiceAndClient(invoiceId: string): Promise<{ invoice: Invoic
 }
 
 export default async function InvoiceDetailPage({ params }: { params: { id: string } }) {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
         redirect('/auth/login');

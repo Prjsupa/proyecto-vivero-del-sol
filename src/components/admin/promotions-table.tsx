@@ -5,9 +5,24 @@ import type { Promotion } from "@/lib/definitions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { Gift } from "lucide-react";
-// import { PromotionActions } from "./promotion-actions";
+import { PromotionActions } from "./promotion-actions";
+import { Badge } from "../ui/badge";
 
 export function PromotionsTable({ promotions }: { promotions: Promotion[] }) {
+    const formatType = (t: Promotion["discount_type"]) => {
+        switch (t) {
+            case 'x_for_y':
+                return 'Llevá X y pagá Y';
+            case 'progressive_discount':
+                return 'Descuento progresivo por cantidad';
+            case 'price_discount':
+                return 'Descuento sobre precios';
+            case 'cross_selling':
+                return 'Cross selling';
+            default:
+                return t;
+        }
+    };
     return (
         <Card>
             <CardHeader>
@@ -32,11 +47,15 @@ export function PromotionsTable({ promotions }: { promotions: Promotion[] }) {
                                 <TableRow key={promotion.id}>
                                     <TableCell className="font-medium">{promotion.name}</TableCell>
                                     <TableCell>
-                                        {/* Badge de estado */}
+                                        {promotion.is_active ? (
+                                            <Badge className="bg-emerald-100 text-emerald-800 hover:bg-emerald-100">Activa</Badge>
+                                        ) : (
+                                            <Badge variant="secondary">Inactiva</Badge>
+                                        )}
                                     </TableCell>
-                                     <TableCell>{promotion.discount_type}</TableCell>
-                                    <TableCell>
-                                        {/* <PromotionActions promotion={promotion} /> */}
+                                     <TableCell>{formatType(promotion.discount_type)}</TableCell>
+                                    <TableCell className="text-right">
+                                        <PromotionActions promotion={promotion} />
                                     </TableCell>
                                 </TableRow>
                             ))

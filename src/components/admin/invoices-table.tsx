@@ -101,6 +101,8 @@ export function InvoicesTable({ invoices, customers }: { invoices: Invoice[], cu
                     <TableRow>
                         <TableHead>Factura</TableHead>
                         <TableHead>Cliente</TableHead>
+                        <TableHead>Sucursal</TableHead>
+                        <TableHead>Vendedor</TableHead>
                         <TableHead>Detalles Pago</TableHead>
                         <TableHead className="text-right">Monto</TableHead>
                     </TableRow>
@@ -114,6 +116,8 @@ export function InvoicesTable({ invoices, customers }: { invoices: Invoice[], cu
                                     <div className="text-sm text-muted-foreground">{format(parseISO(invoice.created_at), 'dd MMM, yyyy')}</div>
                                 </TableCell>
                                 <TableCell>{invoice.client_name}</TableCell>
+                                <TableCell>{invoice.branch_name ?? '-'}</TableCell>
+                                <TableCell>{invoice.seller_name ?? '-'}</TableCell>
                                 <TableCell>
                                     <div className="flex flex-col gap-1">
                                         {invoice.payment_method && <Badge variant="secondary">{invoice.payment_method} {invoice.card_type && `(${invoice.card_type})`}</Badge>}
@@ -127,7 +131,7 @@ export function InvoicesTable({ invoices, customers }: { invoices: Invoice[], cu
                         ))
                     ) : (
                         <TableRow>
-                            <TableCell colSpan={4} className="h-48 text-center">
+                            <TableCell colSpan={6} className="h-48 text-center">
                                 No se encontraron facturas con los filtros seleccionados.
                             </TableCell>
                         </TableRow>

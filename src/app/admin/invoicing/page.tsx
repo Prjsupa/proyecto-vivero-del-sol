@@ -1,12 +1,16 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
-import type { Invoice, Client } from "@/lib/definitions";
+import type { Invoice, Client, Product } from "@/lib/definitions";
 import { InvoicesTable } from "@/components/admin/invoices-table";
 import { ExportInvoicesButton } from "@/components/admin/export-invoices-button";
+import { Button } from "@/components/ui/button";
+import Link from 'next/link';
+import { cookies } from "next/headers";
 
 async function getInvoices(): Promise<Invoice[]> {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const { data, error } = await supabase
         .from('invoices')
         .select('*')
@@ -19,8 +23,24 @@ async function getInvoices(): Promise<Invoice[]> {
     return data;
 }
 
+async function getProducts(): Promise<Product[]> {
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
+    const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .order('name', { ascending: true });
+
+    if (error) {
+        console.error('Error fetching products:', error);
+        return [];
+    }
+    return data as Product[];
+}
+
 async function getClients(): Promise<Client[]> {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const { data, error } = await supabase
         .from('clients')
         .select('*')
@@ -35,8 +55,11 @@ async function getClients(): Promise<Client[]> {
 
 
 export default async function InvoicingPage() {
-    const invoices = await getInvoices();
-    const clients = await getClients();
+    const [invoices, clients, products] = await Promise.all([
+        getInvoices(),
+        getClients(),
+        getProducts(),
+    ]);
 
     return (
         <div className="space-y-8">
@@ -46,8 +69,11 @@ export default async function InvoicingPage() {
                     <p className="text-muted-foreground">Visualiza, filtra y exporta todas las facturas emitidas.</p>
                 </div>
                  <div className="flex items-center gap-2">
-                     <ExportInvoicesButton invoices={invoices} />
-                </div>
+                    <Button asChild>
+                        <Link href="/admin/invoices/new">+ Nueva Factura</Link>
+                    </Button>
+                    <ExportInvoicesButton invoices={invoices} />
+                 </div>
             </div>
              <Card>
                 <CardHeader>

@@ -1,84 +1,25 @@
 
+// src/app/api/sample-csv/route.ts
+
 import { NextResponse } from 'next/server';
-import ExcelJS from 'exceljs';
-import { createClient } from '@/lib/supabase/server';
-import type { Invoice } from '@/lib/definitions';
-import { format } from 'date-fns';
 
-async function getInvoices(): Promise<Invoice[]> {
-    const supabase = createClient();
-    const { data, error } = await supabase
-        .from('invoices')
-        .select('*')
-        .order('created_at', { ascending: false });
+export async function GET() {
+  const csvContent = [
+    'name,sku,category,subcategory,precio_costo,precio_venta,stock,available,description,color,tamaño,proveedor',
+    'Monstera Deliciosa,PL-INT-001,Planta de interior,Hojas grandes,18000,25990,50,TRUE,"Una planta tropical popular con hojas grandes, perforadas.",Verde,"60cm","Proveedor A"',
+    'Pala de jardín,HERR-MAN-001,Herramienta,Manual,10000,15500,120,TRUE,Pala de acero resistente con mango de madera.,Plata,"Standard","Proveedor B"',
+    'Suculenta Echeveria,SUC-ROS-001,Suculenta,Roseta,5000,8000,75,TRUE,,Violeta,"10cm","Proveedor A"',
+    'Fertilizante Universal,FERT-GRA-001,Fertilizante,Granulado,8500,12000,200,TRUE,"Abono completo para todo tipo de plantas.",N/A,"1kg","Proveedor C"',
+    'Maceta de Terracota,MAC-20CM-001,Maceta,20cm,7000,10500,80,FALSE,"20cm de diámetro, ideal para suculentas.",Terracota,"20cm","Proveedor D"',
+    'Rosal trepador,PL-EXT-001,Planta de exterior,Trepadoras,25000,35000,30,TRUE,"Produce flores rojas fragantes durante todo el verano.",Rojo,"1 metro","Proveedor A"',
+    'Limonero,PL-FRU-001,Planta frutal,Cítricos,30000,45000,15,TRUE,"Árbol frutal que produce limones todo el año.",Verde,"1.5 metros","Proveedor E"',
+  ].join('\n');
 
-    if (error) {
-        console.error('Error fetching invoices:', error);
-        return [];
-    }
-    return data;
-}
-
-export async function POST(request: Request) {
-  const { invoiceIds } = await request.json();
-  
-  if (!invoiceIds || !Array.isArray(invoiceIds) || invoiceIds.length === 0) {
-    return new NextResponse('No invoice IDs provided', { status: 400 });
-  }
-  
-  const supabase = createClient();
-  const { data: invoices, error } = await supabase
-    .from('invoices')
-    .select('*')
-    .in('id', invoiceIds)
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    console.error('Error fetching invoices for export:', error);
-    return new NextResponse('Failed to fetch invoices', { status: 500 });
-  }
-
-
-  const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet('Facturas');
-
-  // Define headers
-  worksheet.columns = [
-    { header: 'Nº Factura', key: 'invoice_number', width: 20 },
-    { header: 'Fecha', key: 'created_at', width: 15 },
-    { header: 'Cliente', key: 'client_name', width: 30 },
-    { header: 'Tipo', key: 'invoice_type', width: 10 },
-    { header: 'Monto Total', key: 'total_amount', width: 15, style: { numFmt: '$#,##0.00' } },
-    { header: 'Método Pago Principal', key: 'payment_method', width: 20 },
-    { header: 'Tipo Tarjeta', key: 'card_type', width: 15 },
-    { header: 'Abono', key: 'has_secondary_payment', width: 10 },
-    { header: 'Método Pago Secundario', key: 'secondary_payment_method', width: 25 },
-    { header: 'Productos', key: 'products', width: 50 },
-    { header: 'Notas', key: 'notes', width: 50 },
-  ];
-  
-  worksheet.getRow(1).font = { bold: true };
-
-  // Add data
-  invoices.forEach(invoice => {
-     const productsString = (invoice.products as any[]).map(p => `${p.quantity}x ${p.name}`).join(', ');
-
-    worksheet.addRow({
-      ...invoice,
-      created_at: format(new Date(invoice.created_at), 'dd/MM/yyyy'),
-      products: productsString,
-      has_secondary_payment: invoice.has_secondary_payment ? 'Sí' : 'No',
-    });
-  });
-
-  const buffer = await workbook.xlsx.writeBuffer();
-  const fileName = `facturas-${format(new Date(), 'yyyy-MM-dd')}.xlsx`;
-
-  return new NextResponse(buffer, {
+  return new NextResponse(csvContent, {
     status: 200,
     headers: {
-      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'Content-Disposition': `attachment; filename="${fileName}"`,
+      'Content-Type': 'text/csv; charset=utf-8',
+      'Content-Disposition': 'attachment; filename="sample-products.csv"',
     },
   });
 }

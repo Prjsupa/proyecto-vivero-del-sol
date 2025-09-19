@@ -3,9 +3,11 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Product, Service, Provider, ProviderType, IncomeVoucher, ExpenseVoucher, UnitOfMeasure, UnitOfTime, UnitOfMass, UnitOfVolume, PointOfSale, AccountStatus, Currency, CashAccount } from "@/lib/definitions";
 import { AuxTablesManager } from "@/components/admin/aux-tables-manager";
+import { cookies } from "next/headers";
 
 async function getData() {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const { data: products, error: productsError } = await supabase
         .from('products')
         .select('*')

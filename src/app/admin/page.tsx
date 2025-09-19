@@ -2,9 +2,11 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Product } from "@/lib/definitions";
 import { DashboardClient } from "@/components/admin/dashboard-client";
+import { cookies } from "next/headers";
 
 async function getDashboardData() {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     
     // Fetch all data in parallel
     const [productsData, clientsData] = await Promise.all([

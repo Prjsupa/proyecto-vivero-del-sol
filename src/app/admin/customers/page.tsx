@@ -7,9 +7,11 @@ import { createClient } from "@/lib/supabase/server";
 import { CreateInvoiceDialog } from "@/components/admin/create-invoice-dialog";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
+import { cookies } from "next/headers";
 
 async function getClients(): Promise<Client[]> {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const { data, error } = await supabase
         .from('clients')
         .select('*')
@@ -23,7 +25,8 @@ async function getClients(): Promise<Client[]> {
 }
 
 async function getProducts(): Promise<Product[]> {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const { data, error } = await supabase.from('products').select('*').order('name', { ascending: true });
     if (error) {
         console.error('Error fetching products:', error);

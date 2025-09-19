@@ -5,9 +5,11 @@ import { NextResponse } from 'next/server';
 import ExcelJS from 'exceljs';
 import { createClient } from '@/lib/supabase/server';
 import type { Product } from '@/lib/definitions';
+import { cookies } from 'next/headers';
 
 async function getProducts(): Promise<Product[]> {
-    const supabase = createClient();
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
     const { data, error } = await supabase.from('products').select('*').order('name', { ascending: true });
 
     if (error) {
