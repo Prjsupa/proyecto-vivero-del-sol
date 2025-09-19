@@ -221,6 +221,9 @@ export type Invoice = {
   client_last_name?: string | null;
   client_document_type?: string | null;
   client_document_number?: string | null;
+  client_address?: string | null;
+  client_city?: string | null;
+  client_province?: string | null;
   subtotal?: number | null;
   vat_rate?: number | null;
   vat_amount?: number | null;
@@ -237,3 +240,4 @@ export type Json =
   | Json[]
 
 export type jsonb = Json;
+

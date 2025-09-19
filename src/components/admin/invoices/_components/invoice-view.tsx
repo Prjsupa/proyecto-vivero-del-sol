@@ -1,3 +1,4 @@
+
 'use client';
 import type { Invoice, Client, CompanyData, Json } from "@/lib/definitions";
 import { format, parseISO } from 'date-fns';
@@ -90,20 +91,19 @@ export function InvoiceView({ invoice, client, company }: { invoice: Invoice, cl
                         <tbody>
                              {productLines.map((item, index) => {
                                 const lineSubtotal = item.quantity * item.unitPrice;
-                                const lineDiscount = item.discounts?.reduce((acc, d) => acc + d.amount, 0) || 0;
                                 return (
                                 <tr key={index} className="border-b border-gray-100">
                                     <td className="py-2 px-1">{item.sku || '-'}</td>
                                     <td className="py-2 px-1">{item.name}</td>
                                     <td className="py-2 px-1 text-center">{item.quantity}</td>
                                     <td className="text-right py-2 px-1 font-mono">{formatPrice(item.unitPrice)}</td>
-                                    <td className="text-right py-2 px-1 font-mono">{formatPrice(lineSubtotal - lineDiscount)}</td>
+                                    <td className="text-right py-2 px-1 font-mono">{formatPrice(lineSubtotal)}</td>
                                 </tr>
                             )})}
                         </tbody>
                     </table>
                      <div className="flex justify-between items-start pt-6">
-                        <div className="text-xs text-gray-600 space-y-1">
+                        <div className="text-xs text-gray-600 space-y-1 w-1/2">
                              {promotionsApplied.length > 0 && (
                                 <>
                                     <h3 className="font-semibold uppercase">Promociones Aplicadas:</h3>
