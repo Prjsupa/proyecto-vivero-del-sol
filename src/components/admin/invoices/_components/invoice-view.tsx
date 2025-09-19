@@ -14,6 +14,7 @@ type InvoiceProductLine = {
     unitPrice: number;
     discounts: { label: string; amount: number }[];
     total: number;
+    isService?: boolean;
 }
 
 export function InvoiceView({ invoice, client, company }: { invoice: Invoice, client: Client | null, company: CompanyData | null }) {
@@ -21,10 +22,10 @@ export function InvoiceView({ invoice, client, company }: { invoice: Invoice, cl
     const productLines: InvoiceProductLine[] = Array.isArray(invoice.products) ? invoice.products : [];
     const promotionsApplied = (Array.isArray(invoice.promotions_applied) ? invoice.promotions_applied : []) as { name: string; amount: number }[];
     
-    const subtotal = productLines.reduce((acc, item) => acc + (item.unitPrice * item.quantity), 0);
+    const subtotal = invoice.subtotal || productLines.reduce((acc, item) => acc + (item.unitPrice * item.quantity), 0);
     const totalDiscounts = invoice.discounts_total || 0;
     
-    const clientVatCondition = client?.iva_condition || 'Consumidor Final';
+    const clientVatCondition = invoice.vat_type ? (invoice.vat_type.replace('_', ' ')).replace(/\b\w/g, l => l.toUpperCase()) : 'Consumidor Final';
 
     return (
         <>
@@ -61,16 +62,13 @@ export function InvoiceView({ invoice, client, company }: { invoice: Invoice, cl
                 </header>
 
                  <section className="grid grid-cols-2 gap-8 py-6 border-b border-gray-200 text-sm">
-                    <div>
-                        <h2 className="text-xs font-semibold uppercase text-gray-500 mb-2">Cliente</h2>
-                        <p className="font-bold">{invoice.client_name}</p>
-                        <p>{client?.document_type || 'Documento'}: {client?.document_number || 'No especificado'}</p>
-                        <p>IVA: {clientVatCondition}</p>
+                    <div className="space-y-1">
+                        <p><span className="font-semibold w-24 inline-block">Cliente:</span>{invoice.client_name}</p>
+                        <p><span className="font-semibold w-24 inline-block">Cond. Venta:</span>{invoice.payment_condition} - {invoice.cash_account_code}</p>
                     </div>
-                     <div className="text-right">
-                         <h2 className="text-xs font-semibold uppercase text-gray-500 mb-2">Condición de Venta</h2>
-                        <p className="font-bold">{invoice.payment_method || 'No especificado'}</p>
-                         {invoice.notes && <p className="text-xs italic mt-2">Notas: {invoice.notes}</p>}
+                     <div className="space-y-1 text-right">
+                        <p><span className="font-semibold">Documento:</span> {client?.document_type || 'NN'}: {client?.document_number || 'No especificado'}</p>
+                        <p><span className="font-semibold">IVA:</span> {clientVatCondition}</p>
                     </div>
                 </section>
 
@@ -101,7 +99,7 @@ export function InvoiceView({ invoice, client, company }: { invoice: Invoice, cl
                     </table>
                      <div className="flex justify-between items-start pt-6">
                         <div className="text-xs text-gray-600 space-y-1 w-1/2">
-                            {promotionsApplied.length > 0 && (
+                            {(promotionsApplied.length > 0 || totalDiscounts > 0) && (
                                 <>
                                     <h3 className="font-semibold uppercase">Promociones Aplicadas:</h3>
                                     {promotionsApplied.map((promo, idx) => (

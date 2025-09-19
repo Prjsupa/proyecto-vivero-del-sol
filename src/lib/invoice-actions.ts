@@ -3,7 +3,6 @@
 import { z } from 'zod';
 import { createClient } from './supabase/server';
 import { revalidatePath } from 'next/cache';
-import { cookies } from 'next/headers';
 
 const createInvoiceSchema = z.object({
     clientId: z.coerce.number().optional(), // Optional because a new client can be created
@@ -12,11 +11,8 @@ const createInvoiceSchema = z.object({
     client_document_type: z.string().optional().nullable(),
     client_document_number: z.string().optional().nullable(),
     invoiceType: z.enum(['A', 'B', 'C'], { required_error: "Debes seleccionar un tipo de factura." }),
-    payment_method: z.string().optional(),
-    card_type: z.string().optional(),
-    has_secondary_payment: z.preprocess((val) => val === 'on' || val === true, z.boolean()),
-    secondary_payment_method: z.string().optional(),
-    secondary_card_type: z.string().optional(),
+    payment_condition: z.string().min(1, 'Debes seleccionar una condición de venta'),
+    cash_account_code: z.string().min(1, 'Debes seleccionar una cuenta de caja'),
     notes: z.string().optional(),
     products: z.string().min(1, "Debes añadir al menos un producto.").transform((val) => val ? JSON.parse(val) : []),
     vat_type: z.string(),
@@ -26,8 +22,7 @@ const createInvoiceSchema = z.object({
 });
 
 export async function createInvoice(prevState: any, formData: FormData) {
-    const cookieStore = cookies();
-    const supabase = createClient(cookieStore);
+    const supabase = createClient();
     const validatedFields = createInvoiceSchema.safeParse(Object.fromEntries(formData.entries()));
     
     if (!validatedFields.success) {
@@ -40,18 +35,14 @@ export async function createInvoice(prevState: any, formData: FormData) {
     const { 
         clientId, 
         invoiceType, 
-        payment_method, 
-        card_type,
-        has_secondary_payment, 
-        secondary_payment_method,
-        secondary_card_type,
+        payment_condition,
+        cash_account_code,
         notes, 
         products,
         client_first_name,
         client_last_name,
-        client_document_number,
-        client_document_type,
         vat_rate,
+        vat_type,
         discounts_total,
         promotions_applied
     } = validatedFields.data;
@@ -72,14 +63,12 @@ export async function createInvoice(prevState: any, formData: FormData) {
         subtotal,
         discounts_total,
         vat_rate,
+        vat_type,
         vat_amount,
         total_amount: totalAmount,
         invoice_type: invoiceType,
-        payment_method: payment_method,
-        card_type: card_type,
-        has_secondary_payment: has_secondary_payment,
-        secondary_payment_method: secondary_payment_method,
-        secondary_card_type: secondary_card_type,
+        payment_condition,
+        cash_account_code,
         notes: notes,
         promotions_applied,
     };

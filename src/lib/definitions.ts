@@ -211,13 +211,11 @@ export type Invoice = {
   products: Json;
   total_amount: number;
   invoice_type: 'A' | 'B' | 'C';
-  payment_method?: string | null;
-  card_type?: string | null;
-  has_secondary_payment?: boolean;
-  secondary_payment_method?: string | null;
-  secondary_card_type?: string | null;
+  payment_condition?: string | null;
+  cash_account_code?: string | null;
   notes?: string | null;
   subtotal?: number | null;
+  vat_type?: string | null;
   vat_rate?: number | null;
   vat_amount?: number | null;
   discounts_total?: number | null;

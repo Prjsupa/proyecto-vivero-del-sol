@@ -9,7 +9,6 @@ import { formatPrice } from "@/lib/utils";
 import { useState, useMemo } from "react";
 import { Input } from "../ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { Checkbox } from "../ui/checkbox";
 import { useRouter } from "next/navigation";
 
 
@@ -17,9 +16,7 @@ export function InvoicesTable({ invoices, customers }: { invoices: Invoice[], cu
     const [filters, setFilters] = useState({
         invoiceNumber: '',
         client: 'todos',
-        paymentMethod: 'todos',
-        cardType: 'todos',
-        hasSecondaryPayment: false,
+        paymentCondition: 'todos',
     });
     const router = useRouter();
 
@@ -36,23 +33,12 @@ export function InvoicesTable({ invoices, customers }: { invoices: Invoice[], cu
             if (filters.client !== 'todos' && String(invoice.client_id) !== filters.client) {
                 return false;
             }
-            if (filters.paymentMethod !== 'todos' && invoice.payment_method !== filters.paymentMethod && invoice.secondary_payment_method !== filters.paymentMethod) {
-                return false;
-            }
-            if (filters.cardType !== 'todos' && invoice.card_type !== filters.cardType) {
-                return false;
-            }
-            if (filters.hasSecondaryPayment && !invoice.has_secondary_payment) {
+            if (filters.paymentCondition !== 'todos' && invoice.payment_condition !== filters.paymentCondition) {
                 return false;
             }
             return true;
         });
     }, [invoices, filters]);
-
-    const cardTypesInUse = useMemo(() => {
-        const types = new Set(invoices.map(i => i.card_type).filter(Boolean) as string[]);
-        return ['todos', ...Array.from(types)];
-    }, [invoices]);
 
     const handleRowClick = (invoiceId: string) => {
         router.push(`/admin/invoices/${invoiceId}`);
@@ -60,7 +46,7 @@ export function InvoicesTable({ invoices, customers }: { invoices: Invoice[], cu
 
     return (
         <div className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 p-4 border rounded-lg">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 p-4 border rounded-lg">
                  <Input 
                     placeholder="Buscar por Nº Factura..."
                     value={filters.invoiceNumber}
@@ -73,27 +59,16 @@ export function InvoicesTable({ invoices, customers }: { invoices: Invoice[], cu
                         {customers.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.name} {c.last_name}</SelectItem>)}
                     </SelectContent>
                 </Select>
-                 <Select value={filters.paymentMethod} onValueChange={(val) => handleFilterChange('paymentMethod', val)}>
-                    <SelectTrigger><SelectValue placeholder="Método de Pago" /></SelectTrigger>
+                 <Select value={filters.paymentCondition} onValueChange={(val) => handleFilterChange('paymentCondition', val)}>
+                    <SelectTrigger><SelectValue placeholder="Condición de Venta" /></SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="todos">Todos los Métodos</SelectItem>
+                        <SelectItem value="todos">Todas las Condiciones</SelectItem>
                         <SelectItem value="Efectivo">Efectivo</SelectItem>
+                        <SelectItem value="Tarjeta de crédito">Tarjeta de crédito</SelectItem>
                         <SelectItem value="Transferencia">Transferencia</SelectItem>
-                        <SelectItem value="Tarjeta">Tarjeta</SelectItem>
+                        <SelectItem value="Otro">Otro</SelectItem>
                     </SelectContent>
                 </Select>
-                 <Select value={filters.cardType} onValueChange={(val) => handleFilterChange('cardType', val)}>
-                    <SelectTrigger><SelectValue placeholder="Tipo de Tarjeta" /></SelectTrigger>
-                    <SelectContent>
-                        {cardTypesInUse.map(type => (
-                            <SelectItem key={type} value={type}>{type === 'todos' ? 'Todas las Tarjetas' : type}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-                <div className="flex items-center space-x-2">
-                    <Checkbox id="secondary-payment-filter" checked={filters.hasSecondaryPayment} onCheckedChange={(checked) => handleFilterChange('hasSecondaryPayment', !!checked)} />
-                    <label htmlFor="secondary-payment-filter" className="text-sm font-medium">Solo con abono</label>
-                </div>
             </div>
 
             <Table>
@@ -103,7 +78,7 @@ export function InvoicesTable({ invoices, customers }: { invoices: Invoice[], cu
                         <TableHead>Cliente</TableHead>
                         <TableHead>Sucursal</TableHead>
                         <TableHead>Vendedor</TableHead>
-                        <TableHead>Detalles Pago</TableHead>
+                        <TableHead>Condición de Venta</TableHead>
                         <TableHead className="text-right">Monto</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -120,10 +95,7 @@ export function InvoicesTable({ invoices, customers }: { invoices: Invoice[], cu
                                 <TableCell>{invoice.seller_name ?? '-'}</TableCell>
                                 <TableCell>
                                     <div className="flex flex-col gap-1">
-                                        {invoice.payment_method && <Badge variant="secondary">{invoice.payment_method} {invoice.card_type && `(${invoice.card_type})`}</Badge>}
-                                        {invoice.has_secondary_payment && invoice.secondary_payment_method && (
-                                            <Badge variant="outline">Abono: {invoice.secondary_payment_method} {invoice.secondary_card_type && `(${invoice.secondary_card_type})`}</Badge>
-                                        )}
+                                        {invoice.payment_condition && <Badge variant="secondary">{invoice.payment_condition} - {invoice.cash_account_code}</Badge>}
                                     </div>
                                 </TableCell>
                                 <TableCell className="text-right font-mono">{formatPrice(invoice.total_amount)}</TableCell>

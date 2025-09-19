@@ -97,7 +97,6 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
     const formRef = useRef<HTMLFormElement>(null);
     const { toast } = useToast();
     const router = useRouter();
-    const [showSecondaryPayment, setShowSecondaryPayment] = useState(false);
     const [selectedClientId, setSelectedClientId] = useState<string | undefined>(selectedCustomerId);
     const [invoiceTypeState, setInvoiceTypeState] = useState<'A' | 'B' | 'C'>('B');
     const [clientFirstName, setClientFirstName] = useState<string>('');
@@ -110,10 +109,6 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
     const [sellers, setSellers] = useState<Seller[]>([]);
     const [selectedSellerId, setSelectedSellerId] = useState<number | null>(null);
     const [commissionPercentage, setCommissionPercentage] = useState<number>(0);
-
-    // State to manage payment method selection
-    const [primaryPaymentMethod, setPrimaryPaymentMethod] = useState<string | undefined>();
-    const [secondaryPaymentMethod, setSecondaryPaymentMethod] = useState<string | undefined>();
 
     // POS State
     const [searchTerm, setSearchTerm] = useState('');
@@ -337,17 +332,18 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
 
     // Actualizar el tipo de factura cuando cambia el tipo de IVA
     useEffect(() => {
-        if (vatType === 'consumidor_final') {
-            setInvoiceTypeState('B');
-            setVatRate(0);
-        } else if (vatType === 'exento') {
-            setVatRate(0);
-        } else if (vatType === 'monotributo') {
-            setVatRate(0);
-        } else if (vatType === 'responsable_inscripto') {
+        const client = customers.find(c => String(c.id) === selectedClientId);
+
+        const defaultInvoiceType = client?.default_invoice_type || 'B';
+
+        if (vatType === 'responsable_inscripto') {
+            setInvoiceTypeState(defaultInvoiceType === 'C' ? 'B' : defaultInvoiceType);
             setVatRate(21); // Valor por defecto para RI
+        } else {
+            setInvoiceTypeState(defaultInvoiceType === 'A' ? 'B' : defaultInvoiceType);
+            setVatRate(0);
         }
-    }, [vatType]);
+    }, [vatType, selectedClientId, customers]);
 
     // Actualizar el porcentaje de comisión cuando cambia el vendedor seleccionado
     useEffect(() => {
@@ -373,9 +369,7 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
         setClientLastName(c.last_name || '');
         setClientDocType((c.document_type as any) || 'NN');
         setClientDocNumber(c.document_number || '');
-        if (c.default_invoice_type) {
-            setInvoiceTypeState(c.default_invoice_type);
-        }
+        
         if (c.iva_condition) {
             switch(c.iva_condition) {
                 case "Responsable Inscripto": setVatType('responsable_inscripto'); break;
@@ -512,24 +506,6 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                                             </p>
                                         </div>
                                         <div className="flex items-center gap-4">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-sm text-muted-foreground">Desc. $</span>
-                                                <Input
-                                                    type="number"
-                                                    className="h-8 w-24"
-                                                    step="0.01"
-                                                    min="0"
-                                                    value={String(item.discountAmount ?? 0)}
-                                                    onChange={(e) => {
-                                                        const val = Math.max(0, Number(e.target.value) || 0);
-                                                        const updateFunction = item.product.hasOwnProperty('stock') ? setSelectedProducts : setSelectedServices;
-                                                        updateFunction(curr => curr.map(p => p.product.id === item.product.id ? {
-                                                            ...p,
-                                                            discountAmount: val,
-                                                        } : p) as any);
-                                                    }}
-                                                />
-                                            </div>
                                             <QuantityControl item={item} />
                                             <p className="font-semibold w-24 text-right">{formatPrice(item.total)}</p>
                                         </div>
@@ -629,34 +605,24 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
                                 <Label>Tipo de Factura</Label>
-                                {vatType === 'consumidor_final' && (
-                                    <span className="text-xs text-muted-foreground">Automático para Consumidor Final</span>
-                                )}
                             </div>
                             <RadioGroup 
                                 name="invoiceType" 
                                 value={invoiceTypeState} 
                                 onValueChange={(v) => setInvoiceTypeState(v as 'A'|'B'|'C')}
-                                disabled={vatType === 'consumidor_final'}
-                                className={vatType === 'consumidor_final' ? 'opacity-70' : ''}
+                                className="grid grid-cols-3"
                             >
                                 <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="A" id="type-a" disabled={vatType === 'consumidor_final'} />
-                                    <Label htmlFor="type-a" className={vatType === 'consumidor_final' ? 'text-muted-foreground' : ''}>
-                                        Factura A
-                                    </Label>
+                                    <RadioGroupItem value="A" id="type-a" />
+                                    <Label htmlFor="type-a">Factura A</Label>
                                 </div>
                                 <div className="flex items-center space-x-2">
                                     <RadioGroupItem value="B" id="type-b" />
-                                    <Label htmlFor="type-b" className={vatType === 'consumidor_final' ? 'text-muted-foreground' : ''}>
-                                        Factura B
-                                    </Label>
+                                    <Label htmlFor="type-b">Factura B</Label>
                                 </div>
                                 <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="C" id="type-c" disabled={vatType === 'consumidor_final'} />
-                                    <Label htmlFor="type-c" className={vatType === 'consumidor_final' ? 'text-muted-foreground' : ''}>
-                                        Factura C
-                                    </Label>
+                                    <RadioGroupItem value="C" id="type-c" />
+                                    <Label htmlFor="type-c">Factura C</Label>
                                 </div>
                             </RadioGroup>
                             <FieldError errors={state?.errors?.invoiceType} />
@@ -716,46 +682,35 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                     </div>
                     
                     <div className="space-y-4 rounded-md border p-4">
-                        <h4 className="font-semibold text-sm">Condición de Venta</h4>
                         <div className="space-y-2">
-                            <Label>Método de Pago Principal</Label>
-                            <Select name="payment_method" value={primaryPaymentMethod} onValueChange={setPrimaryPaymentMethod}>
+                            <Label>Condición de Venta</Label>
+                            <Select name="payment_condition">
                                 <SelectTrigger>
                                     <SelectValue placeholder="Selecciona una condición" />
                                 </SelectTrigger>
                                 <SelectContent>
+                                    <SelectItem value="Efectivo">Efectivo</SelectItem>
+                                    <SelectItem value="Tarjeta de crédito">Tarjeta de crédito</SelectItem>
+                                    <SelectItem value="Transferencia">Transferencia</SelectItem>
+                                    <SelectItem value="Otro">Otro</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                         <div className="space-y-2">
+                            <Label>Cuenta de Caja</Label>
+                            <Select name="cash_account_code">
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Selecciona una cuenta de caja" />
+                                </SelectTrigger>
+                                <SelectContent>
                                     {cashAccounts.map(acc => (
-                                        <SelectItem key={acc.code} value={acc.description}>
+                                        <SelectItem key={acc.code} value={acc.code}>
                                             {acc.description}{acc.account_type ? ` (${acc.account_type})` : ''}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
                         </div>
-
-                        <div className="flex items-center space-x-2">
-                            <Checkbox id="has_secondary_payment" name="has_secondary_payment" onCheckedChange={(checked) => setShowSecondaryPayment(!!checked)} />
-                            <Label htmlFor="has_secondary_payment" className="text-sm font-normal">Se abonó con un método de pago secundario</Label>
-                        </div>
-
-                        {showSecondaryPayment && (
-                            <div className="space-y-2 pt-2 border-t">
-                                <Label>Método de Pago Secundario</Label>
-                                <Select name="secondary_payment_method" value={secondaryPaymentMethod} onValueChange={setSecondaryPaymentMethod}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Selecciona una condición" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {cashAccounts.map(acc => (
-                                            <SelectItem key={acc.code} value={acc.description}>
-                                                {acc.description}{acc.account_type ? ` (${acc.account_type})` : ''}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        )}
-
                         <div className="space-y-2">
                             <Label htmlFor="notes">Notas Adicionales</Label>
                             <Textarea id="notes" name="notes" placeholder="Ej: Últimos 4 dígitos de la tarjeta, ID de transferencia, etc." />
