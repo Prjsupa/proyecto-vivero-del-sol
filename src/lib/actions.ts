@@ -1,4 +1,3 @@
-
 'use server';
 
 import { z } from 'zod';
@@ -499,6 +498,14 @@ const clientSchema = z.object({
     if (typeof arg == "string" || arg instanceof Date) return new Date(arg);
     return null;
   }, z.date().optional().nullable()),
+}).superRefine((data, ctx) => {
+    if (data.document_type && data.document_type !== 'NN' && (!data.document_number || data.document_number.trim() === '')) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "El número de documento es requerido.",
+            path: ['document_number'],
+        });
+    }
 });
 
 
@@ -2108,7 +2115,7 @@ export async function updateProvider(prevState: any, formData: FormData) {
         }
     }
 
-    const { error } = await supabase
+    const { error } } = await supabase
         .from('providers')
         .update({ name, provider_type_code: final_provider_type_code, provider_type_description: final_provider_type_description, updated_at: new Date().toISOString() })
         .eq('id', id);

@@ -1,5 +1,3 @@
-
-
 'use client';
 import { useActionState, useEffect, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
@@ -73,6 +71,7 @@ export function EditClientForm({ client, setOpen }: { client: Client, setOpen: (
         client.birth_date && isValid(parseISO(client.birth_date)) ? parseISO(client.birth_date) : undefined
     );
     const [activeTab, setActiveTab] = useState('personal');
+    const [docType, setDocType] = useState<string>(client.document_type || '');
 
     useEffect(() => {
         if (!state) return;
@@ -157,7 +156,7 @@ export function EditClientForm({ client, setOpen }: { client: Client, setOpen: (
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="document_type">Tipo de Documento</Label>
-                                    <Select name="document_type" defaultValue={client.document_type || ''}>
+                                    <Select name="document_type" value={docType} onValueChange={setDocType}>
                                         <SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="DNI">DNI</SelectItem>
@@ -169,7 +168,8 @@ export function EditClientForm({ client, setOpen }: { client: Client, setOpen: (
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="document_number">Nº de Documento</Label>
-                                    <Input id="document_number" name="document_number" defaultValue={client.document_number || ''} />
+                                    <Input id="document_number" name="document_number" defaultValue={client.document_number || ''} disabled={docType === 'NN'} />
+                                    <FieldError errors={state?.errors?.document_number} />
                                     {state?.message && state.message.includes('documento') && !state.errors && (
                                         <p className="text-sm text-destructive flex items-center gap-1 mt-1">
                                             <AlertCircle size={14} /> {state.message}
@@ -259,4 +259,3 @@ export function EditClientForm({ client, setOpen }: { client: Client, setOpen: (
         </DialogContent>
     );
 }
-    

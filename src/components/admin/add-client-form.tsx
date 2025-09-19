@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { useActionState, useEffect, useRef, useState } from 'react';
@@ -73,6 +71,7 @@ export function AddClientForm() {
     const { toast } = useToast();
     const [birthDate, setBirthDate] = useState<Date | undefined>();
     const [activeTab, setActiveTab] = useState('personal');
+    const [docType, setDocType] = useState<string>('');
 
 
     useEffect(() => {
@@ -86,6 +85,7 @@ export function AddClientForm() {
             formRef.current?.reset();
             setBirthDate(undefined);
             setActiveTab('personal');
+            setDocType('');
         } else if (state.message) {
              toast({
                 title: 'Error',
@@ -100,6 +100,7 @@ export function AddClientForm() {
             formRef.current?.reset();
             setBirthDate(undefined);
             setActiveTab('personal');
+            setDocType('');
         }
         setIsDialogOpen(open);
     }
@@ -176,7 +177,7 @@ export function AddClientForm() {
                                  <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="document_type">Tipo de Documento</Label>
-                                        <Select name="document_type">
+                                        <Select name="document_type" onValueChange={setDocType} value={docType}>
                                             <SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="DNI">DNI</SelectItem>
@@ -188,7 +189,8 @@ export function AddClientForm() {
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="document_number">Nº de Documento</Label>
-                                        <Input id="document_number" name="document_number" />
+                                        <Input id="document_number" name="document_number" disabled={docType === 'NN'} />
+                                        <FieldError errors={state?.errors?.document_number} />
                                         {state?.message && state.message.includes('documento') && !state.errors && (
                                             <p className="text-sm text-destructive flex items-center gap-1 mt-1">
                                                 <AlertCircle size={14} /> {state.message}
@@ -279,5 +281,3 @@ export function AddClientForm() {
         </Dialog>
     );
 }
-    
-

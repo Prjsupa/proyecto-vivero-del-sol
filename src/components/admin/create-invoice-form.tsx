@@ -1,4 +1,3 @@
-
 'use client';
 import { useActionState, useEffect, useRef, useState, useMemo } from 'react';
 import { useFormStatus } from 'react-dom';
@@ -77,7 +76,7 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
     const [invoiceTypeState, setInvoiceTypeState] = useState<'A' | 'B' | 'C'>('B');
     const [clientFirstName, setClientFirstName] = useState<string>('');
     const [clientLastName, setClientLastName] = useState<string>('');
-    const [clientDocType, setClientDocType] = useState<'DNI' | 'CUIT' | 'CUIL' | 'NN'>('DNI');
+    const [clientDocType, setClientDocType] = useState<'DNI' | 'CUIT' | 'CUIL' | 'NN'>('NN');
     const [clientDocNumber, setClientDocNumber] = useState<string>('');
     const [vatType, setVatType] = useState<'consumidor_final' | 'exento' | 'monotributo' | 'responsable_inscripto'>('consumidor_final');
     const [vatRate, setVatRate] = useState<number>(0); // % IVA
@@ -553,7 +552,7 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                                 <div className="flex items-center space-x-2"><RadioGroupItem value="CUIL" id="doc-cuil" /><Label htmlFor="doc-cuil">CUIL</Label></div>
                                 <div className="flex items-center space-x-2"><RadioGroupItem value="NN" id="doc-nn" /><Label htmlFor="doc-nn">NN</Label></div>
                             </RadioGroup>
-                            <Input placeholder="Número de documento" value={clientDocNumber} onChange={e => setClientDocNumber(e.target.value)} />
+                            <Input placeholder="Número de documento" value={clientDocNumber} onChange={e => setClientDocNumber(e.target.value)} disabled={clientDocType === 'NN'} />
                         </div>
                     </div>
                     <div className="space-y-2">
