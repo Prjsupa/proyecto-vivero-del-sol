@@ -1278,7 +1278,7 @@ export async function createSubcategoryAndAssignProducts(prevState: any, formDat
 
 const createInvoiceSchema = z.object({
     clientId: z.coerce.number().min(1, "Debes seleccionar un cliente."),
-    invoiceType: z.enum(['A', 'B'], { required_error: "Debes seleccionar un tipo de factura." }),
+    invoiceType: z.enum(['A', 'B', 'C'], { required_error: "Debes seleccionar un tipo de factura." }),
     payment_method: z.string().optional(),
     card_type: z.string().optional(),
     has_secondary_payment: z.preprocess((val) => val === 'on' || val === true, z.boolean()),
@@ -2162,7 +2162,7 @@ const basePromotionSchema = z.object({
   is_active: z.coerce.boolean(),
   discount_type: z.string().min(1, "Debes seleccionar un tipo de descuento."),
   apply_to_type: z.string().min(1, "Debes seleccionar a qué aplica la promoción."),
-  apply_to_ids: z.string().transform(val => val ? val.split(',') : []),
+  apply_to_ids: z.string().transform(val => val ? val.split(',').filter(Boolean) : []),
   can_be_combined: z.coerce.boolean(),
   usage_limit_type: z.enum(['unlimited', 'period']),
   start_date: z.string().optional().nullable(),
@@ -2190,7 +2190,7 @@ const promotionSchema = basePromotionSchema.superRefine((data, ctx) => {
             ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Debe añadir al menos un tramo de descuento.", path: ['progressive_tiers'] });
         }
     }
-     if (data.apply_to_type !== 'all_store' && data.apply_to_type !== 'all_products' && data.apply_to_type !== 'all_services' && data.apply_to_ids.length === 0) {
+     if (!['all_store', 'all_products', 'all_services'].includes(data.apply_to_type) && data.apply_to_ids.length === 0) {
         ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Debes seleccionar al menos un ítem o categoría.", path: ['apply_to_ids'] });
     }
 });
@@ -2248,6 +2248,85 @@ export async function addPromotion(prevState: any, formData: FormData) {
         data: `Promoción '${name}' creada exitosamente.`,
     };
 }
+
+
+const updatePromotionSchema = basePromotionSchema.extend({
+  id: z.coerce.number(),
+});
+
+export async function updatePromotion(prevState: any, formData: FormData) {
+  const validatedFields = updatePromotionSchema.safeParse(Object.fromEntries(formData));
+
+  if (!validatedFields.success) {
+    console.log("Validation Errors:", validatedFields.error.flatten());
+    return {
+      message: "Datos de formulario inválidos. Revisa los campos marcados.",
+      errors: validatedFields.error.flatten().fieldErrors,
+    };
+  }
+
+  const cookieStore = cookies();
+  const supabase = createClient(cookieStore);
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { message: "No autorizado." };
+
+  const { id, name, is_active, discount_type, apply_to_type, apply_to_ids, can_be_combined, usage_limit_type, start_date, end_date, custom_tag, x_for_y_take, x_for_y_pay, progressive_tiers } = validatedFields.data;
+  
+  let discount_value: object = {};
+  if (discount_type === 'x_for_y' && x_for_y_take && x_for_y_pay) {
+    discount_value = { take: x_for_y_take, pay: x_for_y_pay };
+  } else if (discount_type === 'progressive_discount' && progressive_tiers) {
+    const sortedTiers = progressive_tiers.sort((a, b) => a.quantity - b.quantity);
+    discount_value = { tiers: sortedTiers };
+  }
+  
+  const promotionData = {
+    name,
+    is_active,
+    discount_type,
+    discount_value,
+    apply_to_type,
+    apply_to_ids: apply_to_ids && apply_to_ids.length > 0 ? apply_to_ids : null,
+    can_be_combined,
+    usage_limit_type,
+    start_date: (usage_limit_type === 'period' && start_date) ? start_date : null,
+    end_date: (usage_limit_type === 'period' && end_date) ? end_date : null,
+    custom_tag,
+    updated_at: new Date().toISOString(),
+  };
+
+  const { error } = await supabase.from('promotions').update(promotionData).eq('id', id);
+
+  if (error) {
+    return { message: `Error actualizando la promoción: ${error.message}` };
+  }
+
+  revalidatePath('/admin/promotions');
+  return {
+    message: 'success',
+    data: `Promoción '${name}' actualizada exitosamente.`,
+  };
+}
+
+
+export async function deletePromotion(promotionId: number) {
+  if (!promotionId) return { message: "ID de promoción inválido." };
+
+  const cookieStore = cookies();
+  const supabase = createClient(cookieStore);
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { message: 'No autenticado' };
+
+  const { error } = await supabase.from('promotions').delete().eq('id', promotionId);
+
+  if (error) {
+    return { message: `Error al eliminar la promoción: ${error.message}` };
+  }
+  
+  revalidatePath('/admin/promotions');
+  return { message: 'success', data: '¡Promoción eliminada exitosamente!' };
+}
+
 
 // ============== COMPANY DATA =================
 

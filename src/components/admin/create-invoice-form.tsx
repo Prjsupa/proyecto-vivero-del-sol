@@ -1,6 +1,5 @@
 
 'use client';
-'use client';
 import { useActionState, useEffect, useRef, useState, useMemo } from 'react';
 import { useFormStatus } from 'react-dom';
 import { Button } from "@/components/ui/button";
@@ -96,6 +95,7 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
     const [serviceSearch, setServiceSearch] = useState('');
     const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([]);
     const [selectedServices, setSelectedServices] = useState<SelectedProduct[]>([]);
+    const supabase = createClient();
     
     const filteredProducts = useMemo(() => {
         if (!searchTerm) return [];
@@ -126,13 +126,14 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                 productId: item.product.id.toString(),
                 quantity: item.quantity,
                 unitPrice: Number(item.product.precio_venta),
-                categoryId: item.product.category_id,
-                subcategoryId: item.product.subcategory_id
+                categoryId: (item.product as Product).category,
+                subcategoryId: (item.product as Product).subcategory
             }));
 
             try {
                 // Aplicar promociones usando el motor
                 const { lineDiscounts, appliedPromos } = await applyPromotions({
+                    supabase,
                     items: cartItems,
                     branchId: '1' // Ajusta según sea necesario
                 });
@@ -143,49 +144,48 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                         const discount = lineDiscounts[item.product.id.toString()] || 0;
                         return {
                             ...item,
-                            discountAmount: discount
+                            discountAmount: discount,
+                            total: Math.max(0, (item.quantity * item.product.precio_venta) - discount)
                         };
                     })
                 );
 
                 // Actualizar lista de promociones aplicadas
-                const updatedPromos = appliedPromos.map(promo => ({
+                const autoPromos = appliedPromos.map(promo => ({
                     name: promo.name,
                     amount: promo.amount,
-                    source: 'auto'
+                    source: 'auto' as const
                 }));
-
-                // Agregar promociones manuales que ya existían (si las hay)
+                
                 const manualPromos = promotionsApplied.filter(p => p.source === 'manual');
-                setPromotionsApplied([...updatedPromos, ...manualPromos]);
+                setPromotionsApplied([...autoPromos, ...manualPromos]);
 
             } catch (error) {
                 console.error('Error al aplicar promociones:', error);
             }
         };
         
-        applyAutoPromotions();
-    }, [selectedProducts]);
+        if (selectedProducts.length > 0) {
+            applyAutoPromotions();
+        } else {
+            setPromotionsApplied(p => p.filter(promo => promo.source === 'manual'));
+        }
+    }, [selectedProducts, supabase]);
 
-    // Actualizar totales cuando cambian las promociones
-    useEffect(() => {
-        // Los totales ya se actualizan automáticamente por el useMemo
-        // Esta función está aquí por si necesitas lógica adicional
-    }, [promotionsApplied]);
 
     // Totales para vista previa
-    const lineDiscounts = useMemo(() => {
-        const lp = selectedProducts.reduce((acc, p) => acc + (Number(p.discountAmount) || 0), 0);
-        const ls = selectedServices.reduce((acc, p) => acc + (Number(p.discountAmount) || 0), 0);
-        return lp + ls;
-    }, [selectedProducts, selectedServices]);
     const subtotal = useMemo(() => {
         const sp = selectedProducts.reduce((acc, p) => acc + (p.product.precio_venta * p.quantity), 0);
         const ss = selectedServices.reduce((acc, p) => acc + (p.product.precio_venta * p.quantity), 0);
         return sp + ss;
     }, [selectedProducts, selectedServices]);
-    const promoDiscounts = useMemo(() => promotionsApplied.reduce((acc, p) => acc + (Number(p.amount) || 0), 0), [promotionsApplied]);
-    const discountsTotal = promoDiscounts + lineDiscounts;
+    
+    const discountsTotal = useMemo(() => {
+        const lineDiscounts = selectedProducts.reduce((acc, p) => acc + (Number(p.discountAmount) || 0), 0) + selectedServices.reduce((acc, s) => acc + (Number(s.discountAmount) || 0), 0);
+        const manualDiscounts = promotionsApplied.filter(p => p.source === 'manual').reduce((acc, p) => acc + (Number(p.amount) || 0), 0);
+        return lineDiscounts + manualDiscounts;
+    }, [selectedProducts, selectedServices, promotionsApplied]);
+
     const vatAmount = useMemo(() => Number(((subtotal - discountsTotal) * (vatRate / 100)).toFixed(2)), [subtotal, discountsTotal, vatRate]);
     const grandTotal = useMemo(() => Number((subtotal - discountsTotal + vatAmount).toFixed(2)), [subtotal, discountsTotal, vatAmount]);
 
@@ -198,7 +198,7 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                     toast({ title: "Stock insuficiente", description: `Solo quedan ${product.stock} unidades de ${product.name}.`, variant: "destructive" });
                     return currentProducts;
                 }
-                return currentProducts.map(p => p.product.id === product.id ? { ...p, quantity: newQuantity, total: Math.max(0, newQuantity * p.product.precio_venta - (p.discountAmount || 0)) } : p);
+                return currentProducts.map(p => p.product.id === product.id ? { ...p, quantity: newQuantity } : p);
             }
             if (product.stock < 1) {
                  toast({ title: "Stock insuficiente", description: `${product.name} no tiene stock disponible.`, variant: "destructive" });
@@ -223,25 +223,21 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
     
     const updateProductQuantity = (productId: string, newQuantity: number) => {
         setSelectedProducts(currentProducts => {
-            if (newQuantity === 0) {
+            if (newQuantity <= 0) {
                 return currentProducts.filter(p => p.product.id !== productId);
             }
 
             return currentProducts.map(p => {
                 if (p.product.id === productId) {
-                    if (newQuantity > p.product.stock) {
+                    if (newQuantity > (p.product as Product).stock) {
                         toast({
                             title: "Stock insuficiente",
-                            description: `No hay suficiente stock de ${p.product.name}. Stock disponible: ${p.product.stock}`,
+                            description: `No hay suficiente stock de ${p.product.name}. Stock disponible: ${(p.product as Product).stock}`,
                             variant: "destructive"
                         });
-                        return p;
+                        return { ...p, quantity: (p.product as Product).stock };
                     }
-                    return {
-                        ...p,
-                        quantity: newQuantity,
-                        total: Math.max(0, (newQuantity * p.product.precio_venta) - (p.discountAmount || 0))
-                    };
+                    return { ...p, quantity: newQuantity };
                 }
                 return p;
             });
@@ -250,21 +246,29 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
 
     const updateServiceQuantity = (serviceId: string, newQuantity: number) => {
         setSelectedServices(currentServices => {
-            if (newQuantity === 0) {
+            if (newQuantity <= 0) {
                 return currentServices.filter(s => s.product.id !== serviceId);
             }
             return currentServices.map(s => {
                 if (s.product.id === serviceId) {
-                    return {
-                        ...s,
-                        quantity: newQuantity,
-                        total: Math.max(0, (newQuantity * s.product.precio_venta) - (s.discountAmount || 0))
-                    };
+                    return { ...s, quantity: newQuantity };
                 }
                 return s;
             });
         });
     };
+    
+    // Recalculate totals whenever quantities or discounts change.
+    useEffect(() => {
+        setSelectedProducts(currentProducts => currentProducts.map(p => ({
+            ...p,
+            total: Math.max(0, p.quantity * p.product.precio_venta - p.discountAmount)
+        })));
+        setSelectedServices(currentServices => currentServices.map(s => ({
+            ...s,
+            total: Math.max(0, s.quantity * s.product.precio_venta - s.discountAmount)
+        })));
+    }, [selectedProducts.map(p => p.quantity).join(), selectedProducts.map(p => p.discountAmount).join(), selectedServices.map(p => p.quantity).join(), selectedServices.map(p => p.discountAmount).join()]);
 
     useEffect(() => {
         if (state?.message === 'success' && state.data) {
@@ -286,7 +290,6 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
     // Cargar vendedores al montar el componente
     useEffect(() => {
         const loadSellers = async () => {
-            const supabase = createClient();
             const { data, error } = await supabase
                 .from('sellers')
                 .select('*')
@@ -305,7 +308,7 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
         };
         
         loadSellers();
-    }, [toast]);
+    }, [supabase, toast]);
 
     // Actualizar el tipo de factura cuando cambia el tipo de IVA
     useEffect(() => {
@@ -356,8 +359,12 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
     
     const QuantityControl = ({ item }: { item: SelectedProduct }) => {
         const handleQuantityChange = (newQuantity: number) => {
-            if (!isNaN(newQuantity) && newQuantity >= 0) {
-                updateProductQuantity(item.product.id, newQuantity);
+            if (!isNaN(newQuantity)) {
+                 if(item.product.hasOwnProperty('stock')) {
+                    updateProductQuantity(item.product.id, newQuantity);
+                } else {
+                    updateServiceQuantity(item.product.id, newQuantity);
+                }
             }
         };
 
@@ -372,9 +379,9 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                     onChange={(e) => handleQuantityChange(parseInt(e.target.value, 10))}
                     className="h-8 w-14 text-center"
                     min="0"
-                    max={item.product.stock}
+                    max={(item.product as Product).stock}
                 />
-                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(item.quantity + 1)} disabled={item.quantity >= item.product.stock}>
+                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(item.quantity + 1)} disabled={item.product.hasOwnProperty('stock') && item.quantity >= (item.product as Product).stock}>
                     +
                 </Button>
             </div>
@@ -385,7 +392,7 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                 <form id="invoice-form" action={formAction} ref={formRef} className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-8 overflow-hidden">
                 <div className="flex flex-col gap-4 overflow-y-hidden pr-2">
                     <input type="hidden" name="products" value={JSON.stringify([
-                        ...selectedProducts.map(p => ({ productId: p.product.id, name: p.product.name, quantity: p.quantity, unitPrice: p.product.precio_venta, total: p.total, categoryId: p.product.category, subcategoryId: p.product.subcategory, discounts: (p.discountAmount && p.discountAmount > 0) ? [{ label: 'Desc. línea', amount: p.discountAmount }] : [] })),
+                        ...selectedProducts.map(p => ({ productId: p.product.id, name: p.product.name, quantity: p.quantity, unitPrice: p.product.precio_venta, total: p.total, categoryId: (p.product as Product).category, subcategoryId: (p.product as Product).subcategory, discounts: (p.discountAmount && p.discountAmount > 0) ? [{ label: 'Desc. línea', amount: p.discountAmount }] : [] })),
                         ...selectedServices.map(s => ({ productId: s.product.id, name: s.product.name, quantity: s.quantity, unitPrice: (s.product as any).precio_venta, total: s.total, isService: true, discounts: (s.discountAmount && s.discountAmount > 0) ? [{ label: 'Desc. servicio', amount: s.discountAmount }] : [] }))
                     ])} />
                     <input type="hidden" name="client_first_name" value={clientFirstName} />
@@ -457,17 +464,16 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                     <div className="space-y-4 rounded-md border p-4 flex-grow flex flex-col">
                             <Label>Productos y Servicios en la Factura</Label>
                             <ScrollArea className="flex-grow">
-                            {selectedProducts.length === 0 && selectedServices.length === 0 ? (
+                            {[...selectedProducts, ...selectedServices].length === 0 ? (
                                 <div className="text-center text-muted-foreground py-10 flex flex-col items-center justify-center h-full">
                                     <p>Aún no se han añadido productos ni servicios.</p>
                                 </div>
                             ) : (
                                 <div className="space-y-2">
-                                    {/* Productos */}
-                                    {selectedProducts.map(item => (
+                                    {[...selectedProducts, ...selectedServices].map(item => (
                                     <div key={item.product.id} className="flex items-center justify-between p-2 rounded-md bg-muted/50">
                                         <div className="flex-grow">
-                                            <p className="font-medium">{item.product.name}</p>
+                                            <p className="font-medium">{item.product.name} {item.product.hasOwnProperty('stock') ? '' : <span className="text-xs text-muted-foreground">(Servicio)</span>}</p>
                                             <p className="text-sm text-muted-foreground">
                                                 {formatPrice(item.product.precio_venta)} c/u
                                             </p>
@@ -483,42 +489,16 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                                                     value={String(item.discountAmount ?? 0)}
                                                     onChange={(e) => {
                                                         const val = Math.max(0, Number(e.target.value) || 0);
-                                                        setSelectedProducts(curr => curr.map(p => p.product.id === item.product.id ? {
+                                                        const updateFunction = item.product.hasOwnProperty('stock') ? setSelectedProducts : setSelectedServices;
+                                                        updateFunction(curr => curr.map(p => p.product.id === item.product.id ? {
                                                             ...p,
                                                             discountAmount: val,
-                                                            total: Math.max(0, p.quantity * p.product.precio_venta - val)
-                                                        } : p));
+                                                        } : p) as any);
                                                     }}
                                                 />
                                             </div>
                                             <QuantityControl item={item} />
                                             <p className="font-semibold w-24 text-right">{formatPrice(item.total)}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                                {/* Servicios */}
-                                {selectedServices.map(service => (
-                                    <div key={`service-${service.product.id}`} className="flex items-center justify-between p-2 border rounded-md bg-blue-50">
-                                        <div className="flex-1">
-                                            <p className="font-medium">{service.product.name} <span className="text-xs text-muted-foreground">(Servicio)</span></p>
-                                            <p className="text-sm text-muted-foreground">{service.quantity} x {formatPrice(service.product.precio_venta)}</p>
-                                            {service.discountAmount > 0 && (
-                                                <p className="text-xs text-red-500">
-                                                    -{formatPrice(service.discountAmount)} (Descuento)
-                                                </p>
-                                            )}
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <p className="font-medium">{formatPrice(service.total)}</p>
-                                            <Button 
-                                                type="button"
-                                                variant="ghost" 
-                                                size="sm" 
-                                                className="text-red-500 hover:text-red-700"
-                                                onClick={() => updateServiceQuantity(service.product.id, 0)}
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
                                         </div>
                                     </div>
                                 ))}
@@ -534,7 +514,7 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                                     type="button" 
                                     variant="outline" 
                                     size="sm" 
-                                    onClick={() => setPromotionsApplied(arr => [...arr, { name: '', amount: 0 }])}
+                                    onClick={() => setPromotionsApplied(arr => [...arr, { name: '', amount: 0, source: 'manual' }])}
                                 >
                                     Agregar manual
                                 </Button>
@@ -546,15 +526,15 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                             <div className="space-y-2">
                                 {promotionsApplied.map((p, idx) => (
                                     <div key={idx} className="grid grid-cols-12 gap-2 items-center">
-                                        <Input className="col-span-7" placeholder="Nombre de la promo" value={p.name} onChange={e => setPromotionsApplied(list => list.map((it, i) => i===idx ? { ...it, name: e.target.value } : it))} />
-                                        <Input className="col-span-4" type="number" step="0.01" min="0" placeholder="Monto" value={String(p.amount)} onChange={e => setPromotionsApplied(list => list.map((it, i) => i===idx ? { ...it, amount: Number(e.target.value) || 0 } : it))} />
+                                        <Input readOnly={p.source === 'auto'} className="col-span-7" placeholder="Nombre de la promo" value={p.name} onChange={e => setPromotionsApplied(list => list.map((it, i) => i===idx ? { ...it, name: e.target.value } : it))} />
+                                        <Input readOnly={p.source === 'auto'} className="col-span-4" type="number" step="0.01" min="0" placeholder="Monto" value={String(p.amount)} onChange={e => setPromotionsApplied(list => list.map((it, i) => i===idx ? { ...it, amount: Number(e.target.value) || 0 } : it))} />
                                         <Button type="button" variant="ghost" size="sm" className="col-span-1" onClick={() => setPromotionsApplied(list => list.filter((_, i) => i!==idx))}>X</Button>
                                     </div>
                                 ))}
                             </div>
                         )}
                         <p className="text-xs text-muted-foreground mt-2">
-                            Nota: Los ajustes manuales (como los descuentos aplicados manualmente) se reflejan en la UI y en el PDF de la factura.
+                            Nota: Las promociones automáticas se aplican sobre el precio de lista. Los descuentos manuales se suman al total.
                         </p>
                     </div>
                 </div>
@@ -751,6 +731,10 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                                 <span>Subtotal</span>
                                 <span>{formatPrice(subtotal)}</span>
                             </div>
+                            <div className="flex justify-between items-center text-sm text-destructive">
+                                <span>Descuentos</span>
+                                <span>- {formatPrice(discountsTotal)}</span>
+                            </div>
                             <div className="flex justify-between items-center text-sm">
                                 <span>IVA ({vatRate}%)</span>
                                 <span>{formatPrice(vatAmount)}</span>
@@ -775,7 +759,7 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                     {formEl}
                     <div className="mt-4 border-t pt-4 flex gap-2 justify-end">
                         <Button variant="outline" onClick={() => history.back()}>Cancelar</Button>
-                        <SubmitButton disabled={selectedProducts.length === 0} />
+                        <SubmitButton disabled={selectedProducts.length === 0 && selectedServices.length === 0} />
                     </div>
                 </div>
             </div>
@@ -795,7 +779,7 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                 <DialogClose asChild>
                     <Button variant="outline">Cancelar</Button>
                 </DialogClose>
-                <SubmitButton disabled={selectedProducts.length === 0} />
+                <SubmitButton disabled={selectedProducts.length === 0 && selectedServices.length === 0} />
             </DialogFooter>
         </DialogContent>
     )
