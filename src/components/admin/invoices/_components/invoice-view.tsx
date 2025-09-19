@@ -20,12 +20,9 @@ export function InvoiceView({ invoice, client, company }: { invoice: Invoice, cl
     
     const productLines: InvoiceProductLine[] = Array.isArray(invoice.products) ? invoice.products : [];
     const promotionsApplied = (Array.isArray(invoice.promotions_applied) ? invoice.promotions_applied : []) as { name: string; amount: number }[];
-
+    
     const subtotal = productLines.reduce((acc, item) => acc + (item.unitPrice * item.quantity), 0);
-    const totalDiscounts = productLines.reduce((acc, item) => {
-        const itemDiscount = item.discounts?.reduce((dAcc, d) => dAcc + d.amount, 0) || 0;
-        return acc + itemDiscount;
-    }, 0);
+    const totalDiscounts = invoice.discounts_total || 0;
 
     return (
         <>
@@ -91,22 +88,17 @@ export function InvoiceView({ invoice, client, company }: { invoice: Invoice, cl
                                 <th className="text-left font-semibold uppercase py-2 px-1">Descripción</th>
                                 <th className="text-center font-semibold uppercase py-2 px-1 w-[10%]">Cant.</th>
                                 <th className="text-right font-semibold uppercase py-2 px-1 w-[15%]">P. Unit.</th>
-                                <th className="text-right font-semibold uppercase py-2 px-1 w-[15%]">Descuento</th>
                                 <th className="text-right font-semibold uppercase py-2 px-1 w-[15%]">P. Total</th>
                             </tr>
                         </thead>
                         <tbody>
                             {productLines.map((item, index) => {
-                                const itemDiscount = item.discounts?.reduce((acc, d) => acc + d.amount, 0) || 0;
                                 return (
                                 <tr key={index} className="border-b border-gray-100">
                                     <td className="py-2 px-1">{item.sku || '-'}</td>
                                     <td className="py-2 px-1">{item.name}</td>
                                     <td className="py-2 px-1 text-center">{item.quantity}</td>
                                     <td className="text-right py-2 px-1 font-mono">{formatPrice(item.unitPrice)}</td>
-                                    <td className="text-right py-2 px-1 font-mono text-destructive">
-                                        {itemDiscount > 0 ? `- ${formatPrice(itemDiscount)}` : '-'}
-                                    </td>
                                     <td className="text-right py-2 px-1 font-mono">{formatPrice(item.total)}</td>
                                 </tr>
                             )})}
