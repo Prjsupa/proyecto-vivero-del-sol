@@ -82,6 +82,9 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
     const [sellers, setSellers] = useState<Seller[]>([]);
     const [selectedSellerId, setSelectedSellerId] = useState<number | null>(null);
     const [commissionPercentage, setCommissionPercentage] = useState<number>(0);
+    const [paymentCondition, setPaymentCondition] = useState<string>('');
+    const [selectedCashAccount, setSelectedCashAccount] = useState<string>('');
+
 
     // POS State
     const [searchTerm, setSearchTerm] = useState('');
@@ -302,17 +305,13 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
         
         loadSellers();
     }, [supabase, toast]);
-
-    // Actualizar el tipo de factura y tasa de IVA cuando cambia la condición de IVA
+    
     useEffect(() => {
         const client = customers.find(c => String(c.id) === selectedClientId);
-        const defaultInvoiceType = client?.default_invoice_type || 'B';
-    
-        if (vatType === 'responsable_inscripto') {
-            setInvoiceTypeState(defaultInvoiceType === 'C' ? 'B' : defaultInvoiceType);
+        if (vatType === 'consumidor_final') {
+            setInvoiceTypeState('B');
         } else {
-            // Para Consumidor Final, Exento, Monotributo
-            setInvoiceTypeState('B'); // Forzar Factura B
+            setInvoiceTypeState(client?.default_invoice_type || 'B');
         }
     }, [vatType, selectedClientId, customers]);
 
@@ -403,6 +402,8 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                     <input type="hidden" name="commission_percentage" value={String(commissionPercentage)} />
                     <input type="hidden" name="promotions_applied" value={JSON.stringify(promotionsApplied)} />
                     <input type="hidden" name="discounts_total" value={String(discountsTotal)} />
+                    <input type="hidden" name="payment_condition" value={paymentCondition} />
+                    <input type="hidden" name="cash_account_code" value={selectedCashAccount} />
 
                     <div className="space-y-4 rounded-md border p-4">
                             <Label>Añadir Productos</Label>
@@ -560,7 +561,6 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                                 onValueChange={(value: 'consumidor_final' | 'exento' | 'monotributo' | 'responsable_inscripto') => {
                                     setVatType(value);
                                 }}
-                                name="vat_type"
                             >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Seleccionar..." />
@@ -582,7 +582,7 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                                 value={invoiceTypeState} 
                                 onValueChange={(v) => setInvoiceTypeState(v as 'A'|'B'|'C')}
                                 className="grid grid-cols-3"
-                                disabled={vatType === 'consumidor_final' || vatType === 'exento' || vatType === 'monotributo'}
+                                disabled={vatType === 'consumidor_final'}
                             >
                                 <div className="flex items-center space-x-2">
                                     <RadioGroupItem value="A" id="type-a" />
@@ -609,7 +609,6 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                         <Select 
                             value={selectedSellerId ? String(selectedSellerId) : ''} 
                             onValueChange={(value) => setSelectedSellerId(value ? parseInt(value, 10) : null)}
-                            name="seller_id"
                         >
                             <SelectTrigger>
                                 <SelectValue placeholder="Seleccionar vendedor" />
@@ -634,7 +633,6 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                                     min="0"
                                     max="100"
                                     step="0.1"
-                                    name="commission_percentage"
                                 />
                             </div>
                         )}
@@ -643,7 +641,7 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                     <div className="space-y-4 rounded-md border p-4">
                         <div className="space-y-2">
                             <Label>Condición de Venta</Label>
-                            <Select name="payment_condition">
+                            <Select value={paymentCondition} onValueChange={setPaymentCondition}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Selecciona una condición" />
                                 </SelectTrigger>
@@ -654,10 +652,11 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                                     <SelectItem value="Otro">Otro</SelectItem>
                                 </SelectContent>
                             </Select>
+                            <FieldError errors={state?.errors?.payment_condition} />
                         </div>
                          <div className="space-y-2">
                             <Label>Cuenta de Caja</Label>
-                            <Select name="cash_account_code">
+                            <Select value={selectedCashAccount} onValueChange={setSelectedCashAccount}>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Selecciona una cuenta de caja" />
                                 </SelectTrigger>
@@ -669,6 +668,7 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                                     ))}
                                 </SelectContent>
                             </Select>
+                             <FieldError errors={state?.errors?.cash_account_code} />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="notes">Notas Adicionales</Label>
