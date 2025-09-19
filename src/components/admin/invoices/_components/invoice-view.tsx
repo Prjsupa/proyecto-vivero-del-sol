@@ -1,3 +1,4 @@
+
 'use client';
 import type { Invoice, Client, CompanyData, Json } from "@/lib/definitions";
 import { format, parseISO } from 'date-fns';
@@ -64,7 +65,7 @@ export function InvoiceView({ invoice, client, company }: { invoice: Invoice, cl
                  <section className="grid grid-cols-2 gap-8 py-6 border-b border-gray-200 text-sm">
                     <div className="space-y-1">
                         <p><span className="font-semibold w-24 inline-block">Cliente:</span>{invoice.client_name}</p>
-                        <p><span className="font-semibold w-24 inline-block">Cond. Venta:</span>{invoice.payment_condition} - {invoice.cash_account_code}</p>
+                        <p><span className="font-semibold w-24 inline-block">Cond. Venta:</span>{invoice.payment_condition} {invoice.notes ? `- ${invoice.notes}`: ''}</p>
                     </div>
                      <div className="space-y-1 text-right">
                         <p><span className="font-semibold">Documento:</span> {client?.document_type || 'NN'}: {client?.document_number || 'No especificado'}</p>

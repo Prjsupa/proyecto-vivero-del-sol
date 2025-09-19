@@ -70,6 +70,8 @@ export async function createInvoice(prevState: any, formData: FormData) {
         }
     }
     
+    const combinedNotes = `${cash_account_code}${notes ? ` - ${notes}` : ''}`;
+
     const invoiceData = {
         invoice_number: `INV-${Date.now()}`,
         client_id: clientId,
@@ -83,8 +85,7 @@ export async function createInvoice(prevState: any, formData: FormData) {
         total_amount: totalAmount,
         invoice_type: invoiceType,
         payment_condition,
-        cash_account_code,
-        notes: notes,
+        notes: combinedNotes,
         promotions_applied,
         seller_id,
         seller_name,

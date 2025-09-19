@@ -212,7 +212,6 @@ export type Invoice = {
   total_amount: number;
   invoice_type: 'A' | 'B' | 'C';
   payment_condition?: string | null;
-  cash_account_code?: string | null;
   notes?: string | null;
   subtotal?: number | null;
   vat_type?: string | null;

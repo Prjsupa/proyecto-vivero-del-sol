@@ -95,7 +95,7 @@ export function InvoicesTable({ invoices, customers }: { invoices: Invoice[], cu
                                 <TableCell>{invoice.seller_name ?? '-'}</TableCell>
                                 <TableCell>
                                     <div className="flex flex-col gap-1">
-                                        {invoice.payment_condition && <Badge variant="secondary">{invoice.payment_condition} - {invoice.cash_account_code}</Badge>}
+                                        {invoice.payment_condition && <Badge variant="secondary">{invoice.payment_condition}{invoice.notes ? ` - ${invoice.notes}` : ''}</Badge>}
                                     </div>
                                 </TableCell>
                                 <TableCell className="text-right font-mono">{formatPrice(invoice.total_amount)}</TableCell>
