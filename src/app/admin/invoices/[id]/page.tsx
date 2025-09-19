@@ -1,8 +1,8 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
-import type { Invoice, Client } from "@/lib/definitions";
-import { InvoiceView, PrintButton } from "../_components/invoice-view";
+import type { Invoice, Client, CompanyData, CashAccount } from "@/lib/definitions";
+import { InvoiceView, PrintButton } from "@/components/admin/invoices/_components/invoice-view";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
@@ -34,6 +34,21 @@ async function getInvoiceAndClient(invoiceId: string): Promise<{ invoice: Invoic
     
     return { invoice, client: client || null };
 }
+
+async function getCompanyData(): Promise<CompanyData | null> {
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
+    const { data, error } = await supabase
+        .from('company_data')
+        .select('*')
+        .single();
+    if (error) {
+        console.error('Error fetching company data:', error);
+        return null;
+    }
+    return data as CompanyData;
+}
+
 
 export default async function InvoiceDetailPage({ params }: { params: { id: string } }) {
     const cookieStore = cookies();
