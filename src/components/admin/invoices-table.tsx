@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { Invoice, Client } from "@/lib/definitions";
+import type { Invoice, Client, Seller } from "@/lib/definitions";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format, parseISO, isValid } from 'date-fns';
 import { Badge } from "../ui/badge";
@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { useRouter } from "next/navigation";
 
 
-export function InvoicesTable({ invoices, customers }: { invoices: Invoice[], customers: Client[] }) {
+export function InvoicesTable({ invoices, customers, sellers }: { invoices: Invoice[], customers: Client[], sellers: Seller[] }) {
     const [filters, setFilters] = useState({
         invoiceNumber: '',
         client: 'todos',

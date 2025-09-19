@@ -1,6 +1,6 @@
 
 import { createClient } from "@/lib/supabase/server";
-import type { Client, Product, CashAccount, Service } from "@/lib/definitions";
+import type { Client, Product, CashAccount, Service, Seller } from "@/lib/definitions";
 import { CreateInvoiceForm } from "@/components/admin/create-invoice-form";
 import { cookies } from "next/headers";
 
@@ -60,16 +60,32 @@ async function getCashAccounts(): Promise<CashAccount[]> {
   return data as CashAccount[];
 }
 
+async function getSellers(): Promise<Seller[]> {
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
+    const { data, error } = await supabase
+        .from('sellers')
+        .select('*')
+        .order('last_name', { ascending: true });
+    
+    if (error) {
+        console.error('Error fetching sellers:', error);
+        return [];
+    }
+    return data;
+}
+
 export default async function NewInvoicePage() {
-  const [clients, products, services, cashAccounts] = await Promise.all([
+  const [clients, products, services, cashAccounts, sellers] = await Promise.all([
     getClients(),
     getProducts(),
     getServices(),
     getCashAccounts(),
+    getSellers(),
   ]);
 
   // Render full-page CreateInvoiceForm
   return (
-    <CreateInvoiceForm customers={clients} products={products} services={services} cashAccounts={cashAccounts} asPage />
+    <CreateInvoiceForm customers={clients} products={products} services={services} cashAccounts={cashAccounts} sellers={sellers} asPage />
   );
 }

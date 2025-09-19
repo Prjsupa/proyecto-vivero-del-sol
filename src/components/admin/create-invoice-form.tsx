@@ -52,6 +52,7 @@ interface CreateInvoiceFormProps {
     products: Product[];
     services?: Service[];
     cashAccounts?: CashAccount[];
+    sellers?: Seller[];
     selectedCustomerId?: string;
     setOpen?: (open: boolean) => void;
     asPage?: boolean;
@@ -65,7 +66,7 @@ interface SelectedProduct {
 }
 
 
-export function CreateInvoiceForm({ customers, products, services = [], cashAccounts = [], selectedCustomerId, setOpen, asPage = false }: CreateInvoiceFormProps) {
+export function CreateInvoiceForm({ customers, products, services = [], cashAccounts = [], sellers = [], selectedCustomerId, setOpen, asPage = false }: CreateInvoiceFormProps) {
     const [state, formAction] = useActionState(createInvoice, { message: '' });
     const formRef = useRef<HTMLFormElement>(null);
     const { toast } = useToast();
@@ -81,6 +82,7 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
     const [promotionsApplied, setPromotionsApplied] = useState<{ name: string; amount: number; source: 'auto' | 'manual' }[]>([]);
     const [paymentCondition, setPaymentCondition] = useState<string>('');
     const [selectedCashAccount, setSelectedCashAccount] = useState<string>('');
+    const [selectedSellerId, setSelectedSellerId] = useState<string>('');
 
 
     // POS State
@@ -364,6 +366,7 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                     <input type="hidden" name="discounts_total" value={String(discountsTotal)} />
                     <input type="hidden" name="payment_condition" value={paymentCondition} />
                     <input type="hidden" name="cash_account_code" value={selectedCashAccount} />
+                    <input type="hidden" name="seller_id" value={selectedSellerId} />
 
                     <div className="space-y-4 rounded-md border p-4">
                             <Label>Añadir Productos</Label>
@@ -593,6 +596,19 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                                 </SelectContent>
                             </Select>
                              <FieldError errors={state?.errors?.cash_account_code} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Vendedor</Label>
+                            <Select value={selectedSellerId} onValueChange={setSelectedSellerId}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Selecciona un vendedor" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {sellers.map(s => (
+                                        <SelectItem key={s.id} value={String(s.id)}>{s.name} {s.last_name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="notes">Notas Adicionales</Label>

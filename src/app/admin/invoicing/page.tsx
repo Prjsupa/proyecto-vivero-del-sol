@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
-import type { Invoice, Client, Product } from "@/lib/definitions";
+import type { Invoice, Client, Product, Seller } from "@/lib/definitions";
 import { InvoicesTable } from "@/components/admin/invoices-table";
 import { ExportInvoicesButton } from "@/components/admin/export-invoices-button";
 import { Button } from "@/components/ui/button";
@@ -53,12 +53,28 @@ async function getClients(): Promise<Client[]> {
     return data;
 }
 
+async function getSellers(): Promise<Seller[]> {
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
+    const { data, error } = await supabase
+        .from('sellers')
+        .select('*')
+        .order('last_name', { ascending: true });
+    
+    if (error) {
+        console.error('Error fetching sellers:', error);
+        return [];
+    }
+    return data;
+}
+
 
 export default async function InvoicingPage() {
-    const [invoices, clients, products] = await Promise.all([
+    const [invoices, clients, products, sellers] = await Promise.all([
         getInvoices(),
         getClients(),
         getProducts(),
+        getSellers(),
     ]);
 
     return (
@@ -81,7 +97,7 @@ export default async function InvoicingPage() {
                     <CardDescription>Aquí aparecerá la lista de facturas con sus filtros correspondientes.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <InvoicesTable invoices={invoices} customers={clients} />
+                    <InvoicesTable invoices={invoices} customers={clients} sellers={sellers} />
                 </CardContent>
             </Card>
         </div>

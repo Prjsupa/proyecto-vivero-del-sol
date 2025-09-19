@@ -21,6 +21,7 @@ const createInvoiceSchema = z.object({
     vat_rate: z.coerce.number(),
     discounts_total: z.coerce.number(),
     promotions_applied: z.string().transform((val) => val ? JSON.parse(val) : []),
+    seller_id: z.coerce.number().optional(),
 });
 
 export async function createInvoice(prevState: any, formData: FormData) {
@@ -48,12 +49,21 @@ export async function createInvoice(prevState: any, formData: FormData) {
         vat_type,
         discounts_total,
         promotions_applied,
+        seller_id,
     } = validatedFields.data;
     
     if (!products || products.length === 0) {
         return { message: "No se puede crear una factura sin productos." };
     }
     
+    let sellerName: string | undefined;
+    if (seller_id) {
+        const { data: sellerData } = await supabase.from('sellers').select('name, last_name').eq('id', seller_id).single();
+        if (sellerData) {
+            sellerName = `${sellerData.name} ${sellerData.last_name}`;
+        }
+    }
+
     const subtotal = products.reduce((acc: number, p: any) => acc + (p.unitPrice * p.quantity), 0);
     const vat_amount = (subtotal - discounts_total) * (vat_rate / 100);
     const totalAmount = subtotal - discounts_total + vat_amount;
@@ -76,6 +86,8 @@ export async function createInvoice(prevState: any, formData: FormData) {
         payment_condition,
         notes: combinedNotes,
         promotions_applied,
+        seller_id,
+        seller_name: sellerName,
     };
 
     const { data, error } = await supabase.from('invoices').insert([invoiceData]).select('id').single();

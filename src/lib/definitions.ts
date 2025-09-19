@@ -219,7 +219,6 @@ export type Invoice = {
   vat_amount?: number | null;
   discounts_total?: number | null;
   promotions_applied?: Json | null; // e.g., [{ name: string, amount: number }]
-  commission_percentage?: number | null;
 }
 
 export type Json =
@@ -231,4 +230,5 @@ export type Json =
   | Json[]
 
 export type jsonb = Json;
+
 
