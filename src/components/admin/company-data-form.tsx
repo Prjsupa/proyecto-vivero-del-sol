@@ -10,6 +10,14 @@ import { AlertCircle, Loader2, Save } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { CompanyData } from '@/lib/definitions';
 import { updateCompanyData } from '@/lib/actions';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+
+const provinces = [
+    "Buenos Aires", "Ciudad Autónoma de Buenos Aires", "Catamarca", "Chaco", "Chubut", "Córdoba", "Corrientes",
+    "Entre Ríos", "Formosa", "Jujuy", "La Pampa", "La Rioja", "Mendoza", "Misiones", "Neuquén", "Río Negro",
+    "Salta", "San Juan", "San Luis", "Santa Cruz", "Santa Fe", "Santiago del Estero", 
+    "Tierra del Fuego, Antártida e Islas del Atlántico Sur", "Tucumán"
+];
 
 function SubmitButton() {
     const { pending } = useFormStatus();
@@ -94,7 +102,12 @@ export function CompanyDataForm({ companyData }: { companyData: CompanyData }) {
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="provincia">Provincia</Label>
-                        <Input id="provincia" name="provincia" defaultValue={companyData.provincia || ''} />
+                         <Select name="provincia" defaultValue={companyData.provincia || ''}>
+                            <SelectTrigger><SelectValue placeholder="Seleccionar provincia..." /></SelectTrigger>
+                            <SelectContent>
+                                {provinces.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="telefono">Teléfono</Label>

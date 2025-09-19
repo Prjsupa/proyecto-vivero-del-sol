@@ -1,8 +1,8 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
-import type { Invoice, Client, CompanyData, CashAccount } from "@/lib/definitions";
-import { InvoiceView, PrintButton } from "@/components/admin/invoices/_components/invoice-view";
+import type { Invoice, Client, CompanyData } from "@/lib/definitions";
+import { InvoiceView, PrintButton } from "../_components/invoice-view";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
@@ -41,6 +41,7 @@ async function getCompanyData(): Promise<CompanyData | null> {
     const { data, error } = await supabase
         .from('company_data')
         .select('*')
+        .eq('id', 1)
         .single();
     if (error) {
         console.error('Error fetching company data:', error);
@@ -58,7 +59,11 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
         redirect('/auth/login');
     }
 
-    const { invoice, client } = await getInvoiceAndClient(params.id);
+    const [{ invoice, client }, company] = await Promise.all([
+        getInvoiceAndClient(params.id),
+        getCompanyData()
+    ]);
+
 
     return (
         <div className="bg-muted/40 min-h-screen print:bg-white" id="invoice-page">
@@ -73,7 +78,7 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
                      <PrintButton />
                 </div>
 
-                <InvoiceView invoice={invoice} client={client} />
+                <InvoiceView invoice={invoice} client={client} company={company} />
             </div>
         </div>
     );

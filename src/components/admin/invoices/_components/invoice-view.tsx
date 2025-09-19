@@ -1,31 +1,34 @@
 
 'use client';
-import type { Invoice, Client } from "@/lib/definitions";
+import type { Invoice, Client, CompanyData, Json } from "@/lib/definitions";
 import { format, parseISO } from 'date-fns';
 import { formatPrice } from '@/lib/utils';
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
-type ProductLine = {
+type InvoiceProductLine = {
     productId: string;
     name: string;
+    sku?: string;
     quantity: number;
     unitPrice: number;
+    discounts: { label: string; amount: number }[];
     total: number;
 }
 
-export function InvoiceView({ invoice, client }: { invoice: Invoice, client: Client | null }) {
+export function InvoiceView({ invoice, client, company }: { invoice: Invoice, client: Client | null, company: CompanyData | null }) {
     
-    const productLines: ProductLine[] = Array.isArray(invoice.products) ? invoice.products : [];
+    const productLines: InvoiceProductLine[] = Array.isArray(invoice.products) ? invoice.products : [];
+    const promotionsApplied = (Array.isArray(invoice.promotions_applied) ? invoice.promotions_applied : []) as { name: string; amount: number }[];
 
-    const viveroInfo = {
-        name: 'Vivero Del Sol',
-        address: 'Av. Siempre Viva 742',
-        city: 'Springfield',
-        cuit: '30-12345678-9',
-        iva: 'Responsable Inscripto'
-    };
+    const totalItemDiscounts = productLines.reduce((acc, item) => {
+        const itemDiscount = item.discounts?.reduce((dAcc, d) => dAcc + d.amount, 0) || 0;
+        return acc + itemDiscount;
+    }, 0);
+    
+    const totalPromoDiscounts = promotionsApplied.reduce((acc, promo) => acc + promo.amount, 0);
 
     return (
         <>
@@ -39,12 +42,14 @@ export function InvoiceView({ invoice, client }: { invoice: Invoice, client: Cli
                             height={133}
                             className="mb-4"
                         />
-                        <div className="text-sm text-gray-600">
-                            <p className="font-bold">{viveroInfo.name}</p>
-                            <p>{viveroInfo.address}</p>
-                            <p>{viveroInfo.city}</p>
-                            <p>CUIT: {viveroInfo.cuit}</p>
-                             <p>Cond. IVA: {viveroInfo.iva}</p>
+                        <div className="text-sm text-gray-600 space-y-0.5">
+                            <p className="font-bold text-base">{company?.razon_social || company?.nombre_fantasia || 'Vivero Del Sol'}</p>
+                            <p>{company?.domicilio}</p>
+                            <p>{company?.localidad}, {company?.provincia}</p>
+                            <p>CUIT: {company?.cuit}</p>
+                            <p>Cond. IVA: {company?.tipo_resp}</p>
+                            <p>Ing. Brutos: {company?.ing_brutos}</p>
+                            <p>Inicio de Actividades: {company?.inicio_activ}</p>
                         </div>
                     </div>
                     <div className="text-right">
@@ -66,7 +71,7 @@ export function InvoiceView({ invoice, client }: { invoice: Invoice, client: Cli
                         {client && (
                             <>
                                 <p>{client.address || 'Dirección no especificada'}</p>
-                                <p>{client.city || ''} {client.province || ''}</p>
+                                <p>{client.city}, {client.province}</p>
                                 <p>{client.document_type || 'Documento'}: {client.document_number || 'No especificado'}</p>
                                 <p>Cond. IVA: {client.iva_condition || 'Consumidor Final'}</p>
                             </>
@@ -85,27 +90,58 @@ export function InvoiceView({ invoice, client }: { invoice: Invoice, client: Cli
                     <table className="w-full text-sm">
                         <thead className="border-b-2 border-gray-300 text-gray-600">
                             <tr>
-                                <th className="text-left font-semibold uppercase py-2 px-1 w-1/12">Cant.</th>
-                                <th className="text-left font-semibold uppercase py-2 px-1 w-7/12">Descripción</th>
-                                <th className="text-right font-semibold uppercase py-2 px-1 w-2/12">P. Unit.</th>
-                                <th className="text-right font-semibold uppercase py-2 px-1 w-2/12">Subtotal</th>
+                                <th className="text-left font-semibold uppercase py-2 px-1 w-[15%]">SKU</th>
+                                <th className="text-left font-semibold uppercase py-2 px-1">Descripción</th>
+                                <th className="text-center font-semibold uppercase py-2 px-1 w-[10%]">Cant.</th>
+                                <th className="text-right font-semibold uppercase py-2 px-1 w-[15%]">P. Unit.</th>
+                                <th className="text-right font-semibold uppercase py-2 px-1 w-[15%]">Descuento</th>
+                                <th className="text-right font-semibold uppercase py-2 px-1 w-[15%]">P. Total</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {productLines.map((item, index) => (
+                            {productLines.map((item, index) => {
+                                const itemDiscount = item.discounts?.reduce((acc, d) => acc + d.amount, 0) || 0;
+                                return (
                                 <tr key={index} className="border-b border-gray-100">
-                                    <td className="py-2 px-1 text-center">{item.quantity}</td>
+                                    <td className="py-2 px-1">{item.sku || '-'}</td>
                                     <td className="py-2 px-1">{item.name}</td>
+                                    <td className="py-2 px-1 text-center">{item.quantity}</td>
                                     <td className="text-right py-2 px-1 font-mono">{formatPrice(item.unitPrice)}</td>
+                                    <td className="text-right py-2 px-1 font-mono text-destructive">
+                                        {itemDiscount > 0 ? `- ${formatPrice(itemDiscount)}` : '-'}
+                                    </td>
                                     <td className="text-right py-2 px-1 font-mono">{formatPrice(item.total)}</td>
                                 </tr>
-                            ))}
+                            )})}
                         </tbody>
                     </table>
                 </section>
 
                 <footer className="flex justify-end pt-6 border-t-2 border-gray-200">
-                     <div className="w-full max-w-xs text-right space-y-2 text-gray-700">
+                     <div className="w-full max-w-sm text-right space-y-2 text-gray-700">
+                        <div className="flex justify-between">
+                            <span>Subtotal</span>
+                            <span className="font-mono">{formatPrice(invoice.subtotal ?? 0)}</span>
+                        </div>
+                        {totalItemDiscounts > 0 && (
+                             <div className="flex justify-between text-destructive">
+                                <span>Descuentos en Items</span>
+                                <span className="font-mono">- {formatPrice(totalItemDiscounts)}</span>
+                            </div>
+                        )}
+                        {promotionsApplied.map((promo, idx) => (
+                             <div key={idx} className="flex justify-between text-destructive">
+                                <span>Promo: {promo.name}</span>
+                                <span className="font-mono">- {formatPrice(promo.amount)}</span>
+                            </div>
+                        ))}
+                        {(invoice.vat_rate ?? 0) > 0 && (
+                            <div className="flex justify-between">
+                                <span>IVA ({invoice.vat_rate}%)</span>
+                                <span className="font-mono">{formatPrice(invoice.vat_amount ?? 0)}</span>
+                            </div>
+                        )}
+                        <Separator className="my-2"/>
                         <div className="flex justify-between font-bold text-lg text-black">
                             <span>TOTAL</span>
                             <span className="font-mono">{formatPrice(invoice.total_amount)}</span>
