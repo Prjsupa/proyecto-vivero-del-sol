@@ -217,13 +217,6 @@ export type Invoice = {
   secondary_payment_method?: string | null;
   secondary_card_type?: string | null;
   notes?: string | null;
-  client_first_name?: string | null;
-  client_last_name?: string | null;
-  client_document_type?: string | null;
-  client_document_number?: string | null;
-  client_address?: string | null;
-  client_city?: string | null;
-  client_province?: string | null;
   subtotal?: number | null;
   vat_rate?: number | null;
   vat_amount?: number | null;

@@ -1,4 +1,3 @@
-
 'use client';
 import type { Invoice, Client, CompanyData, Json } from "@/lib/definitions";
 import { format, parseISO } from 'date-fns';
@@ -22,7 +21,7 @@ export function InvoiceView({ invoice, client, company }: { invoice: Invoice, cl
     const productLines: InvoiceProductLine[] = Array.isArray(invoice.products) ? invoice.products : [];
     const promotionsApplied = (Array.isArray(invoice.promotions_applied) ? invoice.promotions_applied : []) as { name: string; amount: number }[];
     
-    const subtotal = invoice.subtotal ?? productLines.reduce((acc, item) => acc + (item.unitPrice * item.quantity), 0);
+    const subtotal = productLines.reduce((acc, item) => acc + (item.unitPrice * item.quantity), 0);
     const totalDiscounts = invoice.discounts_total || 0;
 
     return (
@@ -63,9 +62,9 @@ export function InvoiceView({ invoice, client, company }: { invoice: Invoice, cl
                     <div>
                         <h2 className="text-xs font-semibold uppercase text-gray-500 mb-2">Cliente</h2>
                         <p className="font-bold">{invoice.client_name}</p>
-                        <p>{invoice.client_address || client?.address || 'Dirección no especificada'}</p>
-                        <p>{invoice.client_city || client?.city}, {invoice.client_province || client?.province}</p>
-                        <p>{invoice.client_document_type || client?.document_type || 'Documento'}: {invoice.client_document_number || client?.document_number || 'No especificado'}</p>
+                        <p>{client?.address || 'Dirección no especificada'}</p>
+                        <p>{client?.city}, {client?.province}</p>
+                        <p>{client?.document_type || 'Documento'}: {client?.document_number || 'No especificado'}</p>
                         {client && <p>Cond. IVA: {client.iva_condition || 'Consumidor Final'}</p>}
                     </div>
                      <div className="text-right">
@@ -104,7 +103,7 @@ export function InvoiceView({ invoice, client, company }: { invoice: Invoice, cl
                     </table>
                      <div className="flex justify-between items-start pt-6">
                         <div className="text-xs text-gray-600 space-y-1 w-1/2">
-                             {promotionsApplied.length > 0 && (
+                            {promotionsApplied.length > 0 && (
                                 <>
                                     <h3 className="font-semibold uppercase">Promociones Aplicadas:</h3>
                                     {promotionsApplied.map((promo, idx) => (

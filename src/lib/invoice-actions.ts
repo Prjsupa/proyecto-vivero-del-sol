@@ -54,9 +54,6 @@ export async function createInvoice(prevState: any, formData: FormData) {
         client_last_name,
         client_document_number,
         client_document_type,
-        client_address,
-        client_city,
-        client_province,
         vat_rate,
         discounts_total,
         promotions_applied
@@ -74,13 +71,6 @@ export async function createInvoice(prevState: any, formData: FormData) {
         invoice_number: `INV-${Date.now()}`,
         client_id: clientId,
         client_name: `${client_first_name} ${client_last_name}`,
-        client_first_name,
-        client_last_name,
-        client_document_type,
-        client_document_number,
-        client_address,
-        client_city,
-        client_province,
         products: products,
         subtotal,
         discounts_total,
@@ -95,6 +85,7 @@ export async function createInvoice(prevState: any, formData: FormData) {
         secondary_card_type: secondary_card_type,
         notes: notes,
         promotions_applied,
+        // Removed address fields that caused the crash
     };
 
     const { data, error } = await supabase.from('invoices').insert([invoiceData]).select('id').single();
