@@ -6,7 +6,14 @@ import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 
 const createInvoiceSchema = z.object({
-    clientId: z.coerce.number().min(1, "Debes seleccionar un cliente."),
+    clientId: z.coerce.number().optional(), // Optional because a new client can be created
+    client_first_name: z.string().min(1, "El nombre del cliente es requerido."),
+    client_last_name: z.string().min(1, "El apellido del cliente es requerido."),
+    client_document_type: z.string().optional().nullable(),
+    client_document_number: z.string().optional().nullable(),
+    client_address: z.string().optional().nullable(),
+    client_city: z.string().optional().nullable(),
+    client_province: z.string().optional().nullable(),
     invoiceType: z.enum(['A', 'B', 'C'], { required_error: "Debes seleccionar un tipo de factura." }),
     payment_method: z.string().optional(),
     card_type: z.string().optional(),
@@ -14,7 +21,11 @@ const createInvoiceSchema = z.object({
     secondary_payment_method: z.string().optional(),
     secondary_card_type: z.string().optional(),
     notes: z.string().optional(),
-    products: z.string().min(1, "Debes añadir al menos un producto.").transform((val) => val ? JSON.parse(val) : [])
+    products: z.string().min(1, "Debes añadir al menos un producto.").transform((val) => val ? JSON.parse(val) : []),
+    vat_type: z.string(),
+    vat_rate: z.coerce.number(),
+    discounts_total: z.coerce.number(),
+    promotions_applied: z.string().transform((val) => val ? JSON.parse(val) : []),
 });
 
 export async function createInvoice(prevState: any, formData: FormData) {
@@ -38,25 +49,43 @@ export async function createInvoice(prevState: any, formData: FormData) {
         secondary_payment_method,
         secondary_card_type,
         notes, 
-        products 
+        products,
+        client_first_name,
+        client_last_name,
+        client_document_number,
+        client_document_type,
+        client_address,
+        client_city,
+        client_province,
+        vat_rate,
+        discounts_total,
+        promotions_applied
     } = validatedFields.data;
     
     if (!products || products.length === 0) {
         return { message: "No se puede crear una factura sin productos." };
     }
-
-    const { data: clientData, error: clientError } = await supabase.from('clients').select('name, last_name').eq('id', clientId).single();
-    if (clientError || !clientData) {
-        return { message: "Cliente no encontrado." };
-    }
-
-    const totalAmount = products.reduce((acc: number, p: any) => acc + p.total, 0);
-
+    
+    const subtotal = products.reduce((acc: number, p: any) => acc + (p.unitPrice * p.quantity), 0);
+    const vat_amount = (subtotal - discounts_total) * (vat_rate / 100);
+    const totalAmount = subtotal - discounts_total + vat_amount;
+    
     const invoiceData = {
         invoice_number: `INV-${Date.now()}`,
         client_id: clientId,
-        client_name: `${clientData.name} ${clientData.last_name}`,
+        client_name: `${client_first_name} ${client_last_name}`,
+        client_first_name,
+        client_last_name,
+        client_document_type,
+        client_document_number,
+        client_address,
+        client_city,
+        client_province,
         products: products,
+        subtotal,
+        discounts_total,
+        vat_rate,
+        vat_amount,
         total_amount: totalAmount,
         invoice_type: invoiceType,
         payment_method: payment_method,
@@ -65,6 +94,7 @@ export async function createInvoice(prevState: any, formData: FormData) {
         secondary_payment_method: secondary_payment_method,
         secondary_card_type: secondary_card_type,
         notes: notes,
+        promotions_applied,
     };
 
     const { data, error } = await supabase.from('invoices').insert([invoiceData]).select('id').single();

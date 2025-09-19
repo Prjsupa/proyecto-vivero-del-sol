@@ -27,6 +27,32 @@ type SelectedProduct = {
 }
 
 const cardTypes = ["Visa", "MasterCard", "American Express", "Cabal", "Naranja", "Otra"];
+const provinces = [
+    "Buenos Aires",
+    "Ciudad Autónoma de Buenos Aires",
+    "Catamarca",
+    "Chaco",
+    "Chubut",
+    "Córdoba",
+    "Corrientes",
+    "Entre Ríos",
+    "Formosa",
+    "Jujuy",
+    "La Pampa",
+    "La Rioja",
+    "Mendoza",
+    "Misiones",
+    "Neuquén",
+    "Río Negro",
+    "Salta",
+    "San Juan",
+    "San Luis",
+    "Santa Cruz",
+    "Santa Fe",
+    "Santiago del Estero",
+    "Tierra del Fuego, Antártida e Islas del Atlántico Sur",
+    "Tucumán"
+];
 
 
 function SubmitButton({ disabled }: { disabled: boolean }) {
@@ -78,6 +104,9 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
     const [clientLastName, setClientLastName] = useState<string>('');
     const [clientDocType, setClientDocType] = useState<'DNI' | 'CUIT' | 'CUIL' | 'NN'>('NN');
     const [clientDocNumber, setClientDocNumber] = useState<string>('');
+    const [clientAddress, setClientAddress] = useState<string>('');
+    const [clientCity, setClientCity] = useState<string>('');
+    const [clientProvince, setClientProvince] = useState<string>('');
     const [vatType, setVatType] = useState<'consumidor_final' | 'exento' | 'monotributo' | 'responsable_inscripto'>('consumidor_final');
     const [vatRate, setVatRate] = useState<number>(0); // % IVA
     const [promotionsApplied, setPromotionsApplied] = useState<{ name: string; amount: number; source: 'auto' | 'manual' }[]>([]);
@@ -342,18 +371,30 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
         if (!selectedClientId) return;
         const c = customers.find(c => String(c.id) === String(selectedClientId));
         if (!c) return;
+
         setClientFirstName(c.name || '');
         setClientLastName(c.last_name || '');
-        // Documentos según modal de clientes
-        if (c.document_type) {
-            setClientDocType((c.document_type as any) || 'DNI');
-        }
-        if (c.document_number) {
-            setClientDocNumber(c.document_number);
-        }
+        setClientDocType((c.document_type as any) || 'NN');
+        setClientDocNumber(c.document_number || '');
+        setClientAddress(c.address || '');
+        setClientCity(c.city || '');
+        setClientProvince(c.province || '');
+
         if (c.default_invoice_type) {
             setInvoiceTypeState(c.default_invoice_type);
         }
+        if (c.iva_condition) {
+            switch(c.iva_condition) {
+                case "Responsable Inscripto": setVatType('responsable_inscripto'); break;
+                case "Monotributo": setVatType('monotributo'); break;
+                case "Exento": setVatType('exento'); break;
+                case "Consumidor Final":
+                default: setVatType('consumidor_final'); break;
+            }
+        } else {
+            setVatType('consumidor_final');
+        }
+
     }, [selectedClientId, customers]);
     
     const QuantityControl = ({ item }: { item: SelectedProduct }) => {
@@ -398,6 +439,9 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                     <input type="hidden" name="client_last_name" value={clientLastName} />
                     <input type="hidden" name="client_document_type" value={clientDocType} />
                     <input type="hidden" name="client_document_number" value={clientDocNumber} />
+                    <input type="hidden" name="client_address" value={clientAddress} />
+                    <input type="hidden" name="client_city" value={clientCity} />
+                    <input type="hidden" name="client_province" value={clientProvince} />
                     <input type="hidden" name="vat_type" value={vatType} />
                     <input type="hidden" name="vat_rate" value={String(vatRate)} />
                     <input type="hidden" name="seller_id" value={selectedSellerId || ''} />
@@ -539,8 +583,22 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                 </div>
                 
                 <div className="flex flex-col gap-4 overflow-y-auto pr-2">
-                    <div className="space-y-2">
+                    <div className="space-y-4 rounded-md border p-4">
                         <Label>Datos del Cliente</Label>
+                        <div className="space-y-2">
+                            <Label htmlFor="clientId">Buscar Cliente</Label>
+                            <Select name="clientId" value={selectedClientId} onValueChange={(val) => setSelectedClientId(val)}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Selecciona un cliente" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {customers.map(customer => (
+                                        <SelectItem key={customer.id} value={String(customer.id)}>{customer.name} {customer.last_name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <FieldError errors={state?.errors?.clientId} />
+                        </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <Input placeholder="Nombre" value={clientFirstName} onChange={e => setClientFirstName(e.target.value)} />
                             <Input placeholder="Apellido" value={clientLastName} onChange={e => setClientLastName(e.target.value)} />
@@ -554,42 +612,79 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                             </RadioGroup>
                             <Input placeholder="Número de documento" value={clientDocNumber} onChange={e => setClientDocNumber(e.target.value)} disabled={clientDocType === 'NN'} />
                         </div>
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="clientId">Cliente</Label>
-                        <Select name="clientId" value={selectedClientId} onValueChange={(val) => setSelectedClientId(val)}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Selecciona un cliente" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {customers.map(customer => (
-                                    <SelectItem key={customer.id} value={String(customer.id)}>{customer.name} {customer.last_name}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <FieldError errors={state?.errors?.clientId} />
+                        <div className="space-y-2">
+                             <Label>Dirección</Label>
+                            <Input placeholder="Calle y número" value={clientAddress} onChange={e => setClientAddress(e.target.value)} />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                             <Input placeholder="Localidad" value={clientCity} onChange={e => setClientCity(e.target.value)} />
+                             <Select value={clientProvince} onValueChange={setClientProvince}>
+                                <SelectTrigger><SelectValue placeholder="Provincia..." /></SelectTrigger>
+                                <SelectContent>
+                                    {provinces.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
                     
-                    <div className="space-y-2">
-                        <Label>Tipo IVA</Label>
-                        <Select 
-                            value={vatType} 
-                            onValueChange={(value: 'consumidor_final' | 'exento' | 'monotributo' | 'responsable_inscripto') => {
-                                setVatType(value);
-                            }}
-                            name="vat_type"
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="Seleccionar tipo de IVA" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="consumidor_final">Consumidor Final (Factura B)</SelectItem>
-                                <SelectItem value="exento">Exento</SelectItem>
-                                <SelectItem value="monotributo">Monotributo</SelectItem>
-                                <SelectItem value="responsable_inscripto">Responsable Inscripto</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        {vatType === 'responsable_inscripto' && (
+                    <div className="space-y-4 rounded-md border p-4">
+                        <Label>Condición Fiscal</Label>
+                        <div className="space-y-2">
+                            <Label>Condición frente al IVA</Label>
+                            <Select 
+                                value={vatType} 
+                                onValueChange={(value: 'consumidor_final' | 'exento' | 'monotributo' | 'responsable_inscripto') => {
+                                    setVatType(value);
+                                }}
+                                name="vat_type"
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Seleccionar..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="consumidor_final">Consumidor Final</SelectItem>
+                                    <SelectItem value="exento">Exento</SelectItem>
+                                    <SelectItem value="monotributo">Monotributo</SelectItem>
+                                    <SelectItem value="responsable_inscripto">Responsable Inscripto</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                                <Label>Tipo de Factura</Label>
+                                {vatType === 'consumidor_final' && (
+                                    <span className="text-xs text-muted-foreground">Automático para Consumidor Final</span>
+                                )}
+                            </div>
+                            <RadioGroup 
+                                name="invoiceType" 
+                                value={invoiceTypeState} 
+                                onValueChange={(v) => setInvoiceTypeState(v as 'A'|'B'|'C')}
+                                disabled={vatType === 'consumidor_final'}
+                                className={vatType === 'consumidor_final' ? 'opacity-70' : ''}
+                            >
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="A" id="type-a" disabled={vatType === 'consumidor_final'} />
+                                    <Label htmlFor="type-a" className={vatType === 'consumidor_final' ? 'text-muted-foreground' : ''}>
+                                        Factura A
+                                    </Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="B" id="type-b" />
+                                    <Label htmlFor="type-b" className={vatType === 'consumidor_final' ? 'text-muted-foreground' : ''}>
+                                        Factura B
+                                    </Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="C" id="type-c" disabled={vatType === 'consumidor_final'} />
+                                    <Label htmlFor="type-c" className={vatType === 'consumidor_final' ? 'text-muted-foreground' : ''}>
+                                        Factura C
+                                    </Label>
+                                </div>
+                            </RadioGroup>
+                            <FieldError errors={state?.errors?.invoiceType} />
+                        </div>
+                         {vatType === 'responsable_inscripto' && (
                             <div className="mt-2">
                                 <Label>% IVA</Label>
                                 <Input 
@@ -603,44 +698,9 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                             </div>
                         )}
                     </div>
+
                     
-                    <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                            <Label>Tipo de Factura</Label>
-                            {vatType === 'consumidor_final' && (
-                                <span className="text-xs text-muted-foreground">Automático para Consumidor Final</span>
-                            )}
-                        </div>
-                        <RadioGroup 
-                            name="invoiceType" 
-                            value={invoiceTypeState} 
-                            onValueChange={(v) => setInvoiceTypeState(v as 'A'|'B'|'C')}
-                            disabled={vatType === 'consumidor_final'}
-                            className={vatType === 'consumidor_final' ? 'opacity-70' : ''}
-                        >
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="A" id="type-a" disabled={vatType === 'consumidor_final'} />
-                                <Label htmlFor="type-a" className={vatType === 'consumidor_final' ? 'text-muted-foreground' : ''}>
-                                    Factura A
-                                </Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="B" id="type-b" disabled={vatType === 'consumidor_final'} />
-                                <Label htmlFor="type-b" className={vatType === 'consumidor_final' ? 'text-muted-foreground' : ''}>
-                                    Factura B
-                                </Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="C" id="type-c" disabled={vatType === 'consumidor_final'} />
-                                <Label htmlFor="type-c" className={vatType === 'consumidor_final' ? 'text-muted-foreground' : ''}>
-                                    Factura C
-                                </Label>
-                            </div>
-                        </RadioGroup>
-                        <FieldError errors={state?.errors?.invoiceType} />
-                    </div>
-                    
-                    <div className="space-y-2">
+                    <div className="space-y-2 rounded-md border p-4">
                         <div className="flex items-center justify-between">
                             <Label>Vendedor</Label>
                         </div>
