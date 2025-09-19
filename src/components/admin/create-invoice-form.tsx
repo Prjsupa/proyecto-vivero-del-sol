@@ -310,11 +310,9 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
     
         if (vatType === 'responsable_inscripto') {
             setInvoiceTypeState(defaultInvoiceType === 'C' ? 'B' : defaultInvoiceType);
-            setVatRate(21); // Valor por defecto para RI
         } else {
             // Para Consumidor Final, Exento, Monotributo
             setInvoiceTypeState('B'); // Forzar Factura B
-            setVatRate(0);
         }
     }, [vatType, selectedClientId, customers]);
 
@@ -584,7 +582,7 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                                 value={invoiceTypeState} 
                                 onValueChange={(v) => setInvoiceTypeState(v as 'A'|'B'|'C')}
                                 className="grid grid-cols-3"
-                                disabled={vatType !== 'responsable_inscripto'}
+                                disabled={vatType === 'consumidor_final' || vatType === 'exento' || vatType === 'monotributo'}
                             >
                                 <div className="flex items-center space-x-2">
                                     <RadioGroupItem value="A" id="type-a" />
@@ -601,19 +599,6 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                             </RadioGroup>
                             <FieldError errors={state?.errors?.invoiceType} />
                         </div>
-                         {vatType === 'responsable_inscripto' && (
-                            <div className="mt-2">
-                                <Label>% IVA</Label>
-                                <Input 
-                                    type="number" 
-                                    value={String(vatRate)} 
-                                    onChange={(e) => setVatRate(Number(e.target.value) || 0)}
-                                    className="w-24"
-                                    min="0"
-                                    step="0.1"
-                                />
-                            </div>
-                        )}
                     </div>
 
                     

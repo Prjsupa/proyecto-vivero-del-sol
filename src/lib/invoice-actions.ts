@@ -19,6 +19,8 @@ const createInvoiceSchema = z.object({
     vat_rate: z.coerce.number(),
     discounts_total: z.coerce.number(),
     promotions_applied: z.string().transform((val) => val ? JSON.parse(val) : []),
+    seller_id: z.coerce.number().optional().nullable(),
+    commission_percentage: z.coerce.number().optional().nullable(),
 });
 
 export async function createInvoice(prevState: any, formData: FormData) {
@@ -44,7 +46,9 @@ export async function createInvoice(prevState: any, formData: FormData) {
         vat_rate,
         vat_type,
         discounts_total,
-        promotions_applied
+        promotions_applied,
+        seller_id,
+        commission_percentage
     } = validatedFields.data;
     
     if (!products || products.length === 0) {
@@ -54,6 +58,14 @@ export async function createInvoice(prevState: any, formData: FormData) {
     const subtotal = products.reduce((acc: number, p: any) => acc + (p.unitPrice * p.quantity), 0);
     const vat_amount = (subtotal - discounts_total) * (vat_rate / 100);
     const totalAmount = subtotal - discounts_total + vat_amount;
+
+    let seller_name = null;
+    if (seller_id) {
+        const { data: seller } = await supabase.from('sellers').select('name, last_name').eq('id', seller_id).single();
+        if (seller) {
+            seller_name = `${seller.name} ${seller.last_name}`;
+        }
+    }
     
     const invoiceData = {
         invoice_number: `INV-${Date.now()}`,
@@ -71,6 +83,9 @@ export async function createInvoice(prevState: any, formData: FormData) {
         cash_account_code,
         notes: notes,
         promotions_applied,
+        seller_id,
+        seller_name,
+        commission_percentage
     };
 
     const { data, error } = await supabase.from('invoices').insert([invoiceData]).select('id').single();
