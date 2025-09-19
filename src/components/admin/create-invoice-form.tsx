@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Label } from '@/components/ui/label';
 import { AlertCircle, Loader2, Search, Trash2, User } from 'lucide-react';
-import { createInvoice } from '@/lib/actions';
+import { createInvoice } from '@/lib/invoice-actions';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
@@ -567,7 +567,7 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                                 ))}
                             </SelectContent>
                         </Select>
-                        <FieldError errors={state.errors?.clientId} />
+                        <FieldError errors={state?.errors?.clientId} />
                     </div>
                     
                     <div className="space-y-2">
@@ -637,7 +637,7 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                                 </Label>
                             </div>
                         </RadioGroup>
-                        <FieldError errors={state.errors?.invoiceType} />
+                        <FieldError errors={state?.errors?.invoiceType} />
                     </div>
                     
                     <div className="space-y-2">
