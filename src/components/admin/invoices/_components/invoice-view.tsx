@@ -64,8 +64,8 @@ export function InvoiceView({ invoice, client, company }: { invoice: Invoice, cl
 
                  <section className="grid grid-cols-2 gap-8 py-6 border-b border-gray-200 text-sm">
                     <div className="space-y-1">
-                        <p><span className="font-semibold w-24 inline-block">Cliente:</span>{invoice.client_name}</p>
-                        <p><span className="font-semibold w-24 inline-block">Cond. Venta:</span>{invoice.payment_condition} {invoice.notes ? `- ${invoice.notes}`: ''}</p>
+                        <p><span className="font-semibold w-28 inline-block">Apellido y Nombre:</span>{invoice.client_name}</p>
+                        <p><span className="font-semibold w-28 inline-block">Cond. Venta:</span>{invoice.payment_condition} {invoice.notes ? `- ${invoice.notes}`: ''}</p>
                     </div>
                      <div className="space-y-1 text-right">
                         <p><span className="font-semibold">Documento:</span> {client?.document_type || 'NN'}: {client?.document_number || 'No especificado'}</p>
@@ -100,7 +100,7 @@ export function InvoiceView({ invoice, client, company }: { invoice: Invoice, cl
                     </table>
                      <div className="flex justify-between items-start pt-6">
                         <div className="text-xs text-gray-600 space-y-1 w-1/2">
-                            {(promotionsApplied.length > 0 || totalDiscounts > 0) && (
+                            {(promotionsApplied.length > 0) && (
                                 <>
                                     <h3 className="font-semibold uppercase">Promociones Aplicadas:</h3>
                                     {promotionsApplied.map((promo, idx) => (
