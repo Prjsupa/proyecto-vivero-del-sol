@@ -1,4 +1,3 @@
-
 'use client';
 import type { Invoice, Client, CompanyData, Json } from "@/lib/definitions";
 import { format, parseISO } from 'date-fns';
@@ -6,7 +5,6 @@ import { formatPrice } from '@/lib/utils';
 import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
 
 type InvoiceProductLine = {
     productId: string;
@@ -23,12 +21,11 @@ export function InvoiceView({ invoice, client, company }: { invoice: Invoice, cl
     const productLines: InvoiceProductLine[] = Array.isArray(invoice.products) ? invoice.products : [];
     const promotionsApplied = (Array.isArray(invoice.promotions_applied) ? invoice.promotions_applied : []) as { name: string; amount: number }[];
 
-    const totalItemDiscounts = productLines.reduce((acc, item) => {
+    const subtotal = productLines.reduce((acc, item) => acc + (item.unitPrice * item.quantity), 0);
+    const totalDiscounts = productLines.reduce((acc, item) => {
         const itemDiscount = item.discounts?.reduce((dAcc, d) => dAcc + d.amount, 0) || 0;
         return acc + itemDiscount;
     }, 0);
-    
-    const totalPromoDiscounts = promotionsApplied.reduce((acc, promo) => acc + promo.amount, 0);
 
     return (
         <>
@@ -115,39 +112,42 @@ export function InvoiceView({ invoice, client, company }: { invoice: Invoice, cl
                             )})}
                         </tbody>
                     </table>
-                </section>
-
-                <footer className="flex justify-end pt-6 border-t-2 border-gray-200">
-                     <div className="w-full max-w-sm text-right space-y-2 text-gray-700">
-                        <div className="flex justify-between">
-                            <span>Subtotal</span>
-                            <span className="font-mono">{formatPrice(invoice.subtotal ?? 0)}</span>
+                     <div className="flex justify-between items-start pt-6">
+                        <div className="text-xs text-gray-600 space-y-1">
+                            {promotionsApplied.length > 0 && (
+                                <>
+                                    <h3 className="font-semibold uppercase">Promociones Aplicadas:</h3>
+                                    {promotionsApplied.map((promo, idx) => (
+                                        <p key={idx}>- {promo.name}</p>
+                                    ))}
+                                </>
+                            )}
                         </div>
-                        {totalItemDiscounts > 0 && (
-                             <div className="flex justify-between text-destructive">
-                                <span>Descuentos en Items</span>
-                                <span className="font-mono">- {formatPrice(totalItemDiscounts)}</span>
-                            </div>
-                        )}
-                        {promotionsApplied.map((promo, idx) => (
-                             <div key={idx} className="flex justify-between text-destructive">
-                                <span>Promo: {promo.name}</span>
-                                <span className="font-mono">- {formatPrice(promo.amount)}</span>
-                            </div>
-                        ))}
-                        {(invoice.vat_rate ?? 0) > 0 && (
+                        <div className="w-full max-w-sm text-right space-y-2 text-gray-700">
                             <div className="flex justify-between">
-                                <span>IVA ({invoice.vat_rate}%)</span>
-                                <span className="font-mono">{formatPrice(invoice.vat_amount ?? 0)}</span>
+                                <span>Subtotal</span>
+                                <span className="font-mono">{formatPrice(subtotal)}</span>
                             </div>
-                        )}
-                        <Separator className="my-2"/>
-                        <div className="flex justify-between font-bold text-lg text-black">
-                            <span>TOTAL</span>
-                            <span className="font-mono">{formatPrice(invoice.total_amount)}</span>
+                            {totalDiscounts > 0 && (
+                                <div className="flex justify-between text-destructive">
+                                    <span>Descuentos</span>
+                                    <span className="font-mono">- {formatPrice(totalDiscounts)}</span>
+                                </div>
+                            )}
+                            {(invoice.vat_rate ?? 0) > 0 && (
+                                <div className="flex justify-between">
+                                    <span>IVA ({invoice.vat_rate}%)</span>
+                                    <span className="font-mono">{formatPrice(invoice.vat_amount ?? 0)}</span>
+                                </div>
+                            )}
+                            <div className="border-t border-gray-300 my-2"></div>
+                            <div className="flex justify-between font-bold text-lg text-black">
+                                <span>TOTAL</span>
+                                <span className="font-mono">{formatPrice(invoice.total_amount)}</span>
+                            </div>
                         </div>
                     </div>
-                </footer>
+                </section>
             </div>
             <style jsx global>{`
                 @media print {
