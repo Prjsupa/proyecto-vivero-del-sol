@@ -27,33 +27,6 @@ type SelectedProduct = {
 }
 
 const cardTypes = ["Visa", "MasterCard", "American Express", "Cabal", "Naranja", "Otra"];
-const provinces = [
-    "Buenos Aires",
-    "Ciudad Autónoma de Buenos Aires",
-    "Catamarca",
-    "Chaco",
-    "Chubut",
-    "Córdoba",
-    "Corrientes",
-    "Entre Ríos",
-    "Formosa",
-    "Jujuy",
-    "La Pampa",
-    "La Rioja",
-    "Mendoza",
-    "Misiones",
-    "Neuquén",
-    "Río Negro",
-    "Salta",
-    "San Juan",
-    "San Luis",
-    "Santa Cruz",
-    "Santa Fe",
-    "Santiago del Estero",
-    "Tierra del Fuego, Antártida e Islas del Atlántico Sur",
-    "Tucumán"
-];
-
 
 function SubmitButton({ disabled }: { disabled: boolean }) {
     const { pending } = useFormStatus();
@@ -330,17 +303,17 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
         loadSellers();
     }, [supabase, toast]);
 
-    // Actualizar el tipo de factura cuando cambia el tipo de IVA
+    // Actualizar el tipo de factura y tasa de IVA cuando cambia la condición de IVA
     useEffect(() => {
         const client = customers.find(c => String(c.id) === selectedClientId);
-
         const defaultInvoiceType = client?.default_invoice_type || 'B';
-
+    
         if (vatType === 'responsable_inscripto') {
             setInvoiceTypeState(defaultInvoiceType === 'C' ? 'B' : defaultInvoiceType);
             setVatRate(21); // Valor por defecto para RI
         } else {
-            setInvoiceTypeState(defaultInvoiceType === 'A' ? 'B' : defaultInvoiceType);
+            // Para Consumidor Final, Exento, Monotributo
+            setInvoiceTypeState('B'); // Forzar Factura B
             setVatRate(0);
         }
     }, [vatType, selectedClientId, customers]);
@@ -606,11 +579,12 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                             <div className="flex items-center justify-between">
                                 <Label>Tipo de Factura</Label>
                             </div>
-                            <RadioGroup 
+                             <RadioGroup 
                                 name="invoiceType" 
                                 value={invoiceTypeState} 
                                 onValueChange={(v) => setInvoiceTypeState(v as 'A'|'B'|'C')}
                                 className="grid grid-cols-3"
+                                disabled={vatType !== 'responsable_inscripto'}
                             >
                                 <div className="flex items-center space-x-2">
                                     <RadioGroupItem value="A" id="type-a" />
