@@ -11,9 +11,6 @@ const createInvoiceSchema = z.object({
     client_last_name: z.string().min(1, "El apellido del cliente es requerido."),
     client_document_type: z.string().optional().nullable(),
     client_document_number: z.string().optional().nullable(),
-    client_address: z.string().optional().nullable(),
-    client_city: z.string().optional().nullable(),
-    client_province: z.string().optional().nullable(),
     invoiceType: z.enum(['A', 'B', 'C'], { required_error: "Debes seleccionar un tipo de factura." }),
     payment_method: z.string().optional(),
     card_type: z.string().optional(),
@@ -85,7 +82,6 @@ export async function createInvoice(prevState: any, formData: FormData) {
         secondary_card_type: secondary_card_type,
         notes: notes,
         promotions_applied,
-        // Removed address fields that caused the crash
     };
 
     const { data, error } = await supabase.from('invoices').insert([invoiceData]).select('id').single();

@@ -23,6 +23,8 @@ export function InvoiceView({ invoice, client, company }: { invoice: Invoice, cl
     
     const subtotal = productLines.reduce((acc, item) => acc + (item.unitPrice * item.quantity), 0);
     const totalDiscounts = invoice.discounts_total || 0;
+    
+    const clientVatCondition = client?.iva_condition || 'Consumidor Final';
 
     return (
         <>
@@ -62,16 +64,12 @@ export function InvoiceView({ invoice, client, company }: { invoice: Invoice, cl
                     <div>
                         <h2 className="text-xs font-semibold uppercase text-gray-500 mb-2">Cliente</h2>
                         <p className="font-bold">{invoice.client_name}</p>
-                        <p>{client?.address || 'Dirección no especificada'}</p>
-                        <p>{client?.city}, {client?.province}</p>
                         <p>{client?.document_type || 'Documento'}: {client?.document_number || 'No especificado'}</p>
-                        {client && <p>Cond. IVA: {client.iva_condition || 'Consumidor Final'}</p>}
+                        <p>IVA: {clientVatCondition}</p>
                     </div>
                      <div className="text-right">
-                         <h2 className="text-xs font-semibold uppercase text-gray-500 mb-2">Condiciones de Pago</h2>
+                         <h2 className="text-xs font-semibold uppercase text-gray-500 mb-2">Condición de Venta</h2>
                         <p className="font-bold">{invoice.payment_method || 'No especificado'}</p>
-                         {invoice.card_type && <p>Tarjeta: {invoice.card_type}</p>}
-                         {invoice.has_secondary_payment && <p>Abonado con: {invoice.secondary_payment_method} {invoice.secondary_card_type && `(${invoice.secondary_card_type})`}</p>}
                          {invoice.notes && <p className="text-xs italic mt-2">Notas: {invoice.notes}</p>}
                     </div>
                 </section>

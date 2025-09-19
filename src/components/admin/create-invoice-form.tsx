@@ -104,9 +104,6 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
     const [clientLastName, setClientLastName] = useState<string>('');
     const [clientDocType, setClientDocType] = useState<'DNI' | 'CUIT' | 'CUIL' | 'NN'>('NN');
     const [clientDocNumber, setClientDocNumber] = useState<string>('');
-    const [clientAddress, setClientAddress] = useState<string>('');
-    const [clientCity, setClientCity] = useState<string>('');
-    const [clientProvince, setClientProvince] = useState<string>('');
     const [vatType, setVatType] = useState<'consumidor_final' | 'exento' | 'monotributo' | 'responsable_inscripto'>('consumidor_final');
     const [vatRate, setVatRate] = useState<number>(0); // % IVA
     const [promotionsApplied, setPromotionsApplied] = useState<{ name: string; amount: number; source: 'auto' | 'manual' }[]>([]);
@@ -376,10 +373,6 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
         setClientLastName(c.last_name || '');
         setClientDocType((c.document_type as any) || 'NN');
         setClientDocNumber(c.document_number || '');
-        setClientAddress(c.address || '');
-        setClientCity(c.city || '');
-        setClientProvince(c.province || '');
-
         if (c.default_invoice_type) {
             setInvoiceTypeState(c.default_invoice_type);
         }
@@ -439,9 +432,6 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                     <input type="hidden" name="client_last_name" value={clientLastName} />
                     <input type="hidden" name="client_document_type" value={clientDocType} />
                     <input type="hidden" name="client_document_number" value={clientDocNumber} />
-                    <input type="hidden" name="client_address" value={clientAddress} />
-                    <input type="hidden" name="client_city" value={clientCity} />
-                    <input type="hidden" name="client_province" value={clientProvince} />
                     <input type="hidden" name="vat_type" value={vatType} />
                     <input type="hidden" name="vat_rate" value={String(vatRate)} />
                     <input type="hidden" name="seller_id" value={selectedSellerId || ''} />
@@ -612,19 +602,6 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                             </RadioGroup>
                             <Input placeholder="Número de documento" value={clientDocNumber} onChange={e => setClientDocNumber(e.target.value)} disabled={clientDocType === 'NN'} />
                         </div>
-                        <div className="space-y-2">
-                             <Label>Dirección</Label>
-                            <Input placeholder="Calle y número" value={clientAddress} onChange={e => setClientAddress(e.target.value)} />
-                        </div>
-                        <div className="grid grid-cols-2 gap-3">
-                             <Input placeholder="Localidad" value={clientCity} onChange={e => setClientCity(e.target.value)} />
-                             <Select value={clientProvince} onValueChange={setClientProvince}>
-                                <SelectTrigger><SelectValue placeholder="Provincia..." /></SelectTrigger>
-                                <SelectContent>
-                                    {provinces.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
-                                </SelectContent>
-                            </Select>
-                        </div>
                     </div>
                     
                     <div className="space-y-4 rounded-md border p-4">
@@ -739,17 +716,17 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                     </div>
                     
                     <div className="space-y-4 rounded-md border p-4">
-                        <h4 className="font-semibold text-sm">Detalles del Pago</h4>
+                        <h4 className="font-semibold text-sm">Condición de Venta</h4>
                         <div className="space-y-2">
                             <Label>Método de Pago Principal</Label>
                             <Select name="payment_method" value={primaryPaymentMethod} onValueChange={setPrimaryPaymentMethod}>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Selecciona una cuenta de caja" />
+                                    <SelectValue placeholder="Selecciona una condición" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {cashAccounts.map(acc => (
-                                        <SelectItem key={acc.code} value={acc.code}>
-                                            {acc.code} - {acc.description}{acc.account_type ? ` (${acc.account_type})` : ''}
+                                        <SelectItem key={acc.code} value={acc.description}>
+                                            {acc.description}{acc.account_type ? ` (${acc.account_type})` : ''}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -766,12 +743,12 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                                 <Label>Método de Pago Secundario</Label>
                                 <Select name="secondary_payment_method" value={secondaryPaymentMethod} onValueChange={setSecondaryPaymentMethod}>
                                     <SelectTrigger>
-                                        <SelectValue placeholder="Selecciona una cuenta de caja" />
+                                        <SelectValue placeholder="Selecciona una condición" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {cashAccounts.map(acc => (
-                                            <SelectItem key={acc.code} value={acc.code}>
-                                                {acc.code} - {acc.description}{acc.account_type ? ` (${acc.account_type})` : ''}
+                                            <SelectItem key={acc.code} value={acc.description}>
+                                                {acc.description}{acc.account_type ? ` (${acc.account_type})` : ''}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
