@@ -2,7 +2,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import type { Invoice, Client, CompanyData } from "@/lib/definitions";
-import { InvoiceView, PrintButton } from "../_components/invoice-view";
+import { InvoiceView, PrintButton } from "@/components/admin/invoices/_components/invoice-view";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
@@ -22,17 +22,21 @@ async function getInvoiceAndClient(invoiceId: string): Promise<{ invoice: Invoic
         notFound();
     }
     
-    const { data: client, error: clientError } = await supabase
-        .from('clients')
-        .select('*')
-        .eq('id', invoice.client_id)
-        .single();
+    let client: Client | null = null;
+    if (invoice.client_id) {
+        const { data: clientData, error: clientError } = await supabase
+            .from('clients')
+            .select('*')
+            .eq('id', invoice.client_id)
+            .single();
 
-    if (clientError) {
-        console.error('Error fetching client for invoice:', clientError);
+        if (clientError) {
+            console.error('Error fetching client for invoice:', clientError);
+        }
+        client = clientData;
     }
     
-    return { invoice, client: client || null };
+    return { invoice, client };
 }
 
 async function getCompanyData(): Promise<CompanyData | null> {
