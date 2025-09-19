@@ -1,3 +1,4 @@
+
 'use server';
 
 import { z } from 'zod';
@@ -2115,7 +2116,7 @@ export async function updateProvider(prevState: any, formData: FormData) {
         }
     }
 
-    const { error } } = await supabase
+    const { error } = await supabase
         .from('providers')
         .update({ name, provider_type_code: final_provider_type_code, provider_type_description: final_provider_type_description, updated_at: new Date().toISOString() })
         .eq('id', id);
@@ -2387,3 +2388,5 @@ export async function updateCompanyData(prevState: any, formData: FormData) {
         data: `¡Datos de la empresa actualizados exitosamente!`,
     };
 }
+
+    
