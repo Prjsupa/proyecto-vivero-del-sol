@@ -14,14 +14,14 @@ const createInvoiceSchema = z.object({
     client_document_number: z.string().optional().nullable(),
     invoiceType: z.enum(['A', 'B', 'C'], { required_error: "Debes seleccionar un tipo de factura." }),
     payment_condition: z.string().min(1, 'Debes seleccionar una condición de venta'),
-    cash_account_code: z.string().min(1, 'Debes seleccionar una cuenta de caja'),
+    cash_account_code: z.string().optional().nullable(),
     notes: z.string().optional(),
     products: z.string().min(1, "Debes añadir al menos un producto.").transform((val) => val ? JSON.parse(val) : []),
     vat_type: z.string(),
     vat_rate: z.coerce.number(),
     discounts_total: z.coerce.number(),
     promotions_applied: z.string().transform((val) => val ? JSON.parse(val) : []),
-    seller_id: z.coerce.number().optional(),
+    seller_id: z.coerce.number().optional().nullable(),
 });
 
 export async function createInvoice(prevState: any, formData: FormData) {
@@ -69,7 +69,7 @@ export async function createInvoice(prevState: any, formData: FormData) {
     const totalAmount = subtotal - discounts_total + vat_amount;
 
     
-    const combinedNotes = `${cash_account_code}${notes ? ` - ${notes}` : ''}`;
+    const combinedNotes = `${cash_account_code ? `Código Caja: ${cash_account_code}` : ''}${notes ? ` - ${notes}` : ''}`.trim();
 
     const invoiceData = {
         invoice_number: `INV-${Date.now()}`,
@@ -84,7 +84,7 @@ export async function createInvoice(prevState: any, formData: FormData) {
         total_amount: totalAmount,
         invoice_type: invoiceType,
         payment_condition,
-        notes: combinedNotes,
+        notes: combinedNotes || null,
         promotions_applied,
         seller_id,
         seller_name: sellerName,

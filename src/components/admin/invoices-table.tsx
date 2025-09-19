@@ -44,6 +44,18 @@ export function InvoicesTable({ invoices, customers, sellers }: { invoices: Invo
         router.push(`/admin/invoices/${invoiceId}`);
     }
 
+    const getSellerCommission = (invoice: Invoice) => {
+        if (!invoice.seller_id) return null;
+        const seller = sellers.find(s => s.id === invoice.seller_id);
+        if (!seller) return null;
+
+        if (invoice.payment_condition === 'Efectivo') {
+            return seller.cash_sale_commission;
+        }
+        // Assuming other conditions fall under collection commission
+        return seller.collection_commission;
+    }
+
     return (
         <div className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 p-4 border rounded-lg">
@@ -84,23 +96,31 @@ export function InvoicesTable({ invoices, customers, sellers }: { invoices: Invo
                 </TableHeader>
                 <TableBody>
                     {filteredInvoices.length > 0 ? (
-                        filteredInvoices.map((invoice) => (
-                            <TableRow key={invoice.id} onClick={() => handleRowClick(invoice.id)} className="cursor-pointer">
-                                <TableCell>
-                                    <div className="font-medium">{invoice.invoice_number}</div>
-                                    <div className="text-sm text-muted-foreground">{format(parseISO(invoice.created_at), 'dd MMM, yyyy')}</div>
-                                </TableCell>
-                                <TableCell>{invoice.client_name}</TableCell>
-                                <TableCell>{invoice.branch_name ?? '-'}</TableCell>
-                                <TableCell>{invoice.seller_name ?? '-'}</TableCell>
-                                <TableCell>
-                                    <div className="flex flex-col gap-1">
-                                        {invoice.payment_condition && <Badge variant="secondary">{invoice.payment_condition}{invoice.notes ? ` - ${invoice.notes}` : ''}</Badge>}
-                                    </div>
-                                </TableCell>
-                                <TableCell className="text-right font-mono">{formatPrice(invoice.total_amount)}</TableCell>
-                            </TableRow>
-                        ))
+                        filteredInvoices.map((invoice) => {
+                            const commission = getSellerCommission(invoice);
+                            return (
+                                <TableRow key={invoice.id} onClick={() => handleRowClick(invoice.id)} className="cursor-pointer">
+                                    <TableCell>
+                                        <div className="font-medium">{invoice.invoice_number}</div>
+                                        <div className="text-sm text-muted-foreground">{format(parseISO(invoice.created_at), 'dd MMM, yyyy')}</div>
+                                    </TableCell>
+                                    <TableCell>{invoice.client_name}</TableCell>
+                                    <TableCell>{invoice.branch_name ?? '-'}</TableCell>
+                                    <TableCell>
+                                        <div>{invoice.seller_name ?? '-'}</div>
+                                        {commission !== null && (
+                                            <div className="text-xs text-muted-foreground">Comisión: {commission}%</div>
+                                        )}
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="flex flex-col gap-1">
+                                            {invoice.payment_condition && <Badge variant="secondary">{invoice.payment_condition}{invoice.notes ? ` - ${invoice.notes}` : ''}</Badge>}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="text-right font-mono">{formatPrice(invoice.total_amount)}</TableCell>
+                                </TableRow>
+                            )
+                        })
                     ) : (
                         <TableRow>
                             <TableCell colSpan={6} className="h-48 text-center">
