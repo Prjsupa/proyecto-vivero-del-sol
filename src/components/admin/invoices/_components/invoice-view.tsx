@@ -1,6 +1,6 @@
 
 'use client';
-import type { Invoice, Client, CompanyData, Json } from "@/lib/definitions";
+import type { Invoice, Client, CompanyData, Json, CashAccount } from "@/lib/definitions";
 import { format, parseISO } from 'date-fns';
 import { formatPrice } from '@/lib/utils';
 import Image from 'next/image';
@@ -18,7 +18,7 @@ type InvoiceProductLine = {
     isService?: boolean;
 }
 
-export function InvoiceView({ invoice, client, company }: { invoice: Invoice, client: Client | null, company: CompanyData | null }) {
+export function InvoiceView({ invoice, client, company, cashAccounts }: { invoice: Invoice, client: Client | null, company: CompanyData | null, cashAccounts: CashAccount[] }) {
     
     const productLines: InvoiceProductLine[] = Array.isArray(invoice.products) ? invoice.products : [];
     const promotionsApplied = (Array.isArray(invoice.promotions_applied) ? invoice.promotions_applied : []) as { name: string; amount: number }[];

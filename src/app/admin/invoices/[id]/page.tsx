@@ -1,7 +1,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
-import type { Invoice, Client, CompanyData } from "@/lib/definitions";
+import type { Invoice, Client, CompanyData, CashAccount } from "@/lib/definitions";
 import { InvoiceView, PrintButton } from "@/components/admin/invoices/_components/invoice-view";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -54,6 +54,20 @@ async function getCompanyData(): Promise<CompanyData | null> {
     return data as CompanyData;
 }
 
+async function getCashAccounts(): Promise<CashAccount[]> {
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
+    const { data, error } = await supabase
+        .from('cash_accounts')
+        .select('*')
+        .order('description', { ascending: true });
+    if (error) {
+        console.error('Error fetching cash accounts:', error);
+        return [];
+    }
+    return data as CashAccount[];
+}
+
 
 export default async function InvoiceDetailPage({ params }: { params: { id: string } }) {
     const cookieStore = cookies();
@@ -63,9 +77,10 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
         redirect('/auth/login');
     }
 
-    const [{ invoice, client }, company] = await Promise.all([
+    const [{ invoice, client }, company, cashAccounts] = await Promise.all([
         getInvoiceAndClient(params.id),
-        getCompanyData()
+        getCompanyData(),
+        getCashAccounts()
     ]);
 
 
@@ -82,7 +97,7 @@ export default async function InvoiceDetailPage({ params }: { params: { id: stri
                      <PrintButton />
                 </div>
 
-                <InvoiceView invoice={invoice} client={client} company={company} />
+                <InvoiceView invoice={invoice} client={client} company={company} cashAccounts={cashAccounts} />
             </div>
         </div>
     );
