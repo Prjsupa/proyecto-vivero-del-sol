@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { Client, Product, Service, CashAccount, Seller } from "@/lib/definitions";
@@ -56,7 +57,7 @@ export function CustomersTable({ customers, products, services, cashAccounts, se
                                 {customer.phone || customer.mobile_phone || 'N/A'}
                             </TableCell>
                             <TableCell>
-                                 <ClientActions client={customer} allClients={customers} products={products} services={services} cashAccounts={cashAccounts} sellers={sellers}/>
+                                 <ClientActions client={customer} allClients={customers} allProducts={products} services={services} cashAccounts={cashAccounts} sellers={sellers}/>
                             </TableCell>
                         </TableRow>
                     ))

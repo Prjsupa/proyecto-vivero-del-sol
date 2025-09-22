@@ -14,7 +14,7 @@ export function PromotionsTable({ promotions }: { promotions: Promotion[] }) {
             case 'x_for_y':
                 return 'Llevá X y pagá Y';
             case 'progressive_discount':
-                return 'Descuento progresivo por cantidad';
+                return 'Descuento progresivo';
             case 'price_discount':
                 return 'Descuento sobre precios';
             case 'cross_selling':
@@ -23,6 +23,24 @@ export function PromotionsTable({ promotions }: { promotions: Promotion[] }) {
                 return t;
         }
     };
+
+    const formatDiscountValue = (promo: Promotion) => {
+        if (promo.discount_type === 'x_for_y') {
+            const value = promo.discount_value as any;
+            if (value && typeof value === 'object' && 'take' in value && 'pay' in value) {
+                return `Llevá ${value.take}, pagá ${value.pay}`;
+            }
+        }
+        if (promo.discount_type === 'progressive_discount') {
+             const value = promo.discount_value as any;
+            if (value && Array.isArray(value.tiers) && value.tiers.length > 0) {
+                return `${value.tiers.length} tramo(s) de descuento`;
+            }
+        }
+        return '-';
+    }
+
+
     return (
         <Card>
             <CardHeader>
@@ -36,6 +54,7 @@ export function PromotionsTable({ promotions }: { promotions: Promotion[] }) {
                             <TableHead>Nombre</TableHead>
                             <TableHead>Estado</TableHead>
                             <TableHead>Tipo</TableHead>
+                            <TableHead>Valor</TableHead>
                             <TableHead>
                                 <span className="sr-only">Acciones</span>
                             </TableHead>
@@ -54,6 +73,7 @@ export function PromotionsTable({ promotions }: { promotions: Promotion[] }) {
                                         )}
                                     </TableCell>
                                      <TableCell>{formatType(promotion.discount_type)}</TableCell>
+                                     <TableCell>{formatDiscountValue(promotion)}</TableCell>
                                     <TableCell className="text-right">
                                         <PromotionActions promotion={promotion} />
                                     </TableCell>
@@ -61,7 +81,7 @@ export function PromotionsTable({ promotions }: { promotions: Promotion[] }) {
                             ))
                         ) : (
                             <TableRow>
-                                <TableCell colSpan={4} className="h-48 text-center">
+                                <TableCell colSpan={5} className="h-48 text-center">
                                      <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
                                         <Gift className="h-12 w-12" />
                                         <p className="font-semibold">No se encontraron promociones.</p>
