@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Lightbulb, Database, Sparkles } from 'lucide-react';
@@ -61,7 +62,8 @@ export default function DocsPage() {
                                     Se ha optimizado la interacción en las Tablas Auxiliares.
                                 </CardDescription>
                             </div>
-                        </CardHeader>
+                        </div>
+                    </CardHeader>
                     <CardContent className="space-y-2 pl-16">
                         <p className="text-muted-foreground">
                             Al crear, editar o eliminar un registro en cualquier Tabla Auxiliar, el componente ahora se actualiza automáticamente **sin recargar la página completa**. Esto proporciona una experiencia mucho más rápida y fluida, manteniendo tu contexto de trabajo.
