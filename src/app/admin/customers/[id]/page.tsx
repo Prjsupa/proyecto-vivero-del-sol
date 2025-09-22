@@ -1,7 +1,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
-import type { Client, Invoice } from "@/lib/definitions";
+import type { Client, Invoice, Seller } from "@/lib/definitions";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,16 +11,6 @@ import { format, parseISO, isValid } from "date-fns";
 import { InvoicesTable } from "@/components/admin/invoices-table";
 import { Separator } from "@/components/ui/separator";
 import { cookies } from "next/headers";
-
-interface CustomerDetailPageProps {
-    params: {
-        id: string;
-    }
-}
-
-function getInitials(name: string, lastName: string) {
-    return `${name?.charAt(0) ?? ''}${lastName?.charAt(0) ?? ''}`.toUpperCase();
-}
 
 async function getClientDetails(clientId: string): Promise<{ client: Client, invoices: Invoice[] }> {
     const cookieStore = cookies();
@@ -49,8 +39,26 @@ async function getClientDetails(clientId: string): Promise<{ client: Client, inv
     return { client, invoices: invoices || [] };
 }
 
+async function getSellers(): Promise<Seller[]> {
+    const cookieStore = cookies();
+    const supabase = createClient(cookieStore);
+    const { data, error } = await supabase
+        .from('sellers')
+        .select('*')
+        .order('last_name', { ascending: true });
+    
+    if (error) {
+        console.error('Error fetching sellers:', error);
+        return [];
+    }
+    return data;
+}
 
-export default async function CustomerDetailPage({ params }: CustomerDetailPageProps) {
+function getInitials(name: string, lastName: string) {
+    return `${name?.charAt(0) ?? ''}${lastName?.charAt(0) ?? ''}`.toUpperCase();
+}
+
+export default async function CustomerDetailPage({ params }: { params: { id: string } }) {
     const cookieStore = cookies();
     const supabase = createClient(cookieStore);
     const { data: { user } } = await supabase.auth.getUser();
@@ -58,7 +66,10 @@ export default async function CustomerDetailPage({ params }: CustomerDetailPageP
         redirect('/auth/login');
     }
 
-    const { client, invoices } = await getClientDetails(params.id);
+    const [{ client, invoices }, sellers] = await Promise.all([
+        getClientDetails(params.id),
+        getSellers(),
+    ]);
 
     return (
         <div className="space-y-8">
@@ -144,7 +155,7 @@ export default async function CustomerDetailPage({ params }: CustomerDetailPageP
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <InvoicesTable invoices={invoices} customers={[client]} sellers={[]} />
+                            <InvoicesTable invoices={invoices} customers={[client]} sellers={sellers} />
                         </CardContent>
                     </Card>
                 </div>
