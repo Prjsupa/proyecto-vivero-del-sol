@@ -12,7 +12,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { useRouter } from "next/navigation";
 
 
-export function InvoicesTable({ invoices, customers, sellers }: { invoices: Invoice[], customers: Client[], sellers: Seller[] }) {
+interface InvoicesTableProps {
+    invoices: Invoice[];
+    customers: Client[];
+    sellers: Seller[];
+}
+
+export function InvoicesTable({ invoices, customers, sellers }: InvoicesTableProps) {
     const [filters, setFilters] = useState({
         invoiceNumber: '',
         client: 'todos',

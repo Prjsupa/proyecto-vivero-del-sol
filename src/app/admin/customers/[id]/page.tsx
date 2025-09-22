@@ -12,6 +12,12 @@ import { InvoicesTable } from "@/components/admin/invoices-table";
 import { Separator } from "@/components/ui/separator";
 import { cookies } from "next/headers";
 
+interface CustomerDetailPageProps {
+    params: {
+        id: string;
+    }
+}
+
 function getInitials(name: string, lastName: string) {
     return `${name?.charAt(0) ?? ''}${lastName?.charAt(0) ?? ''}`.toUpperCase();
 }
@@ -44,7 +50,7 @@ async function getClientDetails(clientId: string): Promise<{ client: Client, inv
 }
 
 
-export default async function CustomerDetailPage({ params }: { params: { id: string } }) {
+export default async function CustomerDetailPage({ params }: CustomerDetailPageProps) {
     const cookieStore = cookies();
     const supabase = createClient(cookieStore);
     const { data: { user } } = await supabase.auth.getUser();
@@ -138,7 +144,7 @@ export default async function CustomerDetailPage({ params }: { params: { id: str
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <InvoicesTable invoices={invoices} customers={[client]} />
+                            <InvoicesTable invoices={invoices} customers={[client]} sellers={[]} />
                         </CardContent>
                     </Card>
                 </div>
