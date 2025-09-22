@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useActionState, useEffect, useRef, useState } from 'react';
@@ -63,7 +62,7 @@ export function AddUserForm() {
     return (
         <Dialog open={isDialogOpen} onOpenChange={onDialogChange}>
             <DialogTrigger asChild>
-                 <Button>
+                <Button>
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Añadir Admin
                 </Button>

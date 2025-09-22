@@ -108,7 +108,7 @@ export function AddClientForm() {
     return (
         <Dialog open={isDialogOpen} onOpenChange={onDialogChange}>
             <DialogTrigger asChild>
-                 <Button>
+                <Button>
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Nuevo Cliente
                 </Button>

@@ -1,6 +1,6 @@
 'use client';
 
-import type { Client, Product } from "@/lib/definitions";
+import type { Client, Product, Service, CashAccount, Seller } from "@/lib/definitions";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { format, parseISO, isValid } from 'date-fns';
@@ -11,7 +11,7 @@ function getInitials(name: string, lastName: string) {
     return `${name?.charAt(0) ?? ''}${lastName?.charAt(0) ?? ''}`.toUpperCase();
 }
 
-export function CustomersTable({ customers, products }: { customers: Client[], products: Product[] }) {
+export function CustomersTable({ customers, products, services, cashAccounts, sellers }: { customers: Client[], products: Product[], services: Service[], cashAccounts: CashAccount[], sellers: Seller[] }) {
 
     const formatDate = (dateString?: string) => {
         if (!dateString) return '-';
@@ -56,7 +56,7 @@ export function CustomersTable({ customers, products }: { customers: Client[], p
                                 {customer.phone || customer.mobile_phone || 'N/A'}
                             </TableCell>
                             <TableCell>
-                                 <ClientActions client={customer} allClients={customers} allProducts={products} />
+                                 <ClientActions client={customer} allClients={customers} products={products} services={services} cashAccounts={cashAccounts} sellers={sellers}/>
                             </TableCell>
                         </TableRow>
                     ))
