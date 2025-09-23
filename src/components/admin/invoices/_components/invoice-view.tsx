@@ -83,7 +83,7 @@ export function InvoiceView({ invoice, client, company, cashAccounts }: { invoic
                     </div>
                      <div className="space-y-1 text-right">
                         <p>
-                            <span className="font-semibold">{invoice.client_document_type || 'NN'}:</span> {invoice.client_document_number || 'No especificado'}
+                            <span className="font-bold">{invoice.client_document_type || 'NN'}:</span> {invoice.client_document_number || 'No especificado'}
                         </p>
                         <p><span className="font-semibold">IVA:</span> {clientVatCondition}</p>
                     </div>
@@ -173,7 +173,7 @@ export function InvoiceView({ invoice, client, company, cashAccounts }: { invoic
                 }
                 @page {
                     size: auto;
-                    margin: 0;
+                    margin: 0.5in;
                 }
             `}</style>
         </>
