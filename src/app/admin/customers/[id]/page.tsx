@@ -12,6 +12,11 @@ import { InvoicesTable } from "@/components/admin/invoices-table";
 import { Separator } from "@/components/ui/separator";
 import { cookies } from "next/headers";
 
+interface PageProps {
+    params: { id: string };
+    searchParams?: { [key: string]: string | string[] | undefined };
+}
+
 async function getClientDetails(clientId: string): Promise<{ client: Client, invoices: Invoice[] }> {
     const cookieStore = cookies();
     const supabase = createClient(cookieStore);
@@ -58,7 +63,7 @@ function getInitials(name: string, lastName: string) {
     return `${name?.charAt(0) ?? ''}${lastName?.charAt(0) ?? ''}`.toUpperCase();
 }
 
-export default async function CustomerDetailPage({ params }: { params: { id: string } }) {
+export default async function CustomerDetailPage({ params }: PageProps) {
     const cookieStore = cookies();
     const supabase = createClient(cookieStore);
     const { data: { user } } = await supabase.auth.getUser();
