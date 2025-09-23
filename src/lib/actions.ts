@@ -480,26 +480,27 @@ export async function addUser(prevState: any, formData: FormData) {
 const baseClientSchema = z.object({
   name: z.string({ required_error: "El nombre es requerido." }).min(1, 'El nombre es requerido.'),
   last_name: z.string({ required_error: "El apellido es requerido." }).min(1, 'El apellido es requerido.'),
-  razon_social: z.string().transform(e => e === '' ? null : e).optional().nullable(),
-  nombre_fantasia: z.string().transform(e => e === '' ? null : e).optional().nullable(),
-  iva_condition: z.string().transform(e => e === '' ? null : e).optional().nullable(),
-  document_type: z.string().transform(e => e === '' ? null : e).optional().nullable(),
-  document_number: z.string().transform(e => e === '' ? null : e).optional().nullable(),
-  price_list: z.string().transform(e => e === '' ? null : e).optional().nullable(),
-  province: z.string().transform(e => e === '' ? null : e).optional().nullable(),
-  address: z.string().transform(e => e === '' ? null : e).optional().nullable(),
-  city: z.string().transform(e => e === '' ? null : e).optional().nullable(),
-  postal_code: z.string().transform(e => e === '' ? null : e).optional().nullable(),
-  phone: z.string().transform(e => e === '' ? null : e).optional().nullable(),
-  mobile_phone: z.string().transform(e => e === '' ? null : e).optional().nullable(),
-  email: z.string().email('El email no es válido.').or(z.literal('')).transform(e => e === '' ? null : e).optional().nullable(),
-  default_invoice_type: z.enum(['A', 'B', 'C']).or(z.literal('')).transform(e => e === '' ? null : e).optional().nullable(),
+  razon_social: z.string().optional().nullable(),
+  nombre_fantasia: z.string().optional().nullable(),
+  iva_condition: z.string().optional().nullable(),
+  document_type: z.string().optional().nullable(),
+  document_number: z.string().optional().nullable(),
+  price_list: z.string().optional().nullable(),
+  province: z.string().optional().nullable(),
+  address: z.string().optional().nullable(),
+  city: z.string().optional().nullable(),
+  postal_code: z.string().optional().nullable(),
+  phone: z.string().optional().nullable(),
+  mobile_phone: z.string().optional().nullable(),
+  email: z.string().email('El email no es válido.').or(z.literal('')).optional().nullable(),
+  default_invoice_type: z.enum(['A', 'B', 'C']).or(z.literal('')).optional().nullable(),
   birth_date: z.preprocess((arg) => {
     if (!arg || arg === '') return null;
     if (typeof arg == "string" || arg instanceof Date) return new Date(arg);
     return null;
   }, z.date().optional().nullable()),
 });
+
 
 const clientSchema = baseClientSchema.superRefine((data, ctx) => {
     if (data.document_type && data.document_type !== 'NN' && (!data.document_number || data.document_number.trim() === '')) {
