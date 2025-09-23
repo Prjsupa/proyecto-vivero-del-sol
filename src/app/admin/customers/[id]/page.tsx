@@ -1,5 +1,4 @@
 
-
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import type { Client, Invoice, Seller } from "@/lib/definitions";
@@ -12,12 +11,6 @@ import { format, parseISO, isValid } from "date-fns";
 import { InvoicesTable } from "@/components/admin/invoices-table";
 import { Separator } from "@/components/ui/separator";
 import { cookies } from "next/headers";
-
-type PageProps = {
-    params: {
-        id: string;
-    }
-}
 
 async function getClientDetails(clientId: string): Promise<{ client: Client, invoices: Invoice[] }> {
     const cookieStore = cookies();
@@ -65,7 +58,7 @@ function getInitials(name: string, lastName: string) {
     return `${name?.charAt(0) ?? ''}${lastName?.charAt(0) ?? ''}`.toUpperCase();
 }
 
-export default async function CustomerDetailPage({ params }: PageProps) {
+export default async function CustomerDetailPage({ params }: { params: { id: string } }) {
     const cookieStore = cookies();
     const supabase = createClient(cookieStore);
     const { data: { user } } = await supabase.auth.getUser();
@@ -139,12 +132,12 @@ export default async function CustomerDetailPage({ params }: PageProps) {
                                     <p className="text-muted-foreground">Fijo: {client.phone || 'No especificado'}</p>
                                 </div>
                             </div>
-                             {client.birth_date && isValid(parseISO(client.birth_date)) && (
+                             {client.birth_date && isValid(parseISO(client.birth_date as string)) && (
                                 <div className="flex items-start gap-3">
                                     <Cake className="h-4 w-4 mt-1 text-muted-foreground" />
                                     <div>
                                         <p className="font-semibold">Fecha de Nacimiento</p>
-                                        <p className="text-muted-foreground">{format(parseISO(client.birth_date), 'dd/MM/yyyy')}</p>
+                                        <p className="text-muted-foreground">{format(parseISO(client.birth_date as string), 'dd/MM/yyyy')}</p>
                                     </div>
                                 </div>
                             )}
