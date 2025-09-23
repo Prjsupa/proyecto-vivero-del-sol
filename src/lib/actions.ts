@@ -476,30 +476,6 @@ export async function addUser(prevState: any, formData: FormData) {
     };
 }
 
-
-export async function deleteClient(clientId: number) {
-    if (!clientId) {
-        return { message: "ID de cliente inválido." };
-    }
-
-    const cookieStore = cookies();
-    const supabase = createClient(cookieStore);
-    
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { message: 'No autenticado' };
-    
-    const { error } = await supabase.from('clients').delete().eq('id', clientId);
-
-    if (error) {
-        return { message: `Error al eliminar el cliente: ${error.message}` };
-    }
-    
-    revalidatePath('/admin/customers');
-    
-    return { message: 'success', data: '¡Cliente eliminado exitosamente!' };
-}
-
-
 const updatePasswordSchema = z.object({
     currentPassword: z.string().min(1, 'Current password is required.'),
     password: z.string().min(6, 'Password must be at least 6 characters.'),
@@ -2082,4 +2058,240 @@ export async function updateCompanyData(prevState: any, formData: FormData) {
         message: 'success',
         data: `¡Datos de la empresa actualizados exitosamente!`,
     };
+}
+
+
+// ============== CLIENT ACTIONS =================
+
+const baseClientSchema = z.object({
+  name: z.string().min(1, 'El nombre es requerido.'),
+  last_name: z.string().min(1, 'El apellido es requerido.'),
+  razon_social: z.preprocess(val => val === '' ? null : val, z.string().optional().nullable()),
+  nombre_fantasia: z.preprocess(val => val === '' ? null : val, z.string().optional().nullable()),
+  iva_condition: z.preprocess(val => val === '' ? null : val, z.string().optional().nullable()),
+  document_type: z.preprocess(val => val === '' ? null : val, z.string().optional().nullable()),
+  document_number: z.preprocess(val => val === '' ? null : val, z.string().optional().nullable()),
+  price_list: z.preprocess(val => val === '' ? null : val, z.string().optional().nullable()),
+  province: z.preprocess(val => val === '' ? null : val, z.string().optional().nullable()),
+  address: z.preprocess(val => val === '' ? null : val, z.string().optional().nullable()),
+  city: z.preprocess(val => val === '' ? null : val, z.string().optional().nullable()),
+  postal_code: z.preprocess(val => val === '' ? null : val, z.string().optional().nullable()),
+  phone: z.preprocess(val => val === '' ? null : val, z.string().optional().nullable()),
+  mobile_phone: z.preprocess(val => val === '' ? null : val, z.string().optional().nullable()),
+  email: z.preprocess(val => (val === '' ? null : val), z.string().email('El email no es válido.').optional().nullable()),
+  default_invoice_type: z.preprocess(val => (val === '' ? null : val), z.enum(['A', 'B', 'C']).optional().nullable()),
+  birth_date: z.preprocess((arg) => {
+    if (!arg || arg === '') return null;
+    const date = new Date(arg as string);
+    return isNaN(date.getTime()) ? null : date;
+  }, z.date().optional().nullable()),
+});
+
+
+const clientSchema = baseClientSchema.superRefine((data, ctx) => {
+    if (data.document_type && data.document_type !== 'NN' && (!data.document_number || data.document_number.trim() === '')) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "El número de documento es requerido si se especifica un tipo.",
+            path: ['document_number'],
+        });
+    }
+});
+
+const updateClientSchema = clientSchema.extend({
+    id: z.coerce.number(),
+});
+
+
+export async function addClient(prevState: any, formData: FormData) {
+    const validatedFields = clientSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return {
+            message: "Datos de formulario inválidos.",
+            errors: validatedFields.error.flatten().fieldErrors,
+        };
+    }
+    
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        return { message: "No autorizado." };
+    }
+    
+    const clientData = validatedFields.data;
+
+    const { error } = await supabase
+        .from('clients')
+        .insert({ ...clientData, updated_at: new Date().toISOString() });
+
+    if (error) {
+        if(error.code === '23505') { // Unique constraint on document_number
+            return { message: `Error: El número de documento '${validatedFields.data.document_number}' ya existe.` };
+        }
+        return { message: `Error creando el cliente: ${error.message}` };
+    }
+
+    revalidatePath('/admin/customers');
+    return {
+        message: 'success',
+        data: `Cliente ${validatedFields.data.name} ${validatedFields.data.last_name} creado exitosamente.`,
+    };
+}
+
+export async function updateClient(prevState: any, formData: FormData) {
+    const validatedFields = updateClientSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return {
+            message: "Datos de formulario inválidos.",
+            errors: validatedFields.error.flatten().fieldErrors,
+        };
+    }
+    
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        return { message: "No autorizado." };
+    }
+
+    const { id, ...clientData } = validatedFields.data;
+    
+    const { error } = await supabase
+        .from('clients')
+        .update({ ...clientData, updated_at: new Date().toISOString() })
+        .eq('id', id);
+
+    if (error) {
+        if(error.code === '23505') { // Unique constraint on document_number
+            return { message: `Error: El número de documento '${clientData.document_number}' ya existe.` };
+        }
+        return { message: `Error al actualizar el cliente: ${error.message}` };
+    }
+
+    revalidatePath('/admin/customers');
+    revalidatePath(`/admin/customers/${id}`);
+    return {
+        message: 'success',
+        data: `Cliente ${clientData.name} ${clientData.last_name} actualizado exitosamente.`,
+    };
+}
+
+export async function deleteClient(clientId: number) {
+    if (!clientId) {
+        return { message: "ID de cliente inválido." };
+    }
+
+    const supabase = createClient();
+    
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { message: 'No autenticado' };
+    
+    const { error } = await supabase.from('clients').delete().eq('id', clientId);
+
+    if (error) {
+        return { message: `Error al eliminar el cliente: ${error.message}` };
+    }
+    
+    revalidatePath('/admin/customers');
+    
+    return { message: 'success', data: '¡Cliente eliminado exitosamente!' };
+}
+
+
+// ============== SELLER ACTIONS =================
+
+const sellerSchema = z.object({
+  name: z.string().min(1, 'El nombre es requerido.'),
+  last_name: z.string().min(1, 'El apellido es requerido.'),
+  address: z.string().optional(),
+  dni: z.string().optional(),
+  phone: z.string().optional(),
+  authorized_discount: z.coerce.number().optional(),
+  cash_sale_commission: z.coerce.number().optional(),
+  collection_commission: z.coerce.number().optional(),
+});
+
+export async function addSeller(prevState: any, formData: FormData) {
+    const validatedFields = sellerSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return {
+            message: "Datos de formulario inválidos.",
+            errors: validatedFields.error.flatten().fieldErrors,
+        };
+    }
+    
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        return { message: "No autorizado." };
+    }
+
+    const { error } = await supabase.from('sellers').insert({ ...validatedFields.data, updated_at: new Date().toISOString() });
+
+    if (error) {
+        return { message: `Error creando el vendedor: ${error.message}` };
+    }
+
+    revalidatePath('/admin/sellers');
+    return {
+        message: 'success',
+        data: `Vendedor ${validatedFields.data.name} ${validatedFields.data.last_name} creado exitosamente.`,
+    };
+}
+
+
+const updateSellerSchema = sellerSchema.extend({
+    id: z.coerce.number(),
+});
+
+export async function updateSeller(prevState: any, formData: FormData) {
+    const validatedFields = updateSellerSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return {
+            message: "Datos de formulario inválidos.",
+            errors: validatedFields.error.flatten().fieldErrors,
+        };
+    }
+    
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        return { message: "No autorizado." };
+    }
+    
+    const { id, ...sellerData } = validatedFields.data;
+
+    const { error } = await supabase.from('sellers').update({ ...sellerData, updated_at: new Date().toISOString() }).eq('id', id);
+
+    if (error) {
+        return { message: `Error al actualizar el vendedor: ${error.message}` };
+    }
+
+    revalidatePath('/admin/sellers');
+    return {
+        message: 'success',
+        data: `Vendedor ${sellerData.name} ${sellerData.last_name} actualizado exitosamente.`,
+    };
+}
+
+export async function deleteSeller(sellerId: number) {
+    if (!sellerId) {
+        return { message: "ID de vendedor inválido." };
+    }
+
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { message: 'No autenticado' };
+
+    const { error } = await supabase.from('sellers').delete().eq('id', sellerId);
+
+    if (error) {
+        return { message: `Error al eliminar el vendedor: ${error.message}` };
+    }
+
+    revalidatePath('/admin/sellers');
+    return { message: 'success', data: '¡Vendedor eliminado exitosamente!' };
 }

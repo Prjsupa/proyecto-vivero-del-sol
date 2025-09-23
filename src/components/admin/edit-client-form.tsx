@@ -6,7 +6,7 @@ import { DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTit
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AlertCircle, Loader2, Calendar as CalendarIcon } from 'lucide-react';
-import { updateClient } from '@/lib/client-actions';
+import { updateClient } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
 import type { Client } from '@/lib/definitions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
