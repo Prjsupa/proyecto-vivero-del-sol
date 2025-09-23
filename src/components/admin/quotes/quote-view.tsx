@@ -1,10 +1,9 @@
-
 'use client';
 import type { Quote, Json } from "@/lib/definitions";
 import { format } from 'date-fns';
 import { formatPrice } from '@/lib/utils';
 import { Button } from "@/components/ui/button";
-import { Printer, FileDown } from "lucide-react";
+import { Printer } from "lucide-react";
 
 type QuoteItem = {
     id: string;
@@ -149,16 +148,9 @@ export function PrintButton() {
         window.print();
     };
     return (
-        <div className="flex gap-2">
-            <Button onClick={handlePrint}>
-                <Printer className="mr-2 h-4 w-4" />
-                Imprimir / Guardar PDF
-            </Button>
-            {/* Placeholder for Excel export */}
-            <Button variant="outline" disabled>
-                 <FileDown className="mr-2 h-4 w-4" />
-                Exportar a Excel
-            </Button>
-        </div>
+        <Button onClick={handlePrint}>
+            <Printer className="mr-2 h-4 w-4" />
+            Imprimir / Guardar PDF
+        </Button>
     )
 }
