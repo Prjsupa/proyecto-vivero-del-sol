@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { createClient } from './supabase/server';
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
-import { applyPromotions } from './promotions-engine';
+import { applyPromotions, type AppliedPromo } from './promotions-engine';
 
 const createInvoiceSchema = z.object({
     clientId: z.coerce.number().optional(),
@@ -119,6 +119,7 @@ export async function createInvoice(prevState: any, formData: FormData) {
         seller_name: sellerName,
         seller_commission,
         promotions_applied: appliedPromos,
+        general_discount_amount: generalDiscountAmount,
     };
 
     const { data, error } = await supabase.from('invoices').insert([invoiceData]).select('id').single();

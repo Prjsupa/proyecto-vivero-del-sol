@@ -20,6 +20,11 @@ type InvoiceProductLine = {
     isService?: boolean;
 }
 
+type AppliedPromo = {
+  name: string;
+  amount: number;
+};
+
 export function InvoiceView({ invoice, client, company, cashAccounts }: { invoice: Invoice, client: Client | null, company: CompanyData | null, cashAccounts: CashAccount[] }) {
     
     const productLines: InvoiceProductLine[] = Array.isArray(invoice.products) ? invoice.products : [];
@@ -29,7 +34,13 @@ export function InvoiceView({ invoice, client, company, cashAccounts }: { invoic
     
     const clientVatCondition = invoice.vat_type ? (invoice.vat_type.replace('_', ' ')).replace(/\b\w/g, l => l.toUpperCase()) : 'Consumidor Final';
 
-    const promotionsApplied = Array.isArray(invoice.promotions_applied) ? invoice.promotions_applied : [];
+    const promotionsApplied: AppliedPromo[] = Array.isArray(invoice.promotions_applied) ? invoice.promotions_applied : [];
+    const generalDiscount = invoice.general_discount_amount || 0;
+    
+    const allDiscounts = [...promotionsApplied];
+    if (generalDiscount > 0) {
+        allDiscounts.push({ name: 'Descuento General', amount: generalDiscount });
+    }
 
     return (
         <>
@@ -108,10 +119,14 @@ export function InvoiceView({ invoice, client, company, cashAccounts }: { invoic
                                 <span className="font-mono">{formatPrice(subtotal, 'ARS')}</span>
                             </div>
                              {totalDiscounts > 0 && (
-                                <div className="flex justify-between text-destructive">
-                                    <span>Descuentos</span>
-                                    <span className="font-mono">- {formatPrice(totalDiscounts, 'ARS')}</span>
-                                </div>
+                                <>
+                                    {allDiscounts.map((promo, index) => (
+                                        <div key={index} className="flex justify-between text-destructive">
+                                            <span>{promo.name}</span>
+                                            <span className="font-mono">- {formatPrice(promo.amount, 'ARS')}</span>
+                                        </div>
+                                    ))}
+                                </>
                             )}
                             {(invoice.vat_rate ?? 0) > 0 && (
                                 <div className="flex justify-between">
