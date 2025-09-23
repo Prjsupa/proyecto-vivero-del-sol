@@ -477,23 +477,25 @@ export async function addUser(prevState: any, formData: FormData) {
 }
 
 
+const optionalString = z.preprocess((val) => val === '' ? null : val, z.string().optional().nullable());
+
 const baseClientSchema = z.object({
   name: z.string({ required_error: "El nombre es requerido." }).min(1, 'El nombre es requerido.'),
   last_name: z.string({ required_error: "El apellido es requerido." }).min(1, 'El apellido es requerido.'),
-  razon_social: z.string().optional().nullable(),
-  nombre_fantasia: z.string().optional().nullable(),
-  iva_condition: z.string().optional().nullable(),
-  document_type: z.string().optional().nullable(),
-  document_number: z.string().optional().nullable(),
-  price_list: z.string().optional().nullable(),
-  province: z.string().optional().nullable(),
-  address: z.string().optional().nullable(),
-  city: z.string().optional().nullable(),
-  postal_code: z.string().optional().nullable(),
-  phone: z.string().optional().nullable(),
-  mobile_phone: z.string().optional().nullable(),
-  email: z.string().email('El email no es válido.').or(z.literal('')).optional().nullable(),
-  default_invoice_type: z.enum(['A', 'B', 'C']).or(z.literal('')).optional().nullable(),
+  razon_social: optionalString,
+  nombre_fantasia: optionalString,
+  iva_condition: optionalString,
+  document_type: optionalString,
+  document_number: optionalString,
+  price_list: optionalString,
+  province: optionalString,
+  address: optionalString,
+  city: optionalString,
+  postal_code: optionalString,
+  phone: optionalString,
+  mobile_phone: optionalString,
+  email: z.preprocess((val) => val === '' ? null : val, z.string().email('El email no es válido.').optional().nullable()),
+  default_invoice_type: z.preprocess((val) => val === '' ? null : val, z.enum(['A', 'B', 'C']).optional().nullable()),
   birth_date: z.preprocess((arg) => {
     if (!arg || arg === '') return null;
     if (typeof arg == "string" || arg instanceof Date) return new Date(arg);
