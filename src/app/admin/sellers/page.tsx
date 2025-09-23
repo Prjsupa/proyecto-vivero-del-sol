@@ -1,10 +1,8 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Seller } from "@/lib/definitions";
 import { SellersTable } from "@/components/admin/sellers-table";
 import { AddSellerForm } from "@/components/admin/add-seller-form";
 import { createClient } from "@/lib/supabase/server";
-import { PlusCircle } from "lucide-react";
 import { cookies } from "next/headers";
 
 async function getSellers(): Promise<Seller[]> {

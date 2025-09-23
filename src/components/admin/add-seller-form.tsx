@@ -79,46 +79,46 @@ export function AddSellerForm() {
                         <div className="space-y-2">
                             <Label htmlFor="name">Nombre</Label>
                             <Input id="name" name="name" />
-                            <FieldError errors={state.errors?.name} />
+                            <FieldError errors={state?.errors?.name} />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="last_name">Apellido</Label>
                             <Input id="last_name" name="last_name" />
-                            <FieldError errors={state.errors?.last_name} />
+                            <FieldError errors={state?.errors?.last_name} />
                         </div>
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="address">Domicilio</Label>
                         <Input id="address" name="address" />
-                        <FieldError errors={state.errors?.address} />
+                        <FieldError errors={state?.errors?.address} />
                     </div>
                      <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="dni">DNI</Label>
                             <Input id="dni" name="dni" />
-                            <FieldError errors={state.errors?.dni} />
+                            <FieldError errors={state?.errors?.dni} />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="phone">Teléfono</Label>
                             <Input id="phone" name="phone" />
-                            <FieldError errors={state.errors?.phone} />
+                            <FieldError errors={state?.errors?.phone} />
                         </div>
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="authorized_discount">Desc. Autorizado (%)</Label>
                         <Input id="authorized_discount" name="authorized_discount" type="number" step="0.01" />
-                        <FieldError errors={state.errors?.authorized_discount} />
+                        <FieldError errors={state?.errors?.authorized_discount} />
                     </div>
                      <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="cash_sale_commission">Comisión Vta. Efectivo (%)</Label>
                             <Input id="cash_sale_commission" name="cash_sale_commission" type="number" step="0.01" />
-                            <FieldError errors={state.errors?.cash_sale_commission} />
+                            <FieldError errors={state?.errors?.cash_sale_commission} />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="collection_commission">Comisión Cobranza (%)</Label>
                             <Input id="collection_commission" name="collection_commission" type="number" step="0.01" />
-                            <FieldError errors={state.errors?.collection_commission} />
+                            <FieldError errors={state?.errors?.collection_commission} />
                         </div>
                     </div>
                      <DialogFooter className="mt-4">
