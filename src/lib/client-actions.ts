@@ -1,3 +1,4 @@
+
 'use server';
 
 import { z } from 'zod';
@@ -46,6 +47,18 @@ const clientSchema = baseClientSchema.superRefine((data, ctx) => {
     }
 });
 
+const updateClientSchema = baseClientSchema.extend({
+    id: z.coerce.number(),
+}).superRefine((data, ctx) => {
+    if (data.document_type && data.document_type !== 'NN' && (!data.document_number || data.document_number.trim() === '')) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "El número de documento es requerido si se especifica un tipo.",
+            path: ['document_number'],
+        });
+    }
+});
+
 
 export async function addClient(prevState: any, formData: FormData) {
     const validatedFields = clientSchema.safeParse(Object.fromEntries(formData.entries()));
@@ -82,10 +95,6 @@ export async function addClient(prevState: any, formData: FormData) {
         data: `Cliente ${validatedFields.data.name} ${validatedFields.data.last_name} creado exitosamente.`,
     };
 }
-
-const updateClientSchema = clientSchema.extend({
-    id: z.coerce.number(),
-});
 
 export async function updateClient(prevState: any, formData: FormData) {
     const validatedFields = updateClientSchema.safeParse(Object.fromEntries(formData.entries()));
