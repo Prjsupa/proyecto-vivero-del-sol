@@ -74,7 +74,7 @@ export function InvoiceView({ invoice, client, company, cashAccounts }: { invoic
                         <p><span className="font-semibold w-28 inline-block">Cond. Venta:</span>{invoice.payment_condition} {invoice.notes ? `- ${invoice.notes}`: ''}</p>
                     </div>
                      <div className="space-y-1 text-right">
-                        <p>{invoice.client_document_type || 'NN'}: {invoice.client_document_number || 'No especificado'}</p>
+                        <p><span className="font-semibold">{invoice.client_document_type || 'NN'}:</span> {invoice.client_document_number || 'No especificado'}</p>
                         <p><span className="font-semibold">IVA:</span> {clientVatCondition}</p>
                     </div>
                 </section>
@@ -177,4 +177,3 @@ export function PrintButton() {
         </Button>
     )
 }
-
