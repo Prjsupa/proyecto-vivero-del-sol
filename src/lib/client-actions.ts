@@ -8,20 +8,62 @@ import { revalidatePath } from 'next/cache';
 const baseClientSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido.'),
   last_name: z.string().min(1, 'El apellido es requerido.'),
-  razon_social: z.string().optional().transform(e => e === '' ? null : e),
-  nombre_fantasia: z.string().optional().transform(e => e === '' ? null : e),
-  iva_condition: z.string().optional().transform(e => e === '' ? null : e),
-  document_type: z.string().optional().transform(e => e === '' ? null : e),
-  document_number: z.string().optional().transform(e => e === '' ? null : e),
-  price_list: z.string().optional().transform(e => e === '' ? null : e),
-  province: z.string().optional().transform(e => e === '' ? null : e),
-  address: z.string().optional().transform(e => e === '' ? null : e),
-  city: z.string().optional().transform(e => e === '' ? null : e),
-  postal_code: z.string().optional().transform(e => e === '' ? null : e),
-  phone: z.string().optional().transform(e => e === '' ? null : e),
-  mobile_phone: z.string().optional().transform(e => e === '' ? null : e),
-  email: z.string().email('El email no es válido.').optional().or(z.literal('')).transform(e => e === '' ? null : e),
-  default_invoice_type: z.enum(['A', 'B', 'C']).optional().nullable().transform(e => e === '' ? null : e),
+  razon_social: z.preprocess(
+    (val) => val === '' ? null : val,
+    z.string().optional().nullable()
+  ),
+  nombre_fantasia: z.preprocess(
+    (val) => val === '' ? null : val,
+    z.string().optional().nullable()
+  ),
+  iva_condition: z.preprocess(
+    (val) => val === '' ? null : val,
+    z.string().optional().nullable()
+  ),
+  document_type: z.preprocess(
+    (val) => val === '' ? null : val,
+    z.string().optional().nullable()
+  ),
+  document_number: z.preprocess(
+    (val) => val === '' ? null : val,
+    z.string().optional().nullable()
+  ),
+  price_list: z.preprocess(
+    (val) => val === '' ? null : val,
+    z.string().optional().nullable()
+  ),
+  province: z.preprocess(
+    (val) => val === '' ? null : val,
+    z.string().optional().nullable()
+  ),
+  address: z.preprocess(
+    (val) => val === '' ? null : val,
+    z.string().optional().nullable()
+  ),
+  city: z.preprocess(
+    (val) => val === '' ? null : val,
+    z.string().optional().nullable()
+  ),
+  postal_code: z.preprocess(
+    (val) => val === '' ? null : val,
+    z.string().optional().nullable()
+  ),
+  phone: z.preprocess(
+    (val) => val === '' ? null : val,
+    z.string().optional().nullable()
+  ),
+  mobile_phone: z.preprocess(
+    (val) => val === '' ? null : val,
+    z.string().optional().nullable()
+  ),
+  email: z.preprocess(
+    (val) => (val === '' ? null : val),
+    z.string().email('El email no es válido.').optional().nullable()
+  ),
+  default_invoice_type: z.preprocess(
+    (val) => (val === '' ? null : val),
+    z.enum(['A', 'B', 'C']).optional().nullable()
+  ),
   birth_date: z.preprocess((arg) => {
     if (!arg || arg === '') return null;
     try {
@@ -130,3 +172,4 @@ export async function updateClient(prevState: any, formData: FormData) {
         data: `Cliente ${clientData.name} ${clientData.last_name} actualizado exitosamente.`,
     };
 }
+
