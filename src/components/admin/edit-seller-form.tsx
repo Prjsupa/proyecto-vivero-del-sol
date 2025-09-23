@@ -6,7 +6,7 @@ import { DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTit
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AlertCircle, Loader2 } from 'lucide-react';
-import { updateSeller } from '@/lib/actions';
+import { updateSeller } from '@/lib/seller-actions';
 import { useToast } from '@/hooks/use-toast';
 import type { Seller } from '@/lib/definitions';
 
