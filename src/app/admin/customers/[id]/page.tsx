@@ -103,7 +103,9 @@ export default async function CustomerDetailPage({ params }: { params: { id: str
                                 <FileText className="h-4 w-4 mt-1 text-muted-foreground" />
                                 <div>
                                     <p className="font-semibold">Información Fiscal</p>
-                                    <p className="text-muted-foreground">{client.document_type || 'Documento'}: {client.document_number || 'No especificado'}</p>
+                                    <p className="text-muted-foreground">
+                                        <b>{client.document_type || 'Documento'}:</b> {client.document_number || 'No especificado'}
+                                    </p>
                                     <p className="text-muted-foreground">IVA: {client.iva_condition || 'No especificado'}</p>
                                     <p className="text-muted-foreground">Factura por defecto: {client.default_invoice_type || 'No especificado'}</p>
                                 </div>
