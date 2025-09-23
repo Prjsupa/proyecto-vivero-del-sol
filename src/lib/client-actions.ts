@@ -5,26 +5,23 @@ import { z } from 'zod';
 import { createClient } from './supabase/server';
 import { revalidatePath } from 'next/cache';
 
-// Helper to preprocess empty strings into null for optional fields
-const emptyStringToNull = z.preprocess((val) => (val === "" ? null : val), z.string().optional().nullable());
-
 const baseClientSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido.'),
   last_name: z.string().min(1, 'El apellido es requerido.'),
-  razon_social: emptyStringToNull,
-  nombre_fantasia: emptyStringToNull,
-  iva_condition: emptyStringToNull,
-  document_type: emptyStringToNull,
-  document_number: emptyStringToNull,
-  price_list: emptyStringToNull,
-  province: emptyStringToNull,
-  address: emptyStringToNull,
-  city: emptyStringToNull,
-  postal_code: emptyStringToNull,
-  phone: emptyStringToNull,
-  mobile_phone: emptyStringToNull,
-  email: z.preprocess((val) => (val === "" ? null : val), z.string().email('El email no es válido.').optional().nullable()),
-  default_invoice_type: z.preprocess((val) => (val === "" ? null : val), z.enum(['A', 'B', 'C']).optional().nullable()),
+  razon_social: z.string().optional().transform(e => e === '' ? null : e),
+  nombre_fantasia: z.string().optional().transform(e => e === '' ? null : e),
+  iva_condition: z.string().optional().transform(e => e === '' ? null : e),
+  document_type: z.string().optional().transform(e => e === '' ? null : e),
+  document_number: z.string().optional().transform(e => e === '' ? null : e),
+  price_list: z.string().optional().transform(e => e === '' ? null : e),
+  province: z.string().optional().transform(e => e === '' ? null : e),
+  address: z.string().optional().transform(e => e === '' ? null : e),
+  city: z.string().optional().transform(e => e === '' ? null : e),
+  postal_code: z.string().optional().transform(e => e === '' ? null : e),
+  phone: z.string().optional().transform(e => e === '' ? null : e),
+  mobile_phone: z.string().optional().transform(e => e === '' ? null : e),
+  email: z.string().email('El email no es válido.').optional().or(z.literal('')).transform(e => e === '' ? null : e),
+  default_invoice_type: z.enum(['A', 'B', 'C']).optional().nullable().transform(e => e === '' ? null : e),
   birth_date: z.preprocess((arg) => {
     if (!arg || arg === '') return null;
     try {
