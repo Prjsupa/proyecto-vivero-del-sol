@@ -30,9 +30,6 @@ export function InvoiceView({ invoice, client, company, cashAccounts }: { invoic
     const clientVatCondition = invoice.vat_type ? (invoice.vat_type.replace('_', ' ')).replace(/\b\w/g, l => l.toUpperCase()) : 'Consumidor Final';
 
     const promotionsApplied = Array.isArray(invoice.promotions_applied) ? invoice.promotions_applied : [];
-    const discountLabel = promotionsApplied.length > 0
-        ? `Descuentos (${promotionsApplied.map(p => (p as any).name).join(', ')})`
-        : "Descuentos";
 
     return (
         <>
@@ -71,10 +68,12 @@ export function InvoiceView({ invoice, client, company, cashAccounts }: { invoic
                  <section className="grid grid-cols-2 gap-8 py-6 border-b border-gray-200 text-sm">
                     <div className="space-y-1">
                         <p><span className="font-semibold w-28 inline-block">Apellido y Nombre:</span>{invoice.client_name}</p>
-                        <p><span className="font-semibold w-28 inline-block">Cond. Venta:</span>{invoice.payment_condition} {invoice.notes ? `- ${invoice.notes}`: ''}</p>
+                        <p><span className="font-semibold w-28 inline-block">Cond. Venta:</span>{invoice.payment_condition} {invoice.notes ? ` - ${invoice.notes}`: ''}</p>
                     </div>
                      <div className="space-y-1 text-right">
-                        <p><span className="font-semibold">{invoice.client_document_type || 'NN'}:</span> {invoice.client_document_number || 'No especificado'}</p>
+                        <p>
+                            <span className="font-semibold">{invoice.client_document_type || 'NN'}:</span> {invoice.client_document_number || 'No especificado'}
+                        </p>
                         <p><span className="font-semibold">IVA:</span> {clientVatCondition}</p>
                     </div>
                 </section>
@@ -96,8 +95,8 @@ export function InvoiceView({ invoice, client, company, cashAccounts }: { invoic
                                 <tr key={index} className="border-b border-gray-100">
                                     <td className="py-2 px-1">{item.name}</td>
                                     <td className="py-2 px-1 text-center">{item.quantity}</td>
-                                    <td className="text-right py-2 px-1 font-mono">{formatPrice(item.unitPrice)}</td>
-                                    <td className="text-right py-2 px-1 font-mono">{formatPrice(lineSubtotal)}</td>
+                                    <td className="text-right py-2 px-1 font-mono">{formatPrice(item.unitPrice, 'ARS')}</td>
+                                    <td className="text-right py-2 px-1 font-mono">{formatPrice(lineSubtotal, 'ARS')}</td>
                                 </tr>
                             )})}
                         </tbody>
@@ -106,24 +105,24 @@ export function InvoiceView({ invoice, client, company, cashAccounts }: { invoic
                         <div className="w-full max-w-sm text-right space-y-2 text-gray-700">
                             <div className="flex justify-between">
                                 <span>Subtotal</span>
-                                <span className="font-mono">{formatPrice(subtotal)}</span>
+                                <span className="font-mono">{formatPrice(subtotal, 'ARS')}</span>
                             </div>
-                            {totalDiscounts > 0 && (
+                             {totalDiscounts > 0 && (
                                 <div className="flex justify-between text-destructive">
-                                    <span>{discountLabel}</span>
-                                    <span className="font-mono">- {formatPrice(totalDiscounts)}</span>
+                                    <span>Descuentos</span>
+                                    <span className="font-mono">- {formatPrice(totalDiscounts, 'ARS')}</span>
                                 </div>
                             )}
                             {(invoice.vat_rate ?? 0) > 0 && (
                                 <div className="flex justify-between">
                                     <span>IVA ({invoice.vat_rate}%)</span>
-                                    <span className="font-mono">{formatPrice(invoice.vat_amount ?? 0)}</span>
+                                    <span className="font-mono">{formatPrice(invoice.vat_amount ?? 0, 'ARS')}</span>
                                 </div>
                             )}
                             <div className="border-t border-gray-300 my-2"></div>
                             <div className="flex justify-between font-bold text-lg text-black">
                                 <span>TOTAL</span>
-                                <span className="font-mono">{formatPrice(invoice.total_amount)}</span>
+                                <span className="font-mono">{formatPrice(invoice.total_amount, 'ARS')}</span>
                             </div>
                         </div>
                     </div>
