@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { createClient } from './supabase/server';
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
+import { applyPromotions } from './promotions-engine';
 
 const createInvoiceSchema = z.object({
     clientId: z.coerce.number().optional(),
@@ -46,6 +47,8 @@ export async function createInvoice(prevState: any, formData: FormData) {
         products,
         client_first_name,
         client_last_name,
+        client_document_type,
+        client_document_number,
         vat_rate,
         vat_type,
         seller_id,
@@ -66,6 +69,11 @@ export async function createInvoice(prevState: any, formData: FormData) {
         }
     }
 
+    const { lineDiscounts, appliedPromos } = await applyPromotions({
+        supabase,
+        items: products,
+    });
+
     const subtotal = products.reduce((acc: number, p: any) => acc + (p.unitPrice * p.quantity), 0);
     
     const itemDiscounts = products.reduce((acc: number, p: any) => {
@@ -73,7 +81,10 @@ export async function createInvoice(prevState: any, formData: FormData) {
         const manualDiscountAmount = p.manualDiscountType === 'percentage'
             ? itemSubtotal * ((p.manualDiscount || 0) / 100)
             : (p.manualDiscount || 0);
-        return acc + (p.automaticDiscount || 0) + manualDiscountAmount;
+        
+        const autoDiscount = lineDiscounts[p.productId] || 0;
+
+        return acc + autoDiscount + manualDiscountAmount;
     }, 0);
     
     const generalDiscountAmount = general_discount_type === 'percentage'
@@ -86,12 +97,14 @@ export async function createInvoice(prevState: any, formData: FormData) {
     const totalAmount = subtotal - discounts_total + vat_amount;
 
     
-    const combinedNotes = `${cash_account_code ? `Código Caja: ${cash_account_code}` : ''}${notes ? ` - ${notes}` : ''}`.trim();
+    const combinedNotes = `${cash_account_code || ''}${notes ? (cash_account_code ? ' - ' : '') + notes : ''}`.trim();
 
     const invoiceData = {
         invoice_number: `INV-${Date.now()}`,
         client_id: clientId,
         client_name: `${client_first_name} ${client_last_name}`,
+        client_document_type,
+        client_document_number,
         products: products,
         subtotal,
         discounts_total,
@@ -104,7 +117,8 @@ export async function createInvoice(prevState: any, formData: FormData) {
         notes: combinedNotes || null,
         seller_id,
         seller_name: sellerName,
-        seller_commission
+        seller_commission,
+        promotions_applied: appliedPromos,
     };
 
     const { data, error } = await supabase.from('invoices').insert([invoiceData]).select('id').single();

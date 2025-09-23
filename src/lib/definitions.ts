@@ -203,6 +203,8 @@ export type Invoice = {
   invoice_number: string;
   client_id: number;
   client_name: string;
+  client_document_type?: string | null;
+  client_document_number?: string | null;
   branch_id?: string | null;
   branch_name?: string | null;
   seller_id?: number | null;
@@ -218,7 +220,7 @@ export type Invoice = {
   vat_rate?: number | null;
   vat_amount?: number | null;
   discounts_total?: number | null;
-  promotions_applied?: Json | null; // This will now store manual discounts and auto promos info
+  promotions_applied?: Json | null;
 }
 
 export type Json =
@@ -230,5 +232,6 @@ export type Json =
   | Json[]
 
 export type jsonb = Json;
+
 
 

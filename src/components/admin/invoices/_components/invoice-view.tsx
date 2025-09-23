@@ -29,6 +29,11 @@ export function InvoiceView({ invoice, client, company, cashAccounts }: { invoic
     
     const clientVatCondition = invoice.vat_type ? (invoice.vat_type.replace('_', ' ')).replace(/\b\w/g, l => l.toUpperCase()) : 'Consumidor Final';
 
+    const promotionsApplied = Array.isArray(invoice.promotions_applied) ? invoice.promotions_applied : [];
+    const discountLabel = promotionsApplied.length > 0
+        ? `Descuentos (${promotionsApplied.map(p => (p as any).name).join(', ')})`
+        : "Descuentos";
+
     return (
         <>
             <div className="bg-white p-8 rounded-lg shadow-lg max-w-4xl mx-auto border" id="invoice-content">
@@ -69,7 +74,7 @@ export function InvoiceView({ invoice, client, company, cashAccounts }: { invoic
                         <p><span className="font-semibold w-28 inline-block">Cond. Venta:</span>{invoice.payment_condition} {invoice.notes ? `- ${invoice.notes}`: ''}</p>
                     </div>
                      <div className="space-y-1 text-right">
-                        <p><span className="font-semibold">Documento:</span> {client?.document_type || 'NN'}: {client?.document_number || 'No especificado'}</p>
+                        <p>{invoice.client_document_type || 'NN'}: {invoice.client_document_number || 'No especificado'}</p>
                         <p><span className="font-semibold">IVA:</span> {clientVatCondition}</p>
                     </div>
                 </section>
@@ -105,7 +110,7 @@ export function InvoiceView({ invoice, client, company, cashAccounts }: { invoic
                             </div>
                             {totalDiscounts > 0 && (
                                 <div className="flex justify-between text-destructive">
-                                    <span>Descuentos</span>
+                                    <span>{discountLabel}</span>
                                     <span className="font-mono">- {formatPrice(totalDiscounts)}</span>
                                 </div>
                             )}
@@ -172,3 +177,4 @@ export function PrintButton() {
         </Button>
     )
 }
+
