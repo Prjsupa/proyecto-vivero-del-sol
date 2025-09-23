@@ -2082,9 +2082,8 @@ const baseClientSchema = z.object({
   default_invoice_type: z.preprocess(val => (val === '' ? null : val), z.enum(['A', 'B', 'C']).optional().nullable()),
   birth_date: z.preprocess((arg) => {
     if (!arg || arg === '') return null;
-    const date = new Date(arg as string);
-    return isNaN(date.getTime()) ? null : date;
-  }, z.date().optional().nullable()),
+    return arg;
+  }, z.string().optional().nullable()),
 });
 
 

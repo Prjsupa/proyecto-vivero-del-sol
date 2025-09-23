@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Calendar } from '../ui/calendar';
 import { Calendar as CalendarIcon } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, isValid, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 function SubmitButton() {
@@ -82,10 +82,7 @@ export function AddClientForm() {
                 description: state.data,
             });
             setIsDialogOpen(false);
-            formRef.current?.reset();
-            setBirthDate(undefined);
-            setActiveTab('personal');
-            setDocType('');
+            resetForm();
         } else if (state.message) {
              toast({
                 title: 'Error',
@@ -95,12 +92,16 @@ export function AddClientForm() {
         }
     }, [state, toast]);
     
+    const resetForm = () => {
+        formRef.current?.reset();
+        setBirthDate(undefined);
+        setActiveTab('personal');
+        setDocType('');
+    };
+
     const onDialogChange = (open: boolean) => {
         if (!open) {
-            formRef.current?.reset();
-            setBirthDate(undefined);
-            setActiveTab('personal');
-            setDocType('');
+            resetForm();
         }
         setIsDialogOpen(open);
     }
@@ -170,7 +171,7 @@ export function AddClientForm() {
                                             />
                                         </PopoverContent>
                                     </Popover>
-                                     <input type="hidden" name="birth_date" value={birthDate?.toISOString()} />
+                                     <input type="hidden" name="birth_date" value={birthDate ? birthDate.toISOString().split('T')[0] : ''} />
                                 </div>
                             </TabsContent>
                             <TabsContent value="fiscal" forceMount className={cn("space-y-4", activeTab !== 'fiscal' && 'hidden')}>

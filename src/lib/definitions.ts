@@ -45,7 +45,7 @@ export type Client = {
   mobile_phone?: string | null;
   email?: string | null;
   default_invoice_type?: 'A' | 'B' | 'C' | null;
-  birth_date?: string | null;
+  birth_date?: Date | string | null;
 }
 
 export type Seller = {

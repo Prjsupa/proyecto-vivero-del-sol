@@ -68,7 +68,7 @@ export function EditClientForm({ client, setOpen }: { client: Client, setOpen: (
     const formRef = useRef<HTMLFormElement>(null);
     const { toast } = useToast();
     const [birthDate, setBirthDate] = useState<Date | undefined>(
-        client.birth_date && isValid(parseISO(client.birth_date)) ? parseISO(client.birth_date) : undefined
+        client.birth_date && isValid(new Date(client.birth_date)) ? new Date(client.birth_date) : undefined
     );
     const [activeTab, setActiveTab] = useState('personal');
     const [docType, setDocType] = useState<string>(client.document_type || '');
@@ -149,7 +149,7 @@ export function EditClientForm({ client, setOpen }: { client: Client, setOpen: (
                                         />
                                     </PopoverContent>
                                 </Popover>
-                                <input type="hidden" name="birth_date" value={birthDate?.toISOString()} />
+                                <input type="hidden" name="birth_date" value={birthDate ? birthDate.toISOString().split('T')[0] : ''} />
                             </div>
                         </TabsContent>
                         <TabsContent value="fiscal" forceMount className={cn("space-y-4", activeTab !== 'fiscal' && 'hidden')}>
