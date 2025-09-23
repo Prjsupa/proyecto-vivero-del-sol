@@ -30,7 +30,7 @@ function FieldError({ errors }: { errors?: string[] }) {
     )
 }
 
-export function AddSellerForm({ sellers }: { sellers: Seller[] }) {
+export function AddSellerForm() {
     const [state, formAction] = useActionState(addSeller, { message: '' });
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const formRef = useRef<HTMLFormElement>(null);
