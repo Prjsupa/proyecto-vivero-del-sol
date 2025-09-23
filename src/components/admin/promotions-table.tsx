@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { Promotion } from "@/lib/definitions";
+import type { Promotion, XForYValue, ProgressiveDiscountValue } from "@/lib/definitions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { Gift } from "lucide-react";
@@ -26,13 +26,13 @@ export function PromotionsTable({ promotions }: { promotions: Promotion[] }) {
 
     const formatDiscountValue = (promo: Promotion) => {
         if (promo.discount_type === 'x_for_y') {
-            const value = promo.discount_value as any;
+            const value = promo.discount_value as XForYValue;
             if (value && typeof value === 'object' && 'take' in value && 'pay' in value) {
                 return `Llevá ${value.take}, pagá ${value.pay}`;
             }
         }
         if (promo.discount_type === 'progressive_discount') {
-             const value = promo.discount_value as any;
+             const value = promo.discount_value as ProgressiveDiscountValue;
             if (value && Array.isArray(value.tiers) && value.tiers.length > 0) {
                 return `${value.tiers.length} tramo(s) de descuento`;
             }

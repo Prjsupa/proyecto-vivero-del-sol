@@ -165,14 +165,18 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
-type ProgressiveTier = {
+export type ProgressiveTier = {
     quantity: number;
     percentage: number;
 };
 
-type XForYValue = {
+export type XForYValue = {
     take: number;
     pay: number;
+};
+
+export type ProgressiveDiscountValue = {
+    tiers: ProgressiveTier[];
 };
 
 export type Promotion = {
@@ -182,7 +186,7 @@ export type Promotion = {
     name: string;
     is_active: boolean;
     discount_type: 'x_for_y' | 'price_discount' | 'cross_selling' | 'progressive_discount';
-    discount_value: { tiers: ProgressiveTier[] } | XForYValue | Json;
+    discount_value: ProgressiveDiscountValue | XForYValue | Json | null;
     apply_to_type: 'all_store' | 'all_products' | 'all_services' | 'product_categories' | 'product_subcategories' | 'service_categories' | 'products' | 'services';
     apply_to_ids?: string[] | null;
     can_be_combined: boolean;
@@ -204,6 +208,23 @@ export type Quote = {
   currency: string;
   status: 'draft' | 'sent' | 'accepted' | 'rejected';
 }
+
+export type InvoiceProductLine = {
+  productId: string;
+  name: string;
+  quantity: number;
+  unitPrice: number;
+  manualDiscount: number;
+  manualDiscountType: 'amount' | 'percentage';
+  automaticDiscount: number;
+  isService: boolean;
+  total: number;
+};
+
+export type AppliedPromo = {
+  name: string;
+  amount: number;
+};
 
 
 export type Order = {
@@ -228,7 +249,7 @@ export type Invoice = {
   seller_id?: number | null;
   seller_name?: string | null;
   seller_commission?: number | null;
-  products: Json;
+  products: InvoiceProductLine[];
   total_amount: number;
   invoice_type: 'A' | 'B' | 'C';
   payment_condition?: string | null;
@@ -238,9 +259,8 @@ export type Invoice = {
   vat_rate?: number | null;
   vat_amount?: number | null;
   discounts_total?: number | null;
-  promotions_applied?: Json | null;
+  promotions_applied?: AppliedPromo[] | null;
   general_discount_amount?: number | null;
 }
 
 export type jsonb = Json;
-
