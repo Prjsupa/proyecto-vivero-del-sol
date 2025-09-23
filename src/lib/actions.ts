@@ -131,7 +131,7 @@ export async function addProduct(prevState: any, formData: FormData) {
 
 
 const updateProductSchema = baseProductSchema.extend({
-    id: z.string().uuid(),
+    id: z.string().uuid("ID de producto inválido."),
 }).refine(data => data.category || data.new_category, {
     message: "La categoría es requerida.",
     path: ["category"],
@@ -276,7 +276,7 @@ export async function addService(prevState: any, formData: FormData) {
 }
 
 const updateServiceSchema = baseServiceSchema.extend({
-    id: z.string().uuid(),
+    id: z.string().uuid("ID de servicio inválido."),
 }).refine(data => data.category || data.new_category, {
     message: "La categoría es requerida.",
     path: ["category"],
@@ -808,7 +808,7 @@ export async function deleteCategory(categoryName: string) {
 }
 
 const updateProductsCategorySchema = z.object({
-  productIds: z.string().transform(val => val.split(',')),
+  productIds: z.string().min(1, "Debe seleccionar al menos un producto.").transform(val => val.split(',')),
   category: z.string().min(1, "La categoría es requerida."),
 });
 
@@ -846,7 +846,7 @@ export async function updateProductsCategory(prevState: any, formData: FormData)
 }
 
 const updateProductsSubcategorySchema = z.object({
-  productIds: z.string().transform(val => val.split(',')),
+  productIds: z.string().min(1, "Debe seleccionar al menos un producto.").transform(val => val.split(',')),
   subcategory: z.string().optional(),
 });
 
@@ -1162,7 +1162,7 @@ export async function deleteServiceCategory(categoryName: string) {
 }
 
 const updateServicesCategorySchema = z.object({
-  serviceIds: z.string().transform(val => val.split(',')),
+  serviceIds: z.string().min(1, "Debe seleccionar al menos un servicio.").transform(val => val.split(',')),
   category: z.string().min(1, "La categoría es requerida."),
 });
 
@@ -1250,7 +1250,7 @@ export async function createServiceCategoryAndAssignServices(prevState: any, for
 // ============== COLORS =================
 
 const updateProductsColorSchema = z.object({
-  productIds: z.string().transform(val => val.split(',')),
+  productIds: z.string().min(1, "Debe seleccionar al menos un producto.").transform(val => val.split(',')),
   color: z.string().optional(),
 });
 
@@ -1381,7 +1381,7 @@ export async function createColorAndAssignProducts(prevState: any, formData: For
 // ============== SIZES =================
 
 const updateProductsSizeSchema = z.object({
-  productIds: z.string().transform(val => val.split(',')),
+  productIds: z.string().min(1, "Debe seleccionar al menos un producto.").transform(val => val.split(',')),
   size: z.string().optional(),
 });
 
@@ -1513,7 +1513,7 @@ export async function createSizeAndAssignProducts(prevState: any, formData: Form
 // ============== DESCRIPTIONS (PRODUCTS) =================
 
 const updateProductsDescriptionSchema = z.object({
-  productIds: z.string().transform(val => val.split(',')),
+  productIds: z.string().min(1, "Debe seleccionar al menos un producto.").transform(val => val.split(',')),
   description: z.string().optional(),
 });
 
@@ -1594,7 +1594,7 @@ export async function createProductDescriptionAndAssign(prevState: any, formData
 // ============== DESCRIPTIONS (SERVICES) =================
 
 const updateServicesDescriptionSchema = z.object({
-  serviceIds: z.string().transform(val => val.split(',')),
+  serviceIds: z.string().min(1, "Debe seleccionar al menos un servicio.").transform(val => val.split(',')),
   description: z.string().optional(),
 });
 

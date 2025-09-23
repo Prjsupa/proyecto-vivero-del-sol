@@ -52,7 +52,7 @@ export function InvoicesTable({ invoices, customers, sellers }: InvoicesTablePro
 
     return (
         <div className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 p-4 border rounded-lg">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4 border rounded-lg">
                  <Input 
                     placeholder="Buscar por Nº Factura..."
                     value={filters.invoiceNumber}
@@ -83,9 +83,9 @@ export function InvoicesTable({ invoices, customers, sellers }: InvoicesTablePro
                     <TableRow>
                         <TableHead>Factura</TableHead>
                         <TableHead>Cliente</TableHead>
-                        <TableHead>Sucursal</TableHead>
-                        <TableHead>Vendedor</TableHead>
-                        <TableHead>Condición de Venta</TableHead>
+                        <TableHead className="hidden md:table-cell">Sucursal</TableHead>
+                        <TableHead className="hidden lg:table-cell">Vendedor</TableHead>
+                        <TableHead className="hidden sm:table-cell">Condición de Venta</TableHead>
                         <TableHead className="text-right">Monto</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -99,14 +99,14 @@ export function InvoicesTable({ invoices, customers, sellers }: InvoicesTablePro
                                         <div className="text-sm text-muted-foreground">{format(parseISO(invoice.created_at), 'dd MMM, yyyy')}</div>
                                     </TableCell>
                                     <TableCell>{invoice.client_name}</TableCell>
-                                    <TableCell>{invoice.branch_name ?? '-'}</TableCell>
-                                    <TableCell>
+                                    <TableCell className="hidden md:table-cell">{invoice.branch_name ?? '-'}</TableCell>
+                                    <TableCell className="hidden lg:table-cell">
                                         <div>{invoice.seller_name ?? '-'}</div>
                                         {invoice.seller_commission != null && (
                                             <div className="text-xs text-muted-foreground">Comisión: {invoice.seller_commission}%</div>
                                         )}
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell className="hidden sm:table-cell">
                                         <div className="flex flex-col gap-1">
                                             {invoice.payment_condition && <Badge variant="secondary">{invoice.payment_condition}{invoice.notes ? ` - ${invoice.notes}` : ''}</Badge>}
                                         </div>

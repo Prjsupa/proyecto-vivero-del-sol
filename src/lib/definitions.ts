@@ -157,6 +157,24 @@ export type Service = {
   sku?: string | null;
 };
 
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[];
+
+type ProgressiveTier = {
+    quantity: number;
+    percentage: number;
+};
+
+type XForYValue = {
+    take: number;
+    pay: number;
+};
+
 export type Promotion = {
     id: number;
     created_at: string;
@@ -164,7 +182,7 @@ export type Promotion = {
     name: string;
     is_active: boolean;
     discount_type: 'x_for_y' | 'price_discount' | 'cross_selling' | 'progressive_discount';
-    discount_value: jsonb;
+    discount_value: { tiers: ProgressiveTier[] } | XForYValue | Json;
     apply_to_type: 'all_store' | 'all_products' | 'all_services' | 'product_categories' | 'product_subcategories' | 'service_categories' | 'products' | 'services';
     apply_to_ids?: string[] | null;
     can_be_combined: boolean;
@@ -224,16 +242,5 @@ export type Invoice = {
   general_discount_amount?: number | null;
 }
 
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
-
 export type jsonb = Json;
-
-
-
 
