@@ -34,7 +34,7 @@ export default async function SellersPage() {
                     <p className="text-muted-foreground">Gestiona los vendedores del sistema.</p>
                 </div>
                 <div className="flex items-center gap-2">
-                    <AddSellerForm />
+                    <AddSellerForm sellers={sellers}/>
                 </div>
             </div>
             <Card>
