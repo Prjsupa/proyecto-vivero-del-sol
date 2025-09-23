@@ -10,12 +10,12 @@ import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import { formatPrice } from '@/lib/utils';
 import { Badge } from '../ui/badge';
-import { ClipboardList } from 'lucide-react';
+import { ClipboardList, Search } from 'lucide-react';
 
 export function QuotesList({ quotes, clients }: { quotes: Quote[], clients: Client[] }) {
     const router = useRouter();
     const [filters, setFilters] = useState({
-        client: 'todos',
+        clientName: '',
         contentType: 'todos',
         sortBy: 'date_desc',
     });
@@ -27,9 +27,9 @@ export function QuotesList({ quotes, clients }: { quotes: Quote[], clients: Clie
     const filteredAndSortedQuotes = useMemo(() => {
         let filtered = [...quotes];
 
-        // Filter by client
-        if (filters.client !== 'todos') {
-            filtered = filtered.filter(q => String(q.client_id) === filters.client);
+        // Filter by client name
+        if (filters.clientName) {
+            filtered = filtered.filter(q => q.client_name.toLowerCase().includes(filters.clientName.toLowerCase()));
         }
 
         // Filter by content type
@@ -64,15 +64,15 @@ export function QuotesList({ quotes, clients }: { quotes: Quote[], clients: Clie
         <Card>
             <CardHeader>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    <Select value={filters.client} onValueChange={val => handleFilterChange('client', val)}>
-                        <SelectTrigger><SelectValue placeholder="Filtrar por cliente..." /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="todos">Todos los Clientes</SelectItem>
-                            {clients.map(c => (
-                                <SelectItem key={c.id} value={String(c.id)}>{c.name} {c.last_name}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Buscar por cliente..."
+                            className="pl-10"
+                            value={filters.clientName}
+                            onChange={e => handleFilterChange('clientName', e.target.value)}
+                        />
+                    </div>
                     <Select value={filters.contentType} onValueChange={val => handleFilterChange('contentType', val)}>
                         <SelectTrigger><SelectValue placeholder="Filtrar por contenido..." /></SelectTrigger>
                         <SelectContent>
