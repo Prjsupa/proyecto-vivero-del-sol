@@ -1298,9 +1298,9 @@ export async function createSubcategoryAndAssignProducts(prevState: any, formDat
 const quoteSchema = z.object({
     title: z.string().min(1, "El título es requerido."),
     client_id: z.coerce.number().min(1, "Debes seleccionar un cliente."),
-    valid_until: z.string().transform(e => e === '' ? null : e).optional().nullable(),
     currency: z.string().min(1, "La moneda es requerida."),
-    items: z.string().min(1, "Debes añadir al menos un artículo.").transform((val) => val ? JSON.parse(val) : [])
+    items: z.string().transform((val) => val ? JSON.parse(val) : []),
+    resources: z.string().transform((val) => val ? JSON.parse(val) : [])
 });
 
 export async function saveQuote(prevState: any, formData: FormData) {
@@ -1315,10 +1315,10 @@ export async function saveQuote(prevState: any, formData: FormData) {
         };
     }
     
-    const { title, client_id, valid_until, currency, items } = validatedFields.data;
+    const { title, client_id, currency, items, resources } = validatedFields.data;
 
-    if (!items || items.length === 0) {
-        return { message: "No se puede guardar un presupuesto sin artículos." };
+    if ((!items || items.length === 0) && (!resources || resources.length === 0)) {
+        return { message: "No se puede guardar un presupuesto sin artículos o recursos." };
     }
 
     const { data: clientData, error: clientError } = await supabase.from('clients').select('name, last_name').eq('id', client_id).single();
@@ -1326,16 +1326,18 @@ export async function saveQuote(prevState: any, formData: FormData) {
         return { message: "Cliente no encontrado." };
     }
 
-    const total_amount = items.reduce((acc: number, item: any) => acc + item.total, 0);
+    const items_total = items.reduce((acc: number, item: any) => acc + item.total, 0);
+    const resources_total = resources.reduce((acc: number, resource: any) => acc + (Number(resource.cost) || 0), 0);
+    const total_amount = items_total + resources_total;
 
     const quoteData = {
         title,
         client_id,
         client_name: `${clientData.name} ${clientData.last_name}`,
         items,
+        resources,
         total_amount,
         currency,
-        valid_until: valid_until ? new Date(valid_until).toISOString() : null,
         status: 'draft' as const,
     };
 

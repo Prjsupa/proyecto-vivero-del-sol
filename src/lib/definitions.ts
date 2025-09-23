@@ -182,9 +182,9 @@ export type Quote = {
   client_id: number;
   client_name: string;
   items: Json;
+  resources: Json;
   total_amount: number;
   currency: string;
-  valid_until?: string | null;
   status: 'draft' | 'sent' | 'accepted' | 'rejected';
 }
 
@@ -230,6 +230,7 @@ export type Json =
   | Json[]
 
 export type jsonb = Json;
+
 
 
 
