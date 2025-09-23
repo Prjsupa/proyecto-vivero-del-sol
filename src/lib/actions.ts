@@ -1298,7 +1298,7 @@ export async function createSubcategoryAndAssignProducts(prevState: any, formDat
 const quoteSchema = z.object({
     title: z.string().min(1, "El título es requerido."),
     client_id: z.coerce.number().min(1, "Debes seleccionar un cliente."),
-    valid_until: z.string().optional(),
+    valid_until: z.string().transform(e => e === '' ? null : e).optional().nullable(),
     currency: z.string().min(1, "La moneda es requerida."),
     items: z.string().min(1, "Debes añadir al menos un artículo.").transform((val) => val ? JSON.parse(val) : [])
 });
@@ -1335,7 +1335,7 @@ export async function saveQuote(prevState: any, formData: FormData) {
         items,
         total_amount,
         currency,
-        valid_until,
+        valid_until: valid_until ? new Date(valid_until).toISOString() : null,
         status: 'draft' as const,
     };
 
@@ -1353,6 +1353,7 @@ export async function saveQuote(prevState: any, formData: FormData) {
         data: data
     };
 }
+
 
 const updateServiceCategorySchema = z.object({
   oldCategoryName: z.string().min(1, "El nombre de la categoría actual es requerido."),

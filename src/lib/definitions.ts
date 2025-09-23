@@ -184,7 +184,7 @@ export type Quote = {
   items: Json;
   total_amount: number;
   currency: string;
-  valid_until: string;
+  valid_until?: string | null;
   status: 'draft' | 'sent' | 'accepted' | 'rejected';
 }
 
@@ -230,6 +230,7 @@ export type Json =
   | Json[]
 
 export type jsonb = Json;
+
 
 
 

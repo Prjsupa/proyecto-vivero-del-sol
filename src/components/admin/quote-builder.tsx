@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { CalendarIcon, Search, Trash2 } from 'lucide-react';
+import { CalendarIcon, Search, Trash2, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn, formatPrice } from '@/lib/utils';
 import { ScrollArea } from '../ui/scroll-area';
@@ -119,6 +119,9 @@ export function QuoteBuilder({ products, services, clients, currencies }: { prod
     }
 
     const formRef = useRef<HTMLFormElement>(null);
+    
+    const { pending } = useFormStatus();
+
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const formData = new FormData(formRef.current!);
@@ -257,7 +260,9 @@ export function QuoteBuilder({ products, services, clients, currencies }: { prod
                 </CardContent>
                 <CardFooter className="flex justify-end gap-2">
                     <Button variant="outline" type="button" onClick={resetForm}>Limpiar</Button>
-                    <Button type="submit" disabled={items.length === 0 || !selectedClientId}>Guardar Presupuesto</Button>
+                    <Button type="submit" disabled={pending || items.length === 0 || !selectedClientId}>
+                        {pending ? <><Loader2 className="animate-spin mr-2" />Guardando...</> : 'Guardar Presupuesto'}
+                    </Button>
                 </CardFooter>
             </Card>
         </form>
