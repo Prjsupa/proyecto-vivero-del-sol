@@ -50,18 +50,6 @@ export function InvoicesTable({ invoices, customers, sellers }: InvoicesTablePro
         router.push(`/admin/invoices/${invoiceId}`);
     }
 
-    const getSellerCommission = (invoice: Invoice) => {
-        if (!invoice.seller_id) return null;
-        const seller = sellers.find(s => s.id === invoice.seller_id);
-        if (!seller) return null;
-
-        if (invoice.payment_condition === 'Efectivo') {
-            return seller.cash_sale_commission;
-        }
-        // Assuming other conditions fall under collection commission
-        return seller.collection_commission;
-    }
-
     return (
         <div className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 p-4 border rounded-lg">
@@ -82,6 +70,7 @@ export function InvoicesTable({ invoices, customers, sellers }: InvoicesTablePro
                     <SelectContent>
                         <SelectItem value="todos">Todas las Condiciones</SelectItem>
                         <SelectItem value="Efectivo">Efectivo</SelectItem>
+                        <SelectItem value="Cuenta Corriente">Cuenta Corriente</SelectItem>
                         <SelectItem value="Tarjeta de crédito">Tarjeta de crédito</SelectItem>
                         <SelectItem value="Transferencia">Transferencia</SelectItem>
                         <SelectItem value="Otro">Otro</SelectItem>
@@ -103,7 +92,6 @@ export function InvoicesTable({ invoices, customers, sellers }: InvoicesTablePro
                 <TableBody>
                     {filteredInvoices.length > 0 ? (
                         filteredInvoices.map((invoice) => {
-                            const commission = getSellerCommission(invoice);
                             return (
                                 <TableRow key={invoice.id} onClick={() => handleRowClick(invoice.id)} className="cursor-pointer">
                                     <TableCell>
@@ -114,8 +102,8 @@ export function InvoicesTable({ invoices, customers, sellers }: InvoicesTablePro
                                     <TableCell>{invoice.branch_name ?? '-'}</TableCell>
                                     <TableCell>
                                         <div>{invoice.seller_name ?? '-'}</div>
-                                        {commission !== null && (
-                                            <div className="text-xs text-muted-foreground">Comisión: {commission}%</div>
+                                        {invoice.seller_commission != null && (
+                                            <div className="text-xs text-muted-foreground">Comisión: {invoice.seller_commission}%</div>
                                         )}
                                     </TableCell>
                                     <TableCell>

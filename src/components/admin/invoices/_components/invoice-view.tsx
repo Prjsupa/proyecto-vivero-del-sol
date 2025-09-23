@@ -13,7 +13,9 @@ type InvoiceProductLine = {
     sku?: string;
     quantity: number;
     unitPrice: number;
-    discounts: { label: string; amount: number }[];
+    manualDiscount: number;
+    manualDiscountType: 'amount' | 'percentage';
+    automaticDiscount: number;
     total: number;
     isService?: boolean;
 }
@@ -21,7 +23,6 @@ type InvoiceProductLine = {
 export function InvoiceView({ invoice, client, company, cashAccounts }: { invoice: Invoice, client: Client | null, company: CompanyData | null, cashAccounts: CashAccount[] }) {
     
     const productLines: InvoiceProductLine[] = Array.isArray(invoice.products) ? invoice.products : [];
-    const promotionsApplied = (Array.isArray(invoice.promotions_applied) ? invoice.promotions_applied : []) as { name: string; amount: number }[];
     
     const subtotal = invoice.subtotal || productLines.reduce((acc, item) => acc + (item.unitPrice * item.quantity), 0);
     const totalDiscounts = invoice.discounts_total || 0;
@@ -77,11 +78,10 @@ export function InvoiceView({ invoice, client, company, cashAccounts }: { invoic
                     <table className="w-full text-sm">
                         <thead className="border-b-2 border-gray-300 text-gray-600">
                             <tr>
-                                <th className="text-left font-semibold uppercase py-2 px-1 w-[15%]">SKU</th>
                                 <th className="text-left font-semibold uppercase py-2 px-1">Descripción</th>
                                 <th className="text-center font-semibold uppercase py-2 px-1 w-[10%]">Cant.</th>
                                 <th className="text-right font-semibold uppercase py-2 px-1 w-[15%]">P. Unit.</th>
-                                <th className="text-right font-semibold uppercase py-2 px-1 w-[15%]">P. Total</th>
+                                <th className="text-right font-semibold uppercase py-2 px-1 w-[15%]">Subtotal</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -89,7 +89,6 @@ export function InvoiceView({ invoice, client, company, cashAccounts }: { invoic
                                 const lineSubtotal = item.quantity * item.unitPrice;
                                 return (
                                 <tr key={index} className="border-b border-gray-100">
-                                    <td className="py-2 px-1">{item.sku || '-'}</td>
                                     <td className="py-2 px-1">{item.name}</td>
                                     <td className="py-2 px-1 text-center">{item.quantity}</td>
                                     <td className="text-right py-2 px-1 font-mono">{formatPrice(item.unitPrice)}</td>
@@ -98,17 +97,7 @@ export function InvoiceView({ invoice, client, company, cashAccounts }: { invoic
                             )})}
                         </tbody>
                     </table>
-                     <div className="flex justify-between items-start pt-6">
-                        <div className="text-xs text-gray-600 space-y-1 w-1/2">
-                            {(promotionsApplied.length > 0) && (
-                                <>
-                                    <h3 className="font-semibold uppercase">Promociones Aplicadas:</h3>
-                                    {promotionsApplied.map((promo, idx) => (
-                                        <p key={idx}>- {promo.name}</p>
-                                    ))}
-                                </>
-                            )}
-                        </div>
+                     <div className="flex justify-end pt-6">
                         <div className="w-full max-w-sm text-right space-y-2 text-gray-700">
                             <div className="flex justify-between">
                                 <span>Subtotal</span>

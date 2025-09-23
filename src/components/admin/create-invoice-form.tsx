@@ -4,7 +4,7 @@ import { useFormStatus } from 'react-dom';
 import { Button } from "@/components/ui/button";
 import { DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Label } from '@/components/ui/label';
-import { AlertCircle, Loader2, Search, Trash2, User } from 'lucide-react';
+import { AlertCircle, Loader2, Search, Trash2, User, Percent } from 'lucide-react';
 import { createInvoice } from '@/lib/invoice-actions';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
@@ -17,12 +17,13 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { ScrollArea } from '../ui/scroll-area';
 import { Textarea } from '../ui/textarea';
-import { Checkbox } from '../ui/checkbox';
 
 type SelectedProduct = {
-    product: Product;
+    product: Product | Service;
     quantity: number;
-    discountAmount: number; // $ por línea
+    manualDiscount: number; // New field for manual discount per item
+    manualDiscountType: 'amount' | 'percentage';
+    automaticDiscount: number;
     total: number;
 }
 
@@ -58,14 +59,6 @@ interface CreateInvoiceFormProps {
     asPage?: boolean;
 }
 
-interface SelectedProduct {
-    product: Product | Service;
-    quantity: number;
-    discountAmount: number;
-    total: number;
-}
-
-
 export function CreateInvoiceForm({ customers, products, services = [], cashAccounts = [], sellers = [], selectedCustomerId, setOpen, asPage = false }: CreateInvoiceFormProps) {
     const [state, formAction] = useActionState(createInvoice, { message: '' });
     const formRef = useRef<HTMLFormElement>(null);
@@ -79,17 +72,21 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
     const [clientDocNumber, setClientDocNumber] = useState<string>('');
     const [vatType, setVatType] = useState<'consumidor_final' | 'exento' | 'monotributo' | 'responsable_inscripto'>('consumidor_final');
     const [vatRate, setVatRate] = useState<number>(0); // % IVA
-    const [promotionsApplied, setPromotionsApplied] = useState<{ name: string; amount: number; source: 'auto' | 'manual' }[]>([]);
     const [paymentCondition, setPaymentCondition] = useState<string>('');
     const [selectedCashAccount, setSelectedCashAccount] = useState<string>('');
     const [selectedSellerId, setSelectedSellerId] = useState<string>('');
-
+    const [sellerCommission, setSellerCommission] = useState<number | string>('');
 
     // POS State
     const [searchTerm, setSearchTerm] = useState('');
     const [serviceSearch, setServiceSearch] = useState('');
     const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([]);
     const [selectedServices, setSelectedServices] = useState<SelectedProduct[]>([]);
+    
+    // Discounts state
+    const [generalDiscount, setGeneralDiscount] = useState<number>(0);
+    const [generalDiscountType, setGeneralDiscountType] = useState<'amount' | 'percentage'>('amount');
+
     const supabase = createClient();
     
     const filteredProducts = useMemo(() => {
@@ -116,8 +113,8 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
     // Aplicar promociones automáticas cuando cambian los productos
     useEffect(() => {
         const applyAutoPromotions = async () => {
-            // Preparar los ítems para el motor de promociones
-            const cartItems = selectedProducts.map(item => ({
+            const allItems = [...selectedProducts, ...selectedServices];
+            const cartItems = allItems.map(item => ({
                 productId: item.product.id.toString(),
                 quantity: item.quantity,
                 unitPrice: Number(item.product.precio_venta),
@@ -126,49 +123,36 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
             }));
 
             try {
-                // Aplicar promociones usando el motor
-                const { lineDiscounts, appliedPromos } = await applyPromotions({
+                const { lineDiscounts } = await applyPromotions({
                     supabase,
                     items: cartItems,
-                    branchId: '1' // Ajusta según sea necesario
+                    branchId: '1'
                 });
 
-                // Actualizar descuentos en los productos
                 setSelectedProducts(prev => 
-                    prev.map(item => {
-                        const discount = lineDiscounts[item.product.id.toString()] || 0;
-                        return {
-                            ...item,
-                            discountAmount: discount,
-                            total: Math.max(0, (item.quantity * item.product.precio_venta) - discount)
-                        };
-                    })
+                    prev.map(item => ({
+                        ...item,
+                        automaticDiscount: lineDiscounts[item.product.id.toString()] || 0,
+                    }))
                 );
-
-                // Actualizar lista de promociones aplicadas
-                const autoPromos = appliedPromos.map(promo => ({
-                    name: promo.name,
-                    amount: promo.amount,
-                    source: 'auto' as const
-                }));
-                
-                const manualPromos = promotionsApplied.filter(p => p.source === 'manual');
-                setPromotionsApplied([...autoPromos, ...manualPromos]);
+                 setSelectedServices(prev => 
+                    prev.map(item => ({
+                        ...item,
+                        automaticDiscount: lineDiscounts[item.product.id.toString()] || 0,
+                    }))
+                );
 
             } catch (error) {
                 console.error('Error al aplicar promociones:', error);
             }
         };
         
-        if (selectedProducts.length > 0) {
+        if (selectedProducts.length > 0 || selectedServices.length > 0) {
             applyAutoPromotions();
-        } else {
-            setPromotionsApplied(p => p.filter(promo => promo.source === 'manual'));
         }
-    }, [selectedProducts.map(p => p.quantity).join()]); // Depend on quantity changes
+    }, [selectedProducts.map(p => p.quantity).join(), selectedServices.map(s => s.quantity).join()]);
 
-
-    // Totales para vista previa
+    
     const subtotal = useMemo(() => {
         const sp = selectedProducts.reduce((acc, p) => acc + (p.product.precio_venta * p.quantity), 0);
         const ss = selectedServices.reduce((acc, p) => acc + (p.product.precio_venta * p.quantity), 0);
@@ -176,10 +160,16 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
     }, [selectedProducts, selectedServices]);
     
     const discountsTotal = useMemo(() => {
-        const lineDiscounts = selectedProducts.reduce((acc, p) => acc + (Number(p.discountAmount) || 0), 0) + selectedServices.reduce((acc, s) => acc + (Number(s.discountAmount) || 0), 0);
-        const manualDiscounts = promotionsApplied.filter(p => p.source === 'manual').reduce((acc, p) => acc + (Number(p.amount) || 0), 0);
-        return lineDiscounts + manualDiscounts;
-    }, [selectedProducts, selectedServices, promotionsApplied]);
+        const itemDiscounts = [...selectedProducts, ...selectedServices].reduce((acc, p) => {
+            const itemSubtotal = p.product.precio_venta * p.quantity;
+            const manualDiscountAmount = p.manualDiscountType === 'percentage' ? itemSubtotal * (p.manualDiscount / 100) : p.manualDiscount;
+            return acc + p.automaticDiscount + manualDiscountAmount;
+        }, 0);
+
+        const generalDiscountAmount = generalDiscountType === 'percentage' ? subtotal * (generalDiscount / 100) : generalDiscount;
+        
+        return itemDiscounts + generalDiscountAmount;
+    }, [selectedProducts, selectedServices, generalDiscount, generalDiscountType, subtotal]);
 
     const vatAmount = useMemo(() => Number(((subtotal - discountsTotal) * (vatRate / 100)).toFixed(2)), [subtotal, discountsTotal, vatRate]);
     const grandTotal = useMemo(() => Number((subtotal - discountsTotal + vatAmount).toFixed(2)), [subtotal, discountsTotal, vatAmount]);
@@ -199,7 +189,7 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                  toast({ title: "Stock insuficiente", description: `${product.name} no tiene stock disponible.`, variant: "destructive" });
                  return currentProducts;
             }
-            return [...currentProducts, { product, quantity: 1, discountAmount: 0, total: product.precio_venta }];
+            return [...currentProducts, { product, quantity: 1, manualDiscount: 0, manualDiscountType: 'amount', automaticDiscount: 0, total: product.precio_venta }];
         });
         setSearchTerm('');
     }
@@ -209,9 +199,9 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
             const existing = current.find(s => s.product.id === service.id);
             if (existing) {
                 const newQuantity = existing.quantity + 1;
-                return current.map(s => s.product.id === service.id ? { ...s, quantity: newQuantity, total: Math.max(0, newQuantity * service.precio_venta - (s.discountAmount || 0)) } : s);
+                return current.map(s => s.product.id === service.id ? { ...s, quantity: newQuantity, total: Math.max(0, newQuantity * service.precio_venta - (s.manualDiscount || 0)) } : s);
             }
-            return [...current, { product: { ...service, stock: 1, available: true } as any, quantity: 1, discountAmount: 0, total: service.precio_venta }];
+            return [...current, { product: { ...service, stock: 1, available: true } as any, quantity: 1, manualDiscount: 0, manualDiscountType: 'amount', automaticDiscount: 0, total: service.precio_venta }];
         });
         setServiceSearch('');
     }
@@ -253,17 +243,26 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
         });
     };
     
-    // Recalculate totals whenever quantities or discounts change.
     useEffect(() => {
-        setSelectedProducts(currentProducts => currentProducts.map(p => ({
-            ...p,
-            total: Math.max(0, p.quantity * p.product.precio_venta - p.discountAmount)
-        })));
-        setSelectedServices(currentServices => currentServices.map(s => ({
-            ...s,
-            total: Math.max(0, s.quantity * s.product.precio_venta - s.discountAmount)
-        })));
-    }, [selectedProducts.map(p => p.quantity).join(), selectedProducts.map(p => p.discountAmount).join(), selectedServices.map(p => p.quantity).join(), selectedServices.map(p => p.discountAmount).join()]);
+        const recalculateTotals = (items: SelectedProduct[]) => {
+            return items.map(p => {
+                const itemSubtotal = p.quantity * p.product.precio_venta;
+                const manualDiscountAmount = p.manualDiscountType === 'percentage'
+                    ? itemSubtotal * (p.manualDiscount / 100)
+                    : p.manualDiscount;
+                return {
+                    ...p,
+                    total: Math.max(0, itemSubtotal - p.automaticDiscount - manualDiscountAmount)
+                };
+            });
+        };
+        setSelectedProducts(recalculateTotals);
+        setSelectedServices(recalculateTotals);
+    }, [
+        selectedProducts.map(p => `${p.quantity}-${p.manualDiscount}-${p.manualDiscountType}-${p.automaticDiscount}`).join(),
+        selectedServices.map(s => `${s.quantity}-${s.manualDiscount}-${s.manualDiscountType}-${s.automaticDiscount}`).join()
+    ]);
+
 
     useEffect(() => {
         if (state?.message === 'success' && state.data) {
@@ -293,7 +292,6 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
     }, [vatType, selectedClientId, customers]);
 
 
-    // Autocompletar datos del cliente al seleccionar
     useEffect(() => {
         if (!selectedClientId) return;
         const c = customers.find(c => String(c.id) === String(selectedClientId));
@@ -317,11 +315,26 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
         }
 
     }, [selectedClientId, customers]);
+
+     useEffect(() => {
+        if (!selectedSellerId) {
+            setSellerCommission('');
+            return;
+        }
+        const seller = sellers.find(s => String(s.id) === selectedSellerId);
+        if (!seller) return;
+        
+        const commission = paymentCondition === 'Efectivo' 
+            ? seller.cash_sale_commission 
+            : seller.collection_commission;
+            
+        setSellerCommission(commission ?? '');
+    }, [selectedSellerId, paymentCondition, sellers]);
     
-    const QuantityControl = ({ item }: { item: SelectedProduct }) => {
+    const QuantityControl = ({ item, isService }: { item: SelectedProduct, isService: boolean }) => {
         const handleQuantityChange = (newQuantity: number) => {
             if (!isNaN(newQuantity)) {
-                 if(item.product.hasOwnProperty('stock')) {
+                 if(!isService) {
                     updateProductQuantity(item.product.id, newQuantity);
                 } else {
                     updateServiceQuantity(item.product.id, newQuantity);
@@ -340,9 +353,9 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                     onChange={(e) => handleQuantityChange(parseInt(e.target.value, 10))}
                     className="h-8 w-14 text-center"
                     min="0"
-                    max={(item.product as Product).stock}
+                    max={isService ? undefined : (item.product as Product).stock}
                 />
-                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(item.quantity + 1)} disabled={item.product.hasOwnProperty('stock') && item.quantity >= (item.product as Product).stock}>
+                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleQuantityChange(item.quantity + 1)} disabled={!isService && item.quantity >= (item.product as Product).stock}>
                     +
                 </Button>
             </div>
@@ -351,22 +364,32 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
 
     const formEl = (
                 <form id="invoice-form" action={formAction} ref={formRef} className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-8 overflow-hidden">
-                <div className="flex flex-col gap-4 overflow-y-hidden pr-2">
-                    <input type="hidden" name="products" value={JSON.stringify([
-                        ...selectedProducts.map(p => ({ productId: p.product.id, name: p.product.name, quantity: p.quantity, unitPrice: p.product.precio_venta, total: p.total, categoryId: (p.product as Product).category, subcategoryId: (p.product as Product).subcategory, discounts: (p.discountAmount && p.discountAmount > 0) ? [{ label: 'Desc. línea', amount: p.discountAmount }] : [] })),
-                        ...selectedServices.map(s => ({ productId: s.product.id, name: s.product.name, quantity: s.quantity, unitPrice: (s.product as any).precio_venta, total: s.total, isService: true, discounts: (s.discountAmount && s.discountAmount > 0) ? [{ label: 'Desc. servicio', amount: s.discountAmount }] : [] }))
-                    ])} />
+                <div className="flex flex-col gap-4 overflow-y-auto pr-2">
+                     <input type="hidden" name="products" value={JSON.stringify(
+                        [...selectedProducts, ...selectedServices].map(p => ({
+                            productId: p.product.id,
+                            name: p.product.name,
+                            quantity: p.quantity,
+                            unitPrice: p.product.precio_venta,
+                            manualDiscount: p.manualDiscount,
+                            manualDiscountType: p.manualDiscountType,
+                            automaticDiscount: p.automaticDiscount,
+                            isService: !p.product.hasOwnProperty('stock'),
+                            total: p.total
+                        }))
+                    )} />
                     <input type="hidden" name="client_first_name" value={clientFirstName} />
                     <input type="hidden" name="client_last_name" value={clientLastName} />
                     <input type="hidden" name="client_document_type" value={clientDocType} />
                     <input type="hidden" name="client_document_number" value={clientDocNumber} />
                     <input type="hidden" name="vat_type" value={vatType} />
                     <input type="hidden" name="vat_rate" value={String(vatRate)} />
-                    <input type="hidden" name="promotions_applied" value={JSON.stringify(promotionsApplied)} />
-                    <input type="hidden" name="discounts_total" value={String(discountsTotal)} />
                     <input type="hidden" name="payment_condition" value={paymentCondition} />
                     <input type="hidden" name="cash_account_code" value={selectedCashAccount} />
                     <input type="hidden" name="seller_id" value={selectedSellerId} />
+                    <input type="hidden" name="seller_commission" value={String(sellerCommission)} />
+                    <input type="hidden" name="general_discount" value={String(generalDiscount)} />
+                    <input type="hidden" name="general_discount_type" value={generalDiscountType} />
 
                     <div className="space-y-4 rounded-md border p-4">
                             <Label>Añadir Productos</Label>
@@ -425,61 +448,67 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
 
                     <div className="space-y-4 rounded-md border p-4 flex-grow flex flex-col">
                             <Label>Productos y Servicios en la Factura</Label>
-                            <ScrollArea className="flex-grow">
-                            {[...selectedProducts, ...selectedServices].length === 0 ? (
-                                <div className="text-center text-muted-foreground py-10 flex flex-col items-center justify-center h-full">
-                                    <p>Aún no se han añadido productos ni servicios.</p>
-                                </div>
-                            ) : (
-                                <div className="space-y-2">
-                                    {[...selectedProducts, ...selectedServices].map(item => (
-                                    <div key={item.product.id} className="flex items-center justify-between p-2 rounded-md bg-muted/50">
-                                        <div className="flex-grow">
-                                            <p className="font-medium">{item.product.name} {item.product.hasOwnProperty('stock') ? '' : <span className="text-xs text-muted-foreground">(Servicio)</span>}</p>
-                                            <p className="text-sm text-muted-foreground">
-                                                {formatPrice(item.product.precio_venta)} c/u
-                                            </p>
-                                        </div>
-                                        <div className="flex items-center gap-4">
-                                            <QuantityControl item={item} />
-                                            <p className="font-semibold w-24 text-right">{formatPrice(item.total)}</p>
-                                        </div>
+                             <ScrollArea className="flex-grow">
+                                {[...selectedProducts, ...selectedServices].length === 0 ? (
+                                    <div className="text-center text-muted-foreground py-10 flex flex-col items-center justify-center h-full">
+                                        <p>Aún no se han añadido productos ni servicios.</p>
                                     </div>
-                                ))}
-                                </div>
-                            )}
+                                ) : (
+                                    <div className="space-y-2">
+                                    {[...selectedProducts, ...selectedServices].map((item, index) => (
+                                        <div key={item.product.id} className="p-2 rounded-md bg-muted/50">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex-grow">
+                                                    <p className="font-medium">{item.product.name} {item.product.hasOwnProperty('stock') ? '' : <span className="text-xs text-muted-foreground">(Servicio)</span>}</p>
+                                                    <p className="text-sm text-muted-foreground">
+                                                        {formatPrice(item.product.precio_venta)} c/u
+                                                    </p>
+                                                </div>
+                                                <div className="flex items-center gap-4">
+                                                    <QuantityControl item={item} isService={!item.product.hasOwnProperty('stock')} />
+                                                    <p className="font-semibold w-24 text-right">{formatPrice(item.product.precio_venta * item.quantity)}</p>
+                                                </div>
+                                            </div>
+                                            <div className='flex justify-end items-center gap-2 mt-1'>
+                                                <Label htmlFor={`discount-${index}`} className='text-xs'>Desc. manual:</Label>
+                                                 <Input 
+                                                    id={`discount-${index}`} 
+                                                    type="number" 
+                                                    className='h-7 w-20' 
+                                                    value={item.manualDiscount}
+                                                    onChange={e => {
+                                                        const newItems = item.product.hasOwnProperty('stock') ? [...selectedProducts] : [...selectedServices];
+                                                        const currentItem = newItems.find(i => i.product.id === item.product.id);
+                                                        if (currentItem) {
+                                                            currentItem.manualDiscount = parseFloat(e.target.value) || 0;
+                                                            if (item.product.hasOwnProperty('stock')) setSelectedProducts(newItems as any); else setSelectedServices(newItems as any);
+                                                        }
+                                                    }}
+                                                 />
+                                                <Select
+                                                    value={item.manualDiscountType}
+                                                    onValueChange={(val: 'amount' | 'percentage') => {
+                                                        const newItems = item.product.hasOwnProperty('stock') ? [...selectedProducts] : [...selectedServices];
+                                                        const currentItem = newItems.find(i => i.product.id === item.product.id);
+                                                        if (currentItem) {
+                                                            currentItem.manualDiscountType = val;
+                                                            if (item.product.hasOwnProperty('stock')) setSelectedProducts(newItems as any); else setSelectedServices(newItems as any);
+                                                        }
+                                                    }}
+                                                >
+                                                    <SelectTrigger className='h-7 w-20 text-xs'><SelectValue/></SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="amount">$</SelectItem>
+                                                        <SelectItem value="percentage">%</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                             {item.automaticDiscount > 0 && <p className='text-xs text-right text-destructive'>- {formatPrice(item.automaticDiscount)} (promo auto)</p>}
+                                        </div>
+                                    ))}
+                                    </div>
+                                )}
                             </ScrollArea>
-                    </div>
-                    <div className="space-y-2 rounded-md border p-4">
-                        <div className="flex items-center justify-between">
-                            <Label>Promociones aplicadas</Label>
-                            <div className="flex gap-2">
-                                <Button 
-                                    type="button" 
-                                    variant="outline" 
-                                    size="sm" 
-                                    onClick={() => setPromotionsApplied(arr => [...arr, { name: '', amount: 0, source: 'manual' }])}
-                                >
-                                    Agregar manual
-                                </Button>
-                            </div>
-                        </div>
-                        {promotionsApplied.length === 0 ? (
-                            <p className="text-sm text-muted-foreground">No hay promociones aplicadas.</p>
-                        ) : (
-                            <div className="space-y-2">
-                                {promotionsApplied.map((p, idx) => (
-                                    <div key={idx} className="grid grid-cols-12 gap-2 items-center">
-                                        <Input readOnly={p.source === 'auto'} className="col-span-7" placeholder="Nombre de la promo" value={p.name} onChange={e => setPromotionsApplied(list => list.map((it, i) => i===idx ? { ...it, name: e.target.value } : it))} />
-                                        <Input readOnly={p.source === 'auto'} className="col-span-4" type="number" step="0.01" min="0" placeholder="Monto" value={String(p.amount)} onChange={e => setPromotionsApplied(list => list.map((it, i) => i===idx ? { ...it, amount: Number(e.target.value) || 0 } : it))} />
-                                        <Button type="button" variant="ghost" size="sm" className="col-span-1" onClick={() => setPromotionsApplied(list => list.filter((_, i) => i!==idx))}>X</Button>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                        <p className="text-xs text-muted-foreground mt-2">
-                            Nota: Las promociones automáticas se aplican sobre el precio de lista. Los descuentos manuales se suman al total.
-                        </p>
                     </div>
                 </div>
                 
@@ -574,6 +603,7 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="Efectivo">Efectivo</SelectItem>
+                                    <SelectItem value="Cuenta Corriente">Cuenta Corriente</SelectItem>
                                     <SelectItem value="Tarjeta de crédito">Tarjeta de crédito</SelectItem>
                                     <SelectItem value="Transferencia">Transferencia</SelectItem>
                                     <SelectItem value="Otro">Otro</SelectItem>
@@ -597,7 +627,7 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                             </Select>
                              <FieldError errors={state?.errors?.cash_account_code} />
                         </div>
-                        <div className="space-y-2">
+                         <div className="space-y-2">
                             <Label>Vendedor</Label>
                             <Select value={selectedSellerId} onValueChange={setSelectedSellerId}>
                                 <SelectTrigger>
@@ -610,9 +640,31 @@ export function CreateInvoiceForm({ customers, products, services = [], cashAcco
                                 </SelectContent>
                             </Select>
                         </div>
+                        {selectedSellerId && (
+                            <div className="space-y-2">
+                                <Label htmlFor="seller_commission">Comisión Vendedor (%)</Label>
+                                <div className='relative'>
+                                    <Input id="seller_commission" type="number" value={sellerCommission} onChange={e => setSellerCommission(e.target.value)} className="pl-7"/>
+                                    <Percent className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
+                                </div>
+                            </div>
+                        )}
                         <div className="space-y-2">
                             <Label htmlFor="notes">Notas Adicionales</Label>
                             <Textarea id="notes" name="notes" placeholder="Ej: Últimos 4 dígitos de la tarjeta, ID de transferencia, etc." />
+                        </div>
+                         <div className="space-y-2">
+                            <Label>Descuento General</Label>
+                            <div className='flex gap-2'>
+                                <Input type="number" value={generalDiscount} onChange={e => setGeneralDiscount(parseFloat(e.target.value) || 0)} className="flex-grow"/>
+                                <Select value={generalDiscountType} onValueChange={val => setGeneralDiscountType(val as 'amount' | 'percentage')}>
+                                    <SelectTrigger className='w-24'><SelectValue/></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="amount">$</SelectItem>
+                                        <SelectItem value="percentage">%</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
                     </div>
 

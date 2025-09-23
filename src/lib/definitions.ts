@@ -6,7 +6,6 @@ export type Profile = {
   name: string;
   last_name: string;
   avatar_url?: string | null;
-  // rol has been removed
 };
 
 export type CompanyData = {
@@ -208,6 +207,7 @@ export type Invoice = {
   branch_name?: string | null;
   seller_id?: number | null;
   seller_name?: string | null;
+  seller_commission?: number | null;
   products: Json;
   total_amount: number;
   invoice_type: 'A' | 'B' | 'C';
@@ -218,7 +218,7 @@ export type Invoice = {
   vat_rate?: number | null;
   vat_amount?: number | null;
   discounts_total?: number | null;
-  promotions_applied?: Json | null; // e.g., [{ name: string, amount: number }]
+  promotions_applied?: Json | null; // This will now store manual discounts and auto promos info
 }
 
 export type Json =
@@ -230,8 +230,4 @@ export type Json =
   | Json[]
 
 export type jsonb = Json;
-
-
-
-
 

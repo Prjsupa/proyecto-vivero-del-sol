@@ -7,7 +7,7 @@ import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 
 const createInvoiceSchema = z.object({
-    clientId: z.coerce.number().optional(), // Optional because a new client can be created
+    clientId: z.coerce.number().optional(),
     client_first_name: z.string().min(1, "El nombre del cliente es requerido."),
     client_last_name: z.string().min(1, "El apellido del cliente es requerido."),
     client_document_type: z.string().optional().nullable(),
@@ -19,9 +19,10 @@ const createInvoiceSchema = z.object({
     products: z.string().min(1, "Debes añadir al menos un producto.").transform((val) => val ? JSON.parse(val) : []),
     vat_type: z.string(),
     vat_rate: z.coerce.number(),
-    discounts_total: z.coerce.number(),
-    promotions_applied: z.string().transform((val) => val ? JSON.parse(val) : []),
     seller_id: z.coerce.number().optional().nullable(),
+    seller_commission: z.coerce.number().optional().nullable(),
+    general_discount: z.coerce.number().optional().nullable(),
+    general_discount_type: z.enum(['amount', 'percentage']).optional(),
 });
 
 export async function createInvoice(prevState: any, formData: FormData) {
@@ -47,9 +48,10 @@ export async function createInvoice(prevState: any, formData: FormData) {
         client_last_name,
         vat_rate,
         vat_type,
-        discounts_total,
-        promotions_applied,
         seller_id,
+        seller_commission,
+        general_discount,
+        general_discount_type,
     } = validatedFields.data;
     
     if (!products || products.length === 0) {
@@ -65,6 +67,21 @@ export async function createInvoice(prevState: any, formData: FormData) {
     }
 
     const subtotal = products.reduce((acc: number, p: any) => acc + (p.unitPrice * p.quantity), 0);
+    
+    const itemDiscounts = products.reduce((acc: number, p: any) => {
+        const itemSubtotal = p.unitPrice * p.quantity;
+        const manualDiscountAmount = p.manualDiscountType === 'percentage'
+            ? itemSubtotal * ((p.manualDiscount || 0) / 100)
+            : (p.manualDiscount || 0);
+        return acc + (p.automaticDiscount || 0) + manualDiscountAmount;
+    }, 0);
+    
+    const generalDiscountAmount = general_discount_type === 'percentage'
+        ? subtotal * ((general_discount || 0) / 100)
+        : (general_discount || 0);
+
+    const discounts_total = itemDiscounts + generalDiscountAmount;
+
     const vat_amount = (subtotal - discounts_total) * (vat_rate / 100);
     const totalAmount = subtotal - discounts_total + vat_amount;
 
@@ -85,9 +102,9 @@ export async function createInvoice(prevState: any, formData: FormData) {
         invoice_type: invoiceType,
         payment_condition,
         notes: combinedNotes || null,
-        promotions_applied,
         seller_id,
         seller_name: sellerName,
+        seller_commission
     };
 
     const { data, error } = await supabase.from('invoices').insert([invoiceData]).select('id').single();
@@ -102,6 +119,6 @@ export async function createInvoice(prevState: any, formData: FormData) {
     
     return {
         message: 'success',
-        data: data.id // Devuelve el ID de la factura creada
+        data: data.id 
     };
 }
