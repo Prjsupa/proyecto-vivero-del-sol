@@ -1,4 +1,3 @@
-
 'use client';
 import type { Invoice, Client, CompanyData, Json, CashAccount } from "@/lib/definitions";
 import { format, parseISO } from 'date-fns';
@@ -30,7 +29,6 @@ export function InvoiceView({ invoice, client, company, cashAccounts }: { invoic
     const productLines: InvoiceProductLine[] = Array.isArray(invoice.products) ? invoice.products : [];
     
     const subtotal = invoice.subtotal || productLines.reduce((acc, item) => acc + (item.unitPrice * item.quantity), 0);
-    const totalDiscounts = invoice.discounts_total || 0;
     
     const clientVatCondition = invoice.vat_type ? (invoice.vat_type.replace('_', ' ')).replace(/\b\w/g, l => l.toUpperCase()) : 'Consumidor Final';
 
@@ -118,7 +116,7 @@ export function InvoiceView({ invoice, client, company, cashAccounts }: { invoic
                                 <span>Subtotal</span>
                                 <span className="font-mono">{formatPrice(subtotal, 'ARS')}</span>
                             </div>
-                             {totalDiscounts > 0 && (
+                             {allDiscounts.length > 0 && (
                                 <>
                                     {allDiscounts.map((promo, index) => (
                                         <div key={index} className="flex justify-between text-destructive">

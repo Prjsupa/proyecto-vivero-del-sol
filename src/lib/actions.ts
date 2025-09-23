@@ -2066,18 +2066,18 @@ export async function updateCompanyData(prevState: any, formData: FormData) {
 const baseClientSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido.'),
   last_name: z.string().min(1, 'El apellido es requerido.'),
-  razon_social: z.preprocess(val => val === '' ? null : val, z.string().optional().nullable()),
-  nombre_fantasia: z.preprocess(val => val === '' ? null : val, z.string().optional().nullable()),
-  iva_condition: z.preprocess(val => val === '' ? null : val, z.string().optional().nullable()),
-  document_type: z.preprocess(val => val === '' ? null : val, z.string().optional().nullable()),
-  document_number: z.preprocess(val => val === '' ? null : val, z.string().optional().nullable()),
-  price_list: z.preprocess(val => val === '' ? null : val, z.string().optional().nullable()),
-  province: z.preprocess(val => val === '' ? null : val, z.string().optional().nullable()),
-  address: z.preprocess(val => val === '' ? null : val, z.string().optional().nullable()),
-  city: z.preprocess(val => val === '' ? null : val, z.string().optional().nullable()),
-  postal_code: z.preprocess(val => val === '' ? null : val, z.string().optional().nullable()),
-  phone: z.preprocess(val => val === '' ? null : val, z.string().optional().nullable()),
-  mobile_phone: z.preprocess(val => val === '' ? null : val, z.string().optional().nullable()),
+  razon_social: z.preprocess(val => val || null, z.string().optional().nullable()),
+  nombre_fantasia: z.preprocess(val => val || null, z.string().optional().nullable()),
+  iva_condition: z.preprocess(val => val || null, z.string().optional().nullable()),
+  document_type: z.preprocess(val => val || null, z.string().optional().nullable()),
+  document_number: z.preprocess(val => val || null, z.string().optional().nullable()),
+  price_list: z.preprocess(val => val || null, z.string().optional().nullable()),
+  province: z.preprocess(val => val || null, z.string().optional().nullable()),
+  address: z.preprocess(val => val || null, z.string().optional().nullable()),
+  city: z.preprocess(val => val || null, z.string().optional().nullable()),
+  postal_code: z.preprocess(val => val || null, z.string().optional().nullable()),
+  phone: z.preprocess(val => val || null, z.string().optional().nullable()),
+  mobile_phone: z.preprocess(val => val || null, z.string().optional().nullable()),
   email: z.preprocess(val => (val === '' ? null : val), z.string().email('El email no es válido.').optional().nullable()),
   default_invoice_type: z.preprocess(val => (val === '' ? null : val), z.enum(['A', 'B', 'C']).optional().nullable()),
   birth_date: z.preprocess((arg) => {
@@ -2098,8 +2098,16 @@ const clientSchema = baseClientSchema.superRefine((data, ctx) => {
     }
 });
 
-const updateClientSchema = clientSchema.extend({
+const updateClientSchema = baseClientSchema.extend({
     id: z.coerce.number(),
+}).superRefine((data, ctx) => {
+    if (data.document_type && data.document_type !== 'NN' && (!data.document_number || data.document_number.trim() === '')) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "El número de documento es requerido si se especifica un tipo.",
+            path: ['document_number'],
+        });
+    }
 });
 
 

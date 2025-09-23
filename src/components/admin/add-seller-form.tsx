@@ -9,7 +9,6 @@ import { Label } from '@/components/ui/label';
 import { AlertCircle, PlusCircle, Loader2 } from 'lucide-react';
 import { addSeller } from '@/lib/actions';
 import { useToast } from '@/hooks/use-toast';
-import type { Seller } from '@/lib/definitions';
 
 function SubmitButton() {
     const { pending } = useFormStatus();
