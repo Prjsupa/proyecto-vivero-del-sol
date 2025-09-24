@@ -81,8 +81,8 @@ export function AddClientForm() {
                 title: '¡Éxito!',
                 description: state.data,
             });
-            setIsDialogOpen(false);
             resetForm();
+            setIsDialogOpen(false);
         } else if (state.message) {
              toast({
                 title: 'Error',
