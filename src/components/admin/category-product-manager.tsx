@@ -1,0 +1,165 @@
+'use client';
+import { useState, useMemo } from 'react';
+import type { Product } from "@/lib/definitions";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Package } from "lucide-react";
+import { cn, formatPrice } from "@/lib/utils";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '../ui/badge';
+import { Checkbox } from '../ui/checkbox';
+import { BatchActions } from './batch-actions';
+import { Button } from '../ui/button';
+import { EditCategoryForm } from './edit-category-form';
+import { DeleteCategoryAlert } from './delete-category-alert';
+import { AddProductsToCategoryForm } from './add-products-to-category-form';
+
+export function CategoryProductManager({ allProducts, allCategories, onActionCompleted }: { allProducts: Product[], allCategories: string[], onActionCompleted: () => void }) {
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(allCategories[0] || null);
+    const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
+
+    const productsInCategory = useMemo(() => {
+        if (!selectedCategory) return [];
+        return allProducts.filter(p => p.category === selectedCategory);
+    }, [allProducts, selectedCategory]);
+
+    const handleCategoryChange = (category: string) => {
+        setSelectedCategory(category);
+        setSelectedProductIds([]); // Reset selection when category changes
+    };
+
+    const handleSelectAll = (checked: boolean) => {
+        if (checked) {
+            setSelectedProductIds(productsInCategory.map(p => p.id));
+        } else {
+            setSelectedProductIds([]);
+        }
+    };
+
+    const handleSelectRow = (productId: string, checked: boolean) => {
+        if (checked) {
+            setSelectedProductIds(prev => [...prev, productId]);
+        } else {
+            setSelectedProductIds(prev => prev.filter(id => id !== productId));
+        }
+    };
+    
+    const onSubActionCompleted = () => {
+        setSelectedProductIds([]);
+        onActionCompleted();
+    }
+
+    const onCategoryActionCompleted = () => {
+        setSelectedCategory(null);
+        onActionCompleted();
+    }
+
+
+    return (
+        <Card>
+             <CardHeader>
+                <div className="flex flex-col md:flex-row gap-4 items-start">
+                    <div className='w-full md:w-72'>
+                         <Select onValueChange={handleCategoryChange} value={selectedCategory || ''}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Selecciona una categoría" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {allCategories.map(cat => (
+                                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                     {selectedCategory && (
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <AddProductsToCategoryForm 
+                                categoryName={selectedCategory} 
+                                allProducts={allProducts} 
+                                onActionCompleted={onSubActionCompleted}
+                            />
+                            <EditCategoryForm 
+                                categoryName={selectedCategory} 
+                                allCategories={allCategories} 
+                                onCategoryUpdated={onCategoryActionCompleted}
+                            />
+                            <DeleteCategoryAlert 
+                                categoryName={selectedCategory}
+                                productCount={productsInCategory.length}
+                                onCategoryDeleted={onActionCompleted}
+                            />
+                        </div>
+                    )}
+                </div>
+                 {selectedCategory && (
+                    <div className="flex items-center text-sm text-muted-foreground pt-4">
+                        <p><span className="font-semibold text-foreground">{productsInCategory.length}</span> productos en esta categoría.</p>
+                    </div>
+                )}
+            </CardHeader>
+            <CardContent>
+                {selectedProductIds.length > 0 && (
+                    <div className="mb-4">
+                        <BatchActions 
+                            selectedProductIds={selectedProductIds} 
+                            allCategories={allCategories}
+                            onActionCompleted={onSubActionCompleted} 
+                        />
+                    </div>
+                )}
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead className="w-[50px]">
+                                <Checkbox
+                                    onCheckedChange={handleSelectAll}
+                                    checked={productsInCategory.length > 0 && selectedProductIds.length === productsInCategory.length}
+                                    aria-label="Select all"
+                                    disabled={productsInCategory.length === 0}
+                                />
+                            </TableHead>
+                            <TableHead>Nombre</TableHead>
+                            <TableHead>Estado</TableHead>
+                            <TableHead className="hidden md:table-cell">Precio Venta</TableHead>
+                            <TableHead className="hidden md:table-cell">Stock</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {selectedCategory && productsInCategory.length > 0 ? (
+                            productsInCategory.map((product) => (
+                                <TableRow key={product.id} data-state={selectedProductIds.includes(product.id) && "selected"}>
+                                    <TableCell>
+                                         <Checkbox
+                                            onCheckedChange={(checked) => handleSelectRow(product.id, !!checked)}
+                                            checked={selectedProductIds.includes(product.id)}
+                                            aria-label={`Select product ${product.name}`}
+                                        />
+                                    </TableCell>
+                                    <TableCell className="font-medium">{product.name}</TableCell>
+                                    <TableCell>
+                                        <Badge variant={product.available ? 'default' : 'outline'} className={cn(product.available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800')}>
+                                            {product.available ? 'Disponible' : 'No disponible'}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell className="hidden md:table-cell">
+                                        {formatPrice(product.precio_venta)}
+                                    </TableCell>
+                                    <TableCell className="hidden md:table-cell">{product.stock}</TableCell>
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={5} className="h-48 text-center">
+                                    <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                                        <Package className="h-12 w-12" />
+                                        <p className="font-semibold">{selectedCategory ? 'No se encontraron productos en esta categoría.' : 'Por favor, selecciona una categoría para empezar.'}</p>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </CardContent>
+        </Card>
+    );
+}

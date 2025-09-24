@@ -1,0 +1,275 @@
+
+'use client';
+import { useState } from 'react';
+import type { Product, Service, Provider, ProviderType, IncomeVoucher, ExpenseVoucher, UnitOfMeasure, UnitOfTime, UnitOfMass, UnitOfVolume, PointOfSale, AccountStatus, Currency, CashAccount } from "@/lib/definitions";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from '@/components/ui/select';
+import { CategoryProductManager } from './category-product-manager';
+import { SubcategoryProductManager } from './subcategory-product-manager';
+import { ServiceCategoryManager } from './service-category-manager';
+import { CreateCategoryForm } from './create-category-form';
+import { CreateSubcategoryForm } from './create-subcategory-form';
+import { CreateServiceCategoryForm } from './create-service-category-form';
+import { ColorManager } from './color-manager';
+import { SizeManager } from './size-manager';
+import { ProductDescriptionManager } from './product-description-manager';
+import { ServiceDescriptionManager } from './service-description-manager';
+import { CreateColorForm } from './create-color-form';
+import { CreateSizeForm } from './create-size-form';
+import { CreateProductDescriptionForm } from './create-product-description-form';
+import { CreateServiceDescriptionForm } from './create-service-description-form';
+import { ProviderTypeManager } from './provider-type-manager';
+import { CreateProviderTypeForm } from './create-provider-type-form';
+import { IncomeVoucherManager } from './income-voucher-manager';
+import { CreateIncomeVoucherForm } from './create-income-voucher-form';
+import { ExpenseVoucherManager } from './expense-voucher-manager';
+import { CreateExpenseVoucherForm } from './create-expense-voucher-form';
+import { UnitOfMeasureManager } from './unit-of-measure-manager';
+import { CreateUnitOfMeasureForm } from './create-unit-of-measure-form';
+import { UnitOfTimeManager } from './unit-of-time-manager';
+import { CreateUnitOfTimeForm } from './create-unit-of-time-form';
+import { UnitOfMassManager } from './unit-of-mass-manager';
+import { CreateUnitOfMassForm } from './create-unit-of-mass-form';
+import { UnitOfVolumeManager } from './unit-of-volume-manager';
+import { CreateUnitOfVolumeForm } from './create-unit-of-volume-form';
+import { PointOfSaleManager } from './point-of-sale-manager';
+import { CreatePointOfSaleForm } from './create-point-of-sale-form';
+import { useRouter } from 'next/navigation';
+import { AccountStatusManager } from './account-status-manager';
+import { CreateAccountStatusForm } from './create-account-status-form';
+import { CurrencyManager } from './currency-manager';
+import { CreateCurrencyForm } from './create-currency-form';
+import { CashAccountManager } from './cash-account-manager';
+import { CreateCashAccountForm } from './create-cash-account-form';
+
+type AuxTableType = 
+    | 'product_categories' 
+    | 'product_subcategories' 
+    | 'service_categories'
+    | 'product_colors'
+    | 'product_sizes'
+    | 'product_descriptions'
+    | 'service_descriptions'
+    | 'provider_types'
+    | 'income_vouchers'
+    | 'expense_vouchers'
+    | 'units_of_measure'
+    | 'units_of_time'
+    | 'units_of_mass'
+    | 'units_of_volume'
+    | 'points_of_sale'
+    | 'account_statuses'
+    | 'currencies'
+    | 'cash_accounts';
+
+interface AuxTablesManagerProps {
+    products: Product[];
+    services: Service[];
+    providers: Provider[];
+    providerTypes: ProviderType[];
+    incomeVouchers: IncomeVoucher[];
+    expenseVouchers: ExpenseVoucher[];
+    unitsOfMeasure: UnitOfMeasure[];
+    unitsOfTime: UnitOfTime[];
+    unitsOfMass: UnitOfMass[];
+    unitsOfVolume: UnitOfVolume[];
+    pointsOfSale: PointOfSale[];
+    accountStatuses: AccountStatus[];
+    currencies: Currency[];
+    cashAccounts: CashAccount[];
+    productCategories: string[];
+    productSubcategories: string[];
+    serviceCategories: string[];
+    productColors: string[];
+    productSizes: string[];
+    productDescriptions: string[];
+    serviceDescriptions: string[];
+}
+
+
+export function AuxTablesManager({ 
+    products, 
+    services,
+    providers,
+    providerTypes,
+    incomeVouchers,
+    expenseVouchers,
+    unitsOfMeasure,
+    unitsOfTime,
+    unitsOfMass,
+    unitsOfVolume,
+    pointsOfSale,
+    accountStatuses,
+    currencies,
+    cashAccounts,
+    productCategories, 
+    productSubcategories, 
+    serviceCategories,
+    productColors,
+    productSizes,
+    productDescriptions,
+    serviceDescriptions,
+}: AuxTablesManagerProps) {
+    const [selectedTable, setSelectedTable] = useState<AuxTableType>('product_categories');
+    const router = useRouter();
+
+    const onActionCompleted = () => {
+        router.refresh();
+    }
+
+    const renderContent = () => {
+        switch (selectedTable) {
+            case 'product_categories':
+                return <CategoryProductManager allProducts={products} allCategories={productCategories} onActionCompleted={onActionCompleted} />;
+            case 'product_subcategories':
+                return <SubcategoryProductManager allProducts={products} allSubcategories={productSubcategories} onActionCompleted={onActionCompleted} />;
+            case 'service_categories':
+                return <ServiceCategoryManager allServices={services} allCategories={serviceCategories} onActionCompleted={onActionCompleted} />;
+            case 'product_colors':
+                return <ColorManager allProducts={products} allColors={productColors} />;
+            case 'product_sizes':
+                return <SizeManager allProducts={products} allSizes={productSizes} />;
+            case 'product_descriptions':
+                return <ProductDescriptionManager allProducts={products} allDescriptions={productDescriptions} />;
+            case 'service_descriptions':
+                return <ServiceDescriptionManager allServices={services} allDescriptions={serviceDescriptions} />;
+            case 'provider_types':
+                return <ProviderTypeManager allProviders={providers} allProviderTypes={providerTypes} onActionCompleted={onActionCompleted} />;
+            case 'income_vouchers':
+                return <IncomeVoucherManager allVouchers={incomeVouchers} onActionCompleted={onActionCompleted} />;
+            case 'expense_vouchers':
+                return <ExpenseVoucherManager allVouchers={expenseVouchers} onActionCompleted={onActionCompleted} />;
+            case 'units_of_measure':
+                return <UnitOfMeasureManager allUnits={unitsOfMeasure} onActionCompleted={onActionCompleted} />;
+            case 'units_of_time':
+                return <UnitOfTimeManager allUnits={unitsOfTime} onActionCompleted={onActionCompleted} />;
+            case 'units_of_mass':
+                return <UnitOfMassManager allUnits={unitsOfMass} onActionCompleted={onActionCompleted} />;
+            case 'units_of_volume':
+                return <UnitOfVolumeManager allUnits={unitsOfVolume} onActionCompleted={onActionCompleted} />;
+            case 'points_of_sale':
+                return <PointOfSaleManager allUnits={pointsOfSale} onActionCompleted={onActionCompleted} />;
+            case 'account_statuses':
+                return <AccountStatusManager allUnits={accountStatuses} onActionCompleted={onActionCompleted} />;
+            case 'currencies':
+                return <CurrencyManager allUnits={currencies} onActionCompleted={onActionCompleted} />;
+            case 'cash_accounts':
+                return <CashAccountManager allUnits={cashAccounts} onActionCompleted={onActionCompleted} />;
+            default:
+                return null;
+        }
+    };
+    
+    const renderCreateButton = () => {
+        switch (selectedTable) {
+            case 'product_categories':
+                return <CreateCategoryForm allProducts={products} allCategories={productCategories} onActionCompleted={onActionCompleted}/>;
+            case 'product_subcategories':
+                return <CreateSubcategoryForm allProducts={products} allSubcategories={productSubcategories} onActionCompleted={onActionCompleted} />;
+            case 'service_categories':
+                return <CreateServiceCategoryForm allServices={services} allCategories={serviceCategories} onActionCompleted={onActionCompleted}/>;
+            case 'product_colors':
+                return <CreateColorForm allProducts={products} />;
+            case 'product_sizes':
+                return <CreateSizeForm allProducts={products} />;
+            case 'product_descriptions':
+                return <CreateProductDescriptionForm allProducts={products} />;
+            case 'service_descriptions':
+                return <CreateServiceDescriptionForm allServices={services} />;
+            case 'provider_types':
+                return <CreateProviderTypeForm onActionCompleted={onActionCompleted} />;
+            case 'income_vouchers':
+                return <CreateIncomeVoucherForm onActionCompleted={onActionCompleted} />;
+            case 'expense_vouchers':
+                return <CreateExpenseVoucherForm onActionCompleted={onActionCompleted} />;
+            case 'units_of_measure':
+                return <CreateUnitOfMeasureForm onActionCompleted={onActionCompleted} />;
+            case 'units_of_time':
+                return <CreateUnitOfTimeForm onActionCompleted={onActionCompleted} />;
+            case 'units_of_mass':
+                return <CreateUnitOfMassForm onActionCompleted={onActionCompleted} />;
+            case 'units_of_volume':
+                return <CreateUnitOfVolumeForm onActionCompleted={onActionCompleted} />;
+            case 'points_of_sale':
+                return <CreatePointOfSaleForm onActionCompleted={onActionCompleted} />;
+            case 'account_statuses':
+                return <CreateAccountStatusForm onActionCompleted={onActionCompleted} />;
+            case 'currencies':
+                return <CreateCurrencyForm onActionCompleted={onActionCompleted} />;
+            case 'cash_accounts':
+                return <CreateCashAccountForm onActionCompleted={onActionCompleted} />;
+            default:
+                return null;
+        }
+    }
+
+    return (
+        <div className='space-y-6'>
+            <Card>
+                <CardHeader>
+                    <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
+                        <div className="w-full md:w-72">
+                            <Select onValueChange={(value) => setSelectedTable(value as AuxTableType)} value={selectedTable}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Selecciona una tabla para gestionar" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        <SelectLabel>📦 Productos</SelectLabel>
+                                        <SelectItem value="product_categories">Categorías de Productos</SelectItem>
+                                        <SelectItem value="product_subcategories">Subcategorías de Productos</SelectItem>
+                                        <SelectItem value="product_colors">Colores</SelectItem>
+                                        <SelectItem value="product_sizes">Tamaños</SelectItem>
+                                        <SelectItem value="product_descriptions">Descripciones</SelectItem>
+                                    </SelectGroup>
+                                    
+                                    <SelectGroup>
+                                        <SelectLabel>🛠️ Servicios</SelectLabel>
+                                        <SelectItem value="service_categories">Categorías de Servicios</SelectItem>
+                                        <SelectItem value="service_descriptions">Descripciones</SelectItem>
+                                    </SelectGroup>
+                                    
+                                    <SelectGroup>
+                                        <SelectLabel>🏢 Proveedores</SelectLabel>
+                                        <SelectItem value="provider_types">Tipos de Proveedor</SelectItem>
+                                    </SelectGroup>
+                                    
+                                    <SelectGroup>
+                                        <SelectLabel>📋 Comprobantes</SelectLabel>
+                                        <SelectItem value="income_vouchers">Comprobantes de Ingreso</SelectItem>
+                                        <SelectItem value="expense_vouchers">Comprobantes de Egreso</SelectItem>
+                                    </SelectGroup>
+                                    
+                                    <SelectGroup>
+                                        <SelectLabel>📏 Unidades</SelectLabel>
+                                        <SelectItem value="units_of_measure">Unidades de Medida</SelectItem>
+                                        <SelectItem value="units_of_time">Unidades de Tiempo</SelectItem>
+                                        <SelectItem value="units_of_mass">Unidades de Masa</SelectItem>
+                                        <SelectItem value="units_of_volume">Unidades de Volumen</SelectItem>
+                                    </SelectGroup>
+                                    
+                                    <SelectGroup>
+                                        <SelectLabel>💰 Finanzas</SelectLabel>
+                                        <SelectItem value="cash_accounts">Cuentas de Caja</SelectItem>
+                                        <SelectItem value="currencies">Monedas</SelectItem>
+                                        <SelectItem value="account_statuses">Estados de Cuentas</SelectItem>
+                                    </SelectGroup>
+                                    
+                                    <SelectGroup>
+                                        <SelectLabel>🏪 Puntos de Venta</SelectLabel>
+                                        <SelectItem value="points_of_sale">Puntos de Venta</SelectItem>
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="self-end md:self-center">
+                            {renderCreateButton()}
+                        </div>
+                    </div>
+                </CardHeader>
+            </Card>
+
+            {renderContent()}
+        </div>
+    );
+}
