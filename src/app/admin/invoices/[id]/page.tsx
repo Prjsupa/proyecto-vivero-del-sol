@@ -1,4 +1,5 @@
 
+
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import type { Invoice, Client, CompanyData, CashAccount } from "@/lib/definitions";

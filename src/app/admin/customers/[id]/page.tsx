@@ -1,4 +1,5 @@
 
+
 import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import type { Client, Invoice, Seller } from "@/lib/definitions";
@@ -71,6 +72,8 @@ export default async function CustomerDetailPage({ params }: { params: { id: str
         getSellers(),
     ]);
 
+    const safeBirthDate = client.birth_date ? parseISO(client.birth_date) : null;
+
     return (
         <div className="space-y-8">
             <div className="flex items-center gap-4">
@@ -132,12 +135,12 @@ export default async function CustomerDetailPage({ params }: { params: { id: str
                                     <p className="text-muted-foreground">Fijo: {client.phone || 'No especificado'}</p>
                                 </div>
                             </div>
-                             {client.birth_date && isValid(parseISO(client.birth_date as string)) && (
+                             {safeBirthDate && isValid(safeBirthDate) && (
                                 <div className="flex items-start gap-3">
                                     <Cake className="h-4 w-4 mt-1 text-muted-foreground" />
                                     <div>
                                         <p className="font-semibold">Fecha de Nacimiento</p>
-                                        <p className="text-muted-foreground">{format(parseISO(client.birth_date as string), 'dd/MM/yyyy')}</p>
+                                        <p className="text-muted-foreground">{format(safeBirthDate, 'dd/MM/yyyy')}</p>
                                     </div>
                                 </div>
                             )}

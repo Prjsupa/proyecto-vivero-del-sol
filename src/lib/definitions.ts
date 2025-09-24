@@ -45,7 +45,7 @@ export type Client = {
   mobile_phone?: string | null;
   email?: string | null;
   default_invoice_type?: 'A' | 'B' | 'C' | null;
-  birth_date?: Date | string | null;
+  birth_date?: string | null;
 }
 
 export type Seller = {
@@ -186,7 +186,7 @@ export type Promotion = {
     name: string;
     is_active: boolean;
     discount_type: 'x_for_y' | 'price_discount' | 'cross_selling' | 'progressive_discount';
-    discount_value: ProgressiveDiscountValue | XForYValue | Json | null;
+    discount_value: Json | null;
     apply_to_type: 'all_store' | 'all_products' | 'all_services' | 'product_categories' | 'product_subcategories' | 'service_categories' | 'products' | 'services';
     apply_to_ids?: string[] | null;
     can_be_combined: boolean;
@@ -249,7 +249,7 @@ export type Invoice = {
   seller_id?: number | null;
   seller_name?: string | null;
   seller_commission?: number | null;
-  products: InvoiceProductLine[];
+  products: Json | null;
   total_amount: number;
   invoice_type: 'A' | 'B' | 'C';
   payment_condition?: string | null;
@@ -259,7 +259,7 @@ export type Invoice = {
   vat_rate?: number | null;
   vat_amount?: number | null;
   discounts_total?: number | null;
-  promotions_applied?: AppliedPromo[] | null;
+  promotions_applied?: Json | null;
   general_discount_amount?: number | null;
 }
 
