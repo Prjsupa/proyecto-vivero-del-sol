@@ -94,7 +94,7 @@ export default async function CustomerDetailPage({ params }: { params: { id: str
                             <CardDescription>
                                 {client.razon_social || client.nombre_fantasia || 'Cliente'}
                             </CardDescription>
-                            <CardDescription>Cliente desde {format(parseISO(client.created_at), 'MMM yyyy')}</CardDescription>
+                            <CardDescription>Cliente desde {format(parseISO(client.created_at), 'yyyy-MM-dd')}</CardDescription>
                         </CardHeader>
                         <CardContent className="text-sm space-y-4">
                             <Separator />
