@@ -69,9 +69,7 @@ export function EditClientForm({ client, setOpen }: { client: Client, setOpen: (
     const { toast } = useToast();
     
     // Safely parse the birth_date string into a Date object
-    const initialBirthDate = client.birth_date && isValid(parseISO(client.birth_date)) 
-        ? parseISO(client.birth_date) 
-        : undefined;
+    const initialBirthDate = client.birth_date ? new Date(client.birth_date + 'T00:00:00') : undefined;
 
     const [birthDate, setBirthDate] = useState<Date | undefined>(initialBirthDate);
     const [activeTab, setActiveTab] = useState('personal');
