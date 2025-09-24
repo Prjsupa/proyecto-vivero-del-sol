@@ -109,6 +109,11 @@ export function DashboardClient({ data }: { data: DashboardData }) {
                 const aValue = a[lowStockSort.key as keyof Product];
                 const bValue = b[lowStockSort.key as keyof Product];
                 
+                // Handle null/undefined values
+                if (aValue == null && bValue == null) return 0;
+                if (aValue == null) return lowStockSort.direction === 'ascending' ? 1 : -1;
+                if (bValue == null) return lowStockSort.direction === 'ascending' ? -1 : 1;
+                
                 if (aValue < bValue) {
                     return lowStockSort.direction === 'ascending' ? -1 : 1;
                 }

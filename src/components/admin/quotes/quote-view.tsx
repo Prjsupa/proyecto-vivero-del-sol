@@ -25,8 +25,8 @@ type ResourceItem = {
 
 export function QuoteView({ quote }: { quote: Quote }) {
     
-    const items: QuoteItem[] = Array.isArray(quote.items) ? quote.items : [];
-    const resources: ResourceItem[] = Array.isArray(quote.resources) ? quote.resources : [];
+    const items: QuoteItem[] = Array.isArray(quote.items) ? quote.items as QuoteItem[] : [];
+    const resources: ResourceItem[] = Array.isArray(quote.resources) ? quote.resources as ResourceItem[] : [];
     
     return (
         <>

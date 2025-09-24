@@ -34,7 +34,7 @@ function FieldError({ errors }: { errors?: string[] }) {
     )
 }
 
-export function CreateColorForm({ allProducts }: { allProducts: Product[] }) {
+export function CreateColorForm({ allProducts, onActionCompleted }: { allProducts: Product[], onActionCompleted?: () => void }) {
     const [state, formAction] = useActionState(createColorAndAssignProducts, { message: '' });
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const formRef = useRef<HTMLFormElement>(null);
@@ -52,7 +52,7 @@ export function CreateColorForm({ allProducts }: { allProducts: Product[] }) {
             formRef.current?.reset();
             setSelectedProductIds([]);
             setSearchTerm('');
-            window.location.reload();
+            if (onActionCompleted) onActionCompleted();
         } else if (state?.message && state.message !== 'success' && !state.errors) {
              toast({
                 title: 'Error',
@@ -60,7 +60,7 @@ export function CreateColorForm({ allProducts }: { allProducts: Product[] }) {
                 variant: 'destructive'
             });
         }
-    }, [state, toast]);
+    }, [state, toast, onActionCompleted]);
 
     const onDialogChange = (open: boolean) => {
         if (!open) {

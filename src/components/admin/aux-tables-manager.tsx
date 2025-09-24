@@ -169,13 +169,13 @@ export function AuxTablesManager({
             case 'service_categories':
                 return <CreateServiceCategoryForm allServices={services} allCategories={serviceCategories} onActionCompleted={onActionCompleted}/>;
             case 'product_colors':
-                return <CreateColorForm allProducts={products} />;
+                return <CreateColorForm allProducts={products} onActionCompleted={onActionCompleted} />;
             case 'product_sizes':
-                return <CreateSizeForm allProducts={products} />;
+                return <CreateSizeForm allProducts={products} onActionCompleted={onActionCompleted} />;
             case 'product_descriptions':
-                return <CreateProductDescriptionForm allProducts={products} />;
+                return <CreateProductDescriptionForm allProducts={products} onActionCompleted={onActionCompleted} />;
             case 'service_descriptions':
-                return <CreateServiceDescriptionForm allServices={services} />;
+                return <CreateServiceDescriptionForm allServices={services} onActionCompleted={onActionCompleted} />;
             case 'provider_types':
                 return <CreateProviderTypeForm onActionCompleted={onActionCompleted} />;
             case 'income_vouchers':

@@ -15,7 +15,7 @@ type UserWithProfile = Profile & {
 }
 
 async function getAllUsers(): Promise<UserWithProfile[]> {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     
     const supabaseAdmin = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,

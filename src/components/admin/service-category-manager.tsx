@@ -15,7 +15,7 @@ import { DeleteServiceCategoryAlert } from './delete-service-category-alert';
 import { AddServicesToCategoryForm } from './add-services-to-category-form';
 import { ServiceCategoryBatchActions } from './service-category-batch-actions';
 
-export function ServiceCategoryManager({ allServices, allCategories }: { allServices: Service[], allCategories: string[] }) {
+export function ServiceCategoryManager({ allServices, allCategories, onActionCompleted }: { allServices: Service[], allCategories: string[], onActionCompleted?: () => void }) {
     const [selectedCategory, setSelectedCategory] = useState<string | null>(allCategories[0] || null);
     const [selectedServiceIds, setSelectedServiceIds] = useState<string[]>([]);
 
@@ -45,9 +45,9 @@ export function ServiceCategoryManager({ allServices, allCategories }: { allServ
         }
     };
 
-    const onActionCompleted = () => {
+    const onServiceActionCompleted = () => {
         setSelectedServiceIds([]);
-        window.location.reload(); 
+        if (onActionCompleted) onActionCompleted();
     }
 
     const onCategoryActionCompleted = () => {
@@ -77,7 +77,7 @@ export function ServiceCategoryManager({ allServices, allCategories }: { allServ
                             <AddServicesToCategoryForm 
                                 categoryName={selectedCategory} 
                                 allServices={allServices} 
-                                onActionCompleted={onActionCompleted}
+                                onActionCompleted={onServiceActionCompleted}
                             />
                             <EditServiceCategoryForm 
                                 categoryName={selectedCategory} 
@@ -86,7 +86,7 @@ export function ServiceCategoryManager({ allServices, allCategories }: { allServ
                             <DeleteServiceCategoryAlert 
                                 categoryName={selectedCategory}
                                 serviceCount={servicesInCategory.length}
-                                onCategoryDeleted={onActionCompleted}
+                                onCategoryDeleted={onCategoryActionCompleted}
                             />
                         </div>
                     )}
@@ -103,7 +103,7 @@ export function ServiceCategoryManager({ allServices, allCategories }: { allServ
                         <ServiceCategoryBatchActions 
                             selectedServiceIds={selectedServiceIds} 
                             allCategories={allCategories}
-                            onActionCompleted={onActionCompleted} 
+                            onActionCompleted={onServiceActionCompleted} 
                         />
                     </div>
                 )}

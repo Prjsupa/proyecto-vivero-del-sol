@@ -17,7 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 
-export function DeleteProductAlert({ productId, productName, children }: { productId: string, productName: string, children: React.ReactNode }) {
+export function DeleteProductAlert({ productId, productName, children }: { productId: string, productName: string, children?: React.ReactNode }) {
     const [isLoading, setIsLoading] = useState(false);
     const { toast } = useToast();
 

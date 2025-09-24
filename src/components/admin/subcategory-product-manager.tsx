@@ -14,7 +14,7 @@ import { EditSubcategoryForm } from './edit-subcategory-form';
 import { DeleteSubcategoryAlert } from './delete-subcategory-alert';
 import { AddProductsToSubcategoryForm } from './add-products-to-subcategory-form';
 
-export function SubcategoryProductManager({ allProducts, allSubcategories }: { allProducts: Product[], allSubcategories: string[] }) {
+export function SubcategoryProductManager({ allProducts, allSubcategories, onActionCompleted }: { allProducts: Product[], allSubcategories: string[], onActionCompleted?: () => void }) {
     const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(allSubcategories[0] || null);
     const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
 
@@ -44,9 +44,9 @@ export function SubcategoryProductManager({ allProducts, allSubcategories }: { a
         }
     };
 
-    const onActionCompleted = () => {
+    const onProductActionCompleted = () => {
         setSelectedProductIds([]);
-        window.location.reload(); 
+        if (onActionCompleted) onActionCompleted();
     }
 
     const onSubcategoryActionCompleted = () => {
@@ -76,7 +76,7 @@ export function SubcategoryProductManager({ allProducts, allSubcategories }: { a
                             <AddProductsToSubcategoryForm 
                                 subcategoryName={selectedSubcategory}
                                 allProducts={allProducts}
-                                onActionCompleted={onActionCompleted}
+                                onActionCompleted={onProductActionCompleted}
                             />
                             <EditSubcategoryForm
                                 subcategoryName={selectedSubcategory}
@@ -101,7 +101,7 @@ export function SubcategoryProductManager({ allProducts, allSubcategories }: { a
                     <div className="mb-4">
                         <SubcategoryBatchActions 
                             selectedProductIds={selectedProductIds} 
-                            onActionCompleted={onActionCompleted} 
+                            onActionCompleted={onProductActionCompleted} 
                             allSubcategories={allSubcategories}
                         />
                     </div>

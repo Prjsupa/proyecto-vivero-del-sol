@@ -80,7 +80,7 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                      <CollapsibleContent className="data-[state=open]:py-1">
                                         <SidebarMenuItem>
                                             <Link href="/admin/products" className="pl-6">
-                                                <SidebarMenuButton variant="ghost" size="sm">
+                                                <SidebarMenuButton variant="outline" size="sm">
                                                     <Package />
                                                     Productos
                                                 </SidebarMenuButton>
@@ -104,7 +104,7 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                      <CollapsibleContent className="data-[state=open]:py-1">
                                          <SidebarMenuItem>
                                             <Link href="/admin/services" className="pl-6">
-                                                <SidebarMenuButton variant="ghost" size="sm">
+                                                <SidebarMenuButton variant="outline" size="sm">
                                                     <ConciergeBell />
                                                     Listado Servicios
                                                 </SidebarMenuButton>
@@ -112,7 +112,7 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                         </SidebarMenuItem>
                                         <SidebarMenuItem>
                                             <Link href="/admin/quotes" className="pl-6">
-                                                <SidebarMenuButton variant="ghost" size="sm">
+                                                <SidebarMenuButton variant="outline" size="sm">
                                                     <ClipboardList />
                                                     Armar Presupuesto
                                                 </SidebarMenuButton>
@@ -120,7 +120,7 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                         </SidebarMenuItem>
                                         <SidebarMenuItem>
                                             <Link href="/admin/quotes/list" className="pl-6">
-                                                <SidebarMenuButton variant="ghost" size="sm">
+                                                <SidebarMenuButton variant="outline" size="sm">
                                                     <List />
                                                     Listado Presupuestos
                                                 </SidebarMenuButton>
@@ -144,7 +144,7 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                      <CollapsibleContent className="data-[state=open]:py-1">
                                         <SidebarMenuItem>
                                             <Link href="/admin/customers" className="pl-6">
-                                                <SidebarMenuButton variant="ghost" size="sm">
+                                                <SidebarMenuButton variant="outline" size="sm">
                                                     <Users />
                                                     Clientes
                                                 </SidebarMenuButton>
@@ -152,7 +152,7 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                         </SidebarMenuItem>
                                         <SidebarMenuItem>
                                             <Link href="/admin/sellers" className="pl-6">
-                                                <SidebarMenuButton variant="ghost" size="sm">
+                                                <SidebarMenuButton variant="outline" size="sm">
                                                     <Users />
                                                     Vendedores
                                                 </SidebarMenuButton>
@@ -160,7 +160,7 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                         </SidebarMenuItem>
                                         <SidebarMenuItem>
                                             <Link href="/admin/invoicing" className="pl-6">
-                                                <SidebarMenuButton variant="ghost" size="sm">
+                                                <SidebarMenuButton variant="outline" size="sm">
                                                     <Receipt />
                                                     Facturación
                                                 </SidebarMenuButton>
@@ -168,7 +168,7 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                         </SidebarMenuItem>
                                         <SidebarMenuItem>
                                             <Link href="/admin/current-accounts" className="pl-6">
-                                                <SidebarMenuButton variant="ghost" size="sm">
+                                                <SidebarMenuButton variant="outline" size="sm">
                                                     <BookUser />
                                                     Cuentas Corrientes
                                                 </SidebarMenuButton>
@@ -192,7 +192,7 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                      <CollapsibleContent className="data-[state=open]:py-1">
                                         <SidebarMenuItem>
                                             <Link href="#" className="pl-6">
-                                                <SidebarMenuButton variant="ghost" size="sm" disabled>
+                                                <SidebarMenuButton variant="outline" size="sm" disabled>
                                                     <Ticket />
                                                     Cupones
                                                 </SidebarMenuButton>
@@ -200,7 +200,7 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                         </SidebarMenuItem>
                                         <SidebarMenuItem>
                                             <Link href="/admin/promotions" className="pl-6">
-                                                <SidebarMenuButton variant="ghost" size="sm">
+                                                <SidebarMenuButton variant="outline" size="sm">
                                                     <Gift />
                                                     Promociones
                                                 </SidebarMenuButton>
@@ -224,7 +224,7 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                      <CollapsibleContent className="data-[state=open]:py-1">
                                         <SidebarMenuItem>
                                             <Link href="/admin/providers" className="pl-6">
-                                                <SidebarMenuButton variant="ghost" size="sm">
+                                                <SidebarMenuButton variant="outline" size="sm">
                                                     <Users />
                                                     Proveedores
                                                 </SidebarMenuButton>
@@ -232,7 +232,7 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                         </SidebarMenuItem>
                                         <SidebarMenuItem>
                                             <Link href="#" className="pl-6">
-                                                <SidebarMenuButton variant="ghost" size="sm" disabled>
+                                                <SidebarMenuButton variant="outline" size="sm" disabled>
                                                     <BookUser />
                                                     Cuentas Corrientes
                                                 </SidebarMenuButton>
@@ -240,7 +240,7 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                         </SidebarMenuItem>
                                         <SidebarMenuItem>
                                             <Link href="#" className="pl-6">
-                                                <SidebarMenuButton variant="ghost" size="sm" disabled>
+                                                <SidebarMenuButton variant="outline" size="sm" disabled>
                                                     <Receipt />
                                                     Facturas Proveedores
                                                 </SidebarMenuButton>
@@ -248,7 +248,7 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                         </SidebarMenuItem>
                                         <SidebarMenuItem>
                                             <Link href="#" className="pl-6">
-                                                <SidebarMenuButton variant="ghost" size="sm" disabled>
+                                                <SidebarMenuButton variant="outline" size="sm" disabled>
                                                     <FileText />
                                                     Nota Débito Prov.
                                                 </SidebarMenuButton>
@@ -256,7 +256,7 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                         </SidebarMenuItem>
                                          <SidebarMenuItem>
                                             <Link href="#" className="pl-6">
-                                                <SidebarMenuButton variant="ghost" size="sm" disabled>
+                                                <SidebarMenuButton variant="outline" size="sm" disabled>
                                                     <FileText />
                                                     Nota Crédito Prov.
                                                 </SidebarMenuButton>
@@ -264,7 +264,7 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                         </SidebarMenuItem>
                                          <SidebarMenuItem>
                                             <Link href="#" className="pl-6">
-                                                <SidebarMenuButton variant="ghost" size="sm" disabled>
+                                                <SidebarMenuButton variant="outline" size="sm" disabled>
                                                     <Search />
                                                     Consulta de Facturas
                                                 </SidebarMenuButton>
@@ -272,7 +272,7 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                         </SidebarMenuItem>
                                         <SidebarMenuItem>
                                             <Link href="#" className="pl-6">
-                                                <SidebarMenuButton variant="ghost" size="sm" disabled>
+                                                <SidebarMenuButton variant="outline" size="sm" disabled>
                                                     <FileText />
                                                     Rem. Proveedores
                                                 </SidebarMenuButton>
@@ -280,7 +280,7 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                         </SidebarMenuItem>
                                         <SidebarMenuItem>
                                             <Link href="#" className="pl-6">
-                                                <SidebarMenuButton variant="ghost" size="sm" disabled>
+                                                <SidebarMenuButton variant="outline" size="sm" disabled>
                                                     <ShoppingBag />
                                                     Pedidos a Proveed.
                                                 </SidebarMenuButton>
@@ -324,7 +324,7 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                         <CollapsibleContent className="data-[state=open]:py-1">
                                              <SidebarMenuItem>
                                                 <Link href="/admin/aux-tables" className="pl-6">
-                                                    <SidebarMenuButton variant="ghost" size="sm">
+                                                    <SidebarMenuButton variant="outline" size="sm">
                                                         <Database />
                                                         Tablas Auxiliares
                                                     </SidebarMenuButton>
@@ -332,7 +332,7 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                             </SidebarMenuItem>
                                             <SidebarMenuItem>
                                                 <Link href="/admin/company-data" className="pl-6">
-                                                    <SidebarMenuButton variant="ghost" size="sm">
+                                                    <SidebarMenuButton variant="outline" size="sm">
                                                         <Building />
                                                         Datos de la Empresa
                                                     </SidebarMenuButton>

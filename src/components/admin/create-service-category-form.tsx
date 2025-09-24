@@ -34,7 +34,7 @@ function FieldError({ errors }: { errors?: string[] }) {
     )
 }
 
-export function CreateServiceCategoryForm({ allServices, allCategories }: { allServices: Service[], allCategories: string[] }) {
+export function CreateServiceCategoryForm({ allServices, allCategories, onActionCompleted }: { allServices: Service[], allCategories: string[], onActionCompleted?: () => void }) {
     const [state, formAction] = useActionState(createServiceCategoryAndAssignServices, { message: '' });
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const formRef = useRef<HTMLFormElement>(null);
@@ -52,7 +52,7 @@ export function CreateServiceCategoryForm({ allServices, allCategories }: { allS
             formRef.current?.reset();
             setSelectedServiceIds([]);
             setSearchTerm('');
-            window.location.reload();
+            if (onActionCompleted) onActionCompleted();
         } else if (state?.message && state.message !== 'success' && !state.errors) {
              toast({
                 title: 'Error',
@@ -60,7 +60,7 @@ export function CreateServiceCategoryForm({ allServices, allCategories }: { allS
                 variant: 'destructive'
             });
         }
-    }, [state, toast]);
+    }, [state, toast, onActionCompleted]);
 
     const onDialogChange = (open: boolean) => {
         if (!open) {

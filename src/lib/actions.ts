@@ -15,7 +15,7 @@ const contactSchema = z.object({
   message: z.string().min(10, 'Message must be at least 10 characters.'),
 });
 
-export async function handleContact(prevState: any, formData: FormData) {
+export async function handleContact(prevState: any, formData: FormData): Promise<{ message: string; errors?: { name?: string[]; email?: string[]; message?: string[]; }; data?: string; }> {
   const validatedFields = contactSchema.safeParse({
     name: formData.get('name'),
     email: formData.get('email'),
