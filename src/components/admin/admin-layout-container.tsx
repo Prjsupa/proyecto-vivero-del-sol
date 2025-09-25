@@ -1,8 +1,7 @@
-
 'use client';
 
 import { Header } from "@/components/vivero/header";
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider } from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarMenuSub, SidebarMenuSubItem, SidebarMenuSubButton, SidebarProvider } from "@/components/ui/sidebar";
 import { Briefcase, Package, Users, Receipt, BookUser, Wrench, ShoppingBag, BarChart3, Settings, ChevronRight, Building2, ConciergeBell, FileText, Database, Search, Ticket, Gift, Building, ClipboardList, List } from "lucide-react";
 import Link from 'next/link';
 import Image from "next/image";
@@ -11,7 +10,6 @@ import useBranchStore from "@/hooks/use-branch-store";
 import { cn } from "@/lib/utils";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useState, useEffect } from "react";
-
 
 export function AdminLayoutContainer({ children }: { children: React.ReactNode }) {
     const { activeBranch } = useBranchStore();
@@ -31,7 +29,6 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
         return null;
     }
 
-
     return (
         <SidebarProvider>
             <div className={cn(
@@ -46,17 +43,18 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                 alt="Vivero Del Sol Logo 1"
                                 width={210}
                                 height={140}
-                                />
+                            />
                         </div>
                     </SidebarHeader>
                     <SidebarContent>
-                        <SidebarMenu>
-                             <SidebarGroup>
-                                 <SidebarGroupLabel>Sucursal</SidebarGroupLabel>
-                                 <BranchSwitcher />
-                            </SidebarGroup>
-                            <SidebarGroup>
-                                 <SidebarMenuItem>
+                        <SidebarGroup>
+                            <SidebarGroupLabel>Sucursal</SidebarGroupLabel>
+                            <BranchSwitcher />
+                        </SidebarGroup>
+                        
+                        <SidebarGroup>
+                            <SidebarMenu>
+                                <SidebarMenuItem>
                                     <Link href="/admin">
                                         <SidebarMenuButton>
                                             <Briefcase />
@@ -64,254 +62,231 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                         </SidebarMenuButton>
                                     </Link>
                                 </SidebarMenuItem>
-                            </SidebarGroup>
-                            
-                            <Collapsible open={inventarioOpen} onOpenChange={setInventarioOpen}>
-                                <SidebarGroup>
-                                    <CollapsibleTrigger asChild>
-                                        <SidebarMenuButton className="justify-between">
-                                            <div className="flex items-center gap-2">
-                                                <Package />
-                                                <span>Inventario</span>
-                                            </div>
-                                            <ChevronRight className={cn("transform transition-transform duration-200", inventarioOpen && "rotate-90")} />
-                                        </SidebarMenuButton>
-                                    </CollapsibleTrigger>
-                                     <CollapsibleContent className="data-[state=open]:py-1">
-                                        <SidebarMenuItem>
-                                            <Link href="/admin/products" className="pl-6">
-                                                <SidebarMenuButton variant="outline" size="sm">
+                            </SidebarMenu>
+                        </SidebarGroup>
+                        
+                        <SidebarGroup>
+                            <SidebarMenu>
+                                <Collapsible open={inventarioOpen} onOpenChange={setInventarioOpen}>
+                                    <SidebarMenuItem>
+                                        <CollapsibleTrigger asChild>
+                                            <SidebarMenuButton className="justify-between">
+                                                <div className="flex items-center gap-2">
                                                     <Package />
-                                                    Productos
-                                                </SidebarMenuButton>
-                                            </Link>
-                                        </SidebarMenuItem>
+                                                    <span>Inventario</span>
+                                                </div>
+                                                <ChevronRight className={cn("transform transition-transform duration-200", inventarioOpen && "rotate-90")} />
+                                            </SidebarMenuButton>
+                                        </CollapsibleTrigger>
+                                    </SidebarMenuItem>
+                                    <CollapsibleContent>
+                                        <SidebarMenuSub className="ml-4 space-y-1 py-2">
+                                            <SidebarMenuSubItem className="py-1">
+                                                <SidebarMenuSubButton asChild>
+                                                    <Link href="/admin/products">
+                                                        <Package />
+                                                        Productos
+                                                    </Link>
+                                                </SidebarMenuSubButton>
+                                            </SidebarMenuSubItem>
+                                        </SidebarMenuSub>
                                     </CollapsibleContent>
-                                </SidebarGroup>
-                            </Collapsible>
-                            
-                            <Collapsible open={serviciosOpen} onOpenChange={setServiciosOpen}>
-                                <SidebarGroup>
-                                    <CollapsibleTrigger asChild>
-                                        <SidebarMenuButton className="justify-between">
-                                            <div className="flex items-center gap-2">
-                                                <ConciergeBell />
-                                                <span>Servicios</span>
-                                            </div>
-                                            <ChevronRight className={cn("transform transition-transform duration-200", serviciosOpen && "rotate-90")} />
-                                        </SidebarMenuButton>
-                                    </CollapsibleTrigger>
-                                     <CollapsibleContent className="data-[state=open]:py-1">
-                                         <SidebarMenuItem>
-                                            <Link href="/admin/services" className="pl-6">
-                                                <SidebarMenuButton variant="outline" size="sm">
+                                </Collapsible>
+                                
+                                <Collapsible open={serviciosOpen} onOpenChange={setServiciosOpen}>
+                                    <SidebarMenuItem>
+                                        <CollapsibleTrigger asChild>
+                                            <SidebarMenuButton className="justify-between">
+                                                <div className="flex items-center gap-2">
                                                     <ConciergeBell />
-                                                    Listado Servicios
-                                                </SidebarMenuButton>
-                                            </Link>
-                                        </SidebarMenuItem>
-                                        <SidebarMenuItem>
-                                            <Link href="/admin/quotes" className="pl-6">
-                                                <SidebarMenuButton variant="outline" size="sm">
-                                                    <ClipboardList />
-                                                    Armar Presupuesto
-                                                </SidebarMenuButton>
-                                            </Link>
-                                        </SidebarMenuItem>
-                                        <SidebarMenuItem>
-                                            <Link href="/admin/quotes/list" className="pl-6">
-                                                <SidebarMenuButton variant="outline" size="sm">
-                                                    <List />
-                                                    Listado Presupuestos
-                                                </SidebarMenuButton>
-                                            </Link>
-                                        </SidebarMenuItem>
+                                                    <span>Servicios</span>
+                                                </div>
+                                                <ChevronRight className={cn("transform transition-transform duration-200", serviciosOpen && "rotate-90")} />
+                                            </SidebarMenuButton>
+                                        </CollapsibleTrigger>
+                                    </SidebarMenuItem>
+                                    <CollapsibleContent>
+                                        <SidebarMenuSub className="ml-4 space-y-1 py-2">
+                                            <SidebarMenuSubItem className="py-1">
+                                                <SidebarMenuSubButton asChild>
+                                                    <Link href="/admin/services">
+                                                        <ConciergeBell />
+                                                        Listado Servicios
+                                                    </Link>
+                                                </SidebarMenuSubButton>
+                                            </SidebarMenuSubItem>
+                                            <SidebarMenuSubItem className="py-1">
+                                                <SidebarMenuSubButton asChild>
+                                                    <Link href="/admin/quotes">
+                                                        <ClipboardList />
+                                                        Armar Presupuesto
+                                                    </Link>
+                                                </SidebarMenuSubButton>
+                                            </SidebarMenuSubItem>
+                                            <SidebarMenuSubItem className="py-1">
+                                                <SidebarMenuSubButton asChild>
+                                                    <Link href="/admin/quotes/list">
+                                                        <List />
+                                                        Listado Presupuestos
+                                                    </Link>
+                                                </SidebarMenuSubButton>
+                                            </SidebarMenuSubItem>
+                                        </SidebarMenuSub>
                                     </CollapsibleContent>
-                                </SidebarGroup>
-                            </Collapsible>
+                                </Collapsible>
 
-                            <Collapsible open={ventasOpen} onOpenChange={setVentasOpen}>
-                                <SidebarGroup>
-                                    <CollapsibleTrigger asChild>
-                                        <SidebarMenuButton className="justify-between">
-                                            <div className="flex items-center gap-2">
-                                                <ShoppingBag />
-                                                <span>Ventas</span>
-                                            </div>
-                                            <ChevronRight className={cn("transform transition-transform duration-200", ventasOpen && "rotate-90")} />
-                                        </SidebarMenuButton>
-                                    </CollapsibleTrigger>
-                                     <CollapsibleContent className="data-[state=open]:py-1">
-                                        <SidebarMenuItem>
-                                            <Link href="/admin/customers" className="pl-6">
-                                                <SidebarMenuButton variant="outline" size="sm">
-                                                    <Users />
-                                                    Clientes
-                                                </SidebarMenuButton>
-                                            </Link>
-                                        </SidebarMenuItem>
-                                        <SidebarMenuItem>
-                                            <Link href="/admin/sellers" className="pl-6">
-                                                <SidebarMenuButton variant="outline" size="sm">
-                                                    <Users />
-                                                    Vendedores
-                                                </SidebarMenuButton>
-                                            </Link>
-                                        </SidebarMenuItem>
-                                        <SidebarMenuItem>
-                                            <Link href="/admin/invoicing" className="pl-6">
-                                                <SidebarMenuButton variant="outline" size="sm">
-                                                    <Receipt />
-                                                    Facturación
-                                                </SidebarMenuButton>
-                                            </Link>
-                                        </SidebarMenuItem>
-                                        <SidebarMenuItem>
-                                            <Link href="/admin/current-accounts" className="pl-6">
-                                                <SidebarMenuButton variant="outline" size="sm">
-                                                    <BookUser />
-                                                    Cuentas Corrientes
-                                                </SidebarMenuButton>
-                                            </Link>
-                                        </SidebarMenuItem>
+                                <Collapsible open={ventasOpen} onOpenChange={setVentasOpen}>
+                                    <SidebarMenuItem>
+                                        <CollapsibleTrigger asChild>
+                                            <SidebarMenuButton className="justify-between">
+                                                <div className="flex items-center gap-2">
+                                                    <ShoppingBag />
+                                                    <span>Ventas</span>
+                                                </div>
+                                                <ChevronRight className={cn("transform transition-transform duration-200", ventasOpen && "rotate-90")} />
+                                            </SidebarMenuButton>
+                                        </CollapsibleTrigger>
+                                    </SidebarMenuItem>
+                                    <CollapsibleContent>
+                                        <SidebarMenuSub className="ml-4 space-y-1 py-2">
+                                            <SidebarMenuSubItem className="py-1">
+                                                <SidebarMenuSubButton asChild>
+                                                    <Link href="/admin/customers">
+                                                        <Users />
+                                                        Clientes
+                                                    </Link>
+                                                </SidebarMenuSubButton>
+                                            </SidebarMenuSubItem>
+                                            <SidebarMenuSubItem className="py-1">
+                                                <SidebarMenuSubButton asChild>
+                                                    <Link href="/admin/sellers">
+                                                        <Users />
+                                                        Vendedores
+                                                    </Link>
+                                                </SidebarMenuSubButton>
+                                            </SidebarMenuSubItem>
+                                            <SidebarMenuSubItem className="py-1">
+                                                <SidebarMenuSubButton asChild>
+                                                    <Link href="/admin/invoicing">
+                                                        <Receipt />
+                                                        Facturación
+                                                    </Link>
+                                                </SidebarMenuSubButton>
+                                            </SidebarMenuSubItem>
+                                            <SidebarMenuSubItem className="py-1">
+                                                <SidebarMenuSubButton asChild>
+                                                    <Link href="/admin/current-accounts">
+                                                        <BookUser />
+                                                        Cuentas Corrientes
+                                                    </Link>
+                                                </SidebarMenuSubButton>
+                                            </SidebarMenuSubItem>
+                                        </SidebarMenuSub>
                                     </CollapsibleContent>
-                                </SidebarGroup>
-                            </Collapsible>
+                                </Collapsible>
 
-                            <Collapsible open={descuentoOpen} onOpenChange={setDescuentoOpen}>
-                                <SidebarGroup>
-                                    <CollapsibleTrigger asChild>
-                                        <SidebarMenuButton className="justify-between">
-                                            <div className="flex items-center gap-2">
-                                                <Ticket />
-                                                <span>Descuento</span>
-                                            </div>
-                                            <ChevronRight className={cn("transform transition-transform duration-200", descuentoOpen && "rotate-90")} />
-                                        </SidebarMenuButton>
-                                    </CollapsibleTrigger>
-                                     <CollapsibleContent className="data-[state=open]:py-1">
-                                        <SidebarMenuItem>
-                                            <Link href="#" className="pl-6">
-                                                <SidebarMenuButton variant="outline" size="sm" disabled>
+                                <Collapsible open={descuentoOpen} onOpenChange={setDescuentoOpen}>
+                                    <SidebarMenuItem>
+                                        <CollapsibleTrigger asChild>
+                                            <SidebarMenuButton className="justify-between">
+                                                <div className="flex items-center gap-2">
+                                                    <Ticket />
+                                                    <span>Descuento</span>
+                                                </div>
+                                                <ChevronRight className={cn("transform transition-transform duration-200", descuentoOpen && "rotate-90")} />
+                                            </SidebarMenuButton>
+                                        </CollapsibleTrigger>
+                                    </SidebarMenuItem>
+                                    <CollapsibleContent>
+                                        <SidebarMenuSub className="ml-4 space-y-1 py-2">
+                                            <SidebarMenuSubItem className="py-1">
+                                                <SidebarMenuSubButton className="opacity-50 cursor-not-allowed">
                                                     <Ticket />
                                                     Cupones
-                                                </SidebarMenuButton>
-                                            </Link>
-                                        </SidebarMenuItem>
-                                        <SidebarMenuItem>
-                                            <Link href="/admin/promotions" className="pl-6">
-                                                <SidebarMenuButton variant="outline" size="sm">
-                                                    <Gift />
-                                                    Promociones
-                                                </SidebarMenuButton>
-                                            </Link>
-                                        </SidebarMenuItem>
+                                                </SidebarMenuSubButton>
+                                            </SidebarMenuSubItem>
+                                            <SidebarMenuSubItem className="py-1">
+                                                <SidebarMenuSubButton asChild>
+                                                    <Link href="/admin/promotions">
+                                                        <Gift />
+                                                        Promociones
+                                                    </Link>
+                                                </SidebarMenuSubButton>
+                                            </SidebarMenuSubItem>
+                                        </SidebarMenuSub>
                                     </CollapsibleContent>
-                                </SidebarGroup>
-                            </Collapsible>
+                                </Collapsible>
 
-                            <Collapsible open={proveedoresOpen} onOpenChange={setProveedoresOpen}>
-                                <SidebarGroup>
-                                    <CollapsibleTrigger asChild>
-                                        <SidebarMenuButton className="justify-between">
-                                            <div className="flex items-center gap-2">
-                                                <Building2 />
-                                                <span>Proveedores</span>
-                                            </div>
-                                            <ChevronRight className={cn("transform transition-transform duration-200", proveedoresOpen && "rotate-90")} />
-                                        </SidebarMenuButton>
-                                    </CollapsibleTrigger>
-                                     <CollapsibleContent className="data-[state=open]:py-1">
-                                        <SidebarMenuItem>
-                                            <Link href="/admin/providers" className="pl-6">
-                                                <SidebarMenuButton variant="outline" size="sm">
-                                                    <Users />
-                                                    Proveedores
-                                                </SidebarMenuButton>
-                                            </Link>
-                                        </SidebarMenuItem>
-                                        <SidebarMenuItem>
-                                            <Link href="#" className="pl-6">
-                                                <SidebarMenuButton variant="outline" size="sm" disabled>
+                                <Collapsible open={proveedoresOpen} onOpenChange={setProveedoresOpen}>
+                                    <SidebarMenuItem>
+                                        <CollapsibleTrigger asChild>
+                                            <SidebarMenuButton className="justify-between">
+                                                <div className="flex items-center gap-2">
+                                                    <Building2 />
+                                                    <span>Proveedores</span>
+                                                </div>
+                                                <ChevronRight className={cn("transform transition-transform duration-200", proveedoresOpen && "rotate-90")} />
+                                            </SidebarMenuButton>
+                                        </CollapsibleTrigger>
+                                    </SidebarMenuItem>
+                                    <CollapsibleContent>
+                                        <SidebarMenuSub className="ml-4 space-y-1 py-2">
+                                            <SidebarMenuSubItem className="py-1">
+                                                <SidebarMenuSubButton asChild>
+                                                    <Link href="/admin/providers">
+                                                        <Users />
+                                                        Proveedores
+                                                    </Link>
+                                                </SidebarMenuSubButton>
+                                            </SidebarMenuSubItem>
+                                            <SidebarMenuSubItem className="py-1">
+                                                <SidebarMenuSubButton className="opacity-50 cursor-not-allowed">
                                                     <BookUser />
                                                     Cuentas Corrientes
-                                                </SidebarMenuButton>
-                                            </Link>
-                                        </SidebarMenuItem>
-                                        <SidebarMenuItem>
-                                            <Link href="#" className="pl-6">
-                                                <SidebarMenuButton variant="outline" size="sm" disabled>
+                                                </SidebarMenuSubButton>
+                                            </SidebarMenuSubItem>
+                                            <SidebarMenuSubItem className="py-1">
+                                                <SidebarMenuSubButton className="opacity-50 cursor-not-allowed">
                                                     <Receipt />
                                                     Facturas Proveedores
-                                                </SidebarMenuButton>
-                                            </Link>
-                                        </SidebarMenuItem>
-                                        <SidebarMenuItem>
-                                            <Link href="#" className="pl-6">
-                                                <SidebarMenuButton variant="outline" size="sm" disabled>
+                                                </SidebarMenuSubButton>
+                                            </SidebarMenuSubItem>
+                                            <SidebarMenuSubItem className="py-1">
+                                                <SidebarMenuSubButton className="opacity-50 cursor-not-allowed">
                                                     <FileText />
                                                     Nota Débito Prov.
-                                                </SidebarMenuButton>
-                                            </Link>
-                                        </SidebarMenuItem>
-                                         <SidebarMenuItem>
-                                            <Link href="#" className="pl-6">
-                                                <SidebarMenuButton variant="outline" size="sm" disabled>
+                                                </SidebarMenuSubButton>
+                                            </SidebarMenuSubItem>
+                                            <SidebarMenuSubItem className="py-1">
+                                                <SidebarMenuSubButton className="opacity-50 cursor-not-allowed">
                                                     <FileText />
                                                     Nota Crédito Prov.
-                                                </SidebarMenuButton>
-                                            </Link>
-                                        </SidebarMenuItem>
-                                         <SidebarMenuItem>
-                                            <Link href="#" className="pl-6">
-                                                <SidebarMenuButton variant="outline" size="sm" disabled>
+                                                </SidebarMenuSubButton>
+                                            </SidebarMenuSubItem>
+                                            <SidebarMenuSubItem className="py-1">
+                                                <SidebarMenuSubButton className="opacity-50 cursor-not-allowed">
                                                     <Search />
                                                     Consulta de Facturas
-                                                </SidebarMenuButton>
-                                            </Link>
-                                        </SidebarMenuItem>
-                                        <SidebarMenuItem>
-                                            <Link href="#" className="pl-6">
-                                                <SidebarMenuButton variant="outline" size="sm" disabled>
+                                                </SidebarMenuSubButton>
+                                            </SidebarMenuSubItem>
+                                            <SidebarMenuSubItem className="py-1">
+                                                <SidebarMenuSubButton className="opacity-50 cursor-not-allowed">
                                                     <FileText />
                                                     Rem. Proveedores
-                                                </SidebarMenuButton>
-                                            </Link>
-                                        </SidebarMenuItem>
-                                        <SidebarMenuItem>
-                                            <Link href="#" className="pl-6">
-                                                <SidebarMenuButton variant="outline" size="sm" disabled>
+                                                </SidebarMenuSubButton>
+                                            </SidebarMenuSubItem>
+                                            <SidebarMenuSubItem className="py-1">
+                                                <SidebarMenuSubButton className="opacity-50 cursor-not-allowed">
                                                     <ShoppingBag />
                                                     Pedidos a Proveed.
-                                                </SidebarMenuButton>
-                                            </Link>
-                                        </SidebarMenuItem>
+                                                </SidebarMenuSubButton>
+                                            </SidebarMenuSubItem>
+                                        </SidebarMenuSub>
                                     </CollapsibleContent>
-                                </SidebarGroup>
-                            </Collapsible>
-                            
-                             <SidebarGroup>
-                                <SidebarGroupLabel>Análisis</SidebarGroupLabel>
-                                <SidebarMenuItem>
-                                    <SidebarMenuButton disabled>
-                                        <BarChart3 />
-                                        Reportes
-                                    </SidebarMenuButton>
-                                </SidebarMenuItem>
-                            </SidebarGroup>
+                                </Collapsible>
 
-                             <SidebarGroup>
-                                <SidebarGroupLabel>Sistema</SidebarGroupLabel>
-                                <SidebarMenuItem>
-                                    <Link href="/admin/users">
-                                        <SidebarMenuButton>
-                                            <Users />
-                                            Admins
-                                        </SidebarMenuButton>
-                                    </Link>
-                                </SidebarMenuItem>
                                 <Collapsible open={mantenimientoOpen} onOpenChange={setMantenimientoOpen}>
-                                    <SidebarGroup>
+                                    <SidebarMenuItem>
                                         <CollapsibleTrigger asChild>
                                             <SidebarMenuButton className="justify-between">
                                                 <div className="flex items-center gap-2">
@@ -321,34 +296,46 @@ export function AdminLayoutContainer({ children }: { children: React.ReactNode }
                                                 <ChevronRight className={cn("transform transition-transform duration-200", mantenimientoOpen && "rotate-90")} />
                                             </SidebarMenuButton>
                                         </CollapsibleTrigger>
-                                        <CollapsibleContent className="data-[state=open]:py-1">
-                                             <SidebarMenuItem>
-                                                <Link href="/admin/aux-tables" className="pl-6">
-                                                    <SidebarMenuButton variant="outline" size="sm">
+                                    </SidebarMenuItem>
+                                    <CollapsibleContent>
+                                        <SidebarMenuSub className="ml-4 space-y-1 py-2">
+                                            <SidebarMenuSubItem className="py-1">
+                                                <SidebarMenuSubButton asChild>
+                                                    <Link href="/admin/aux-tables">
                                                         <Database />
                                                         Tablas Auxiliares
-                                                    </SidebarMenuButton>
-                                                </Link>
-                                            </SidebarMenuItem>
-                                            <SidebarMenuItem>
-                                                <Link href="/admin/company-data" className="pl-6">
-                                                    <SidebarMenuButton variant="outline" size="sm">
+                                                    </Link>
+                                                </SidebarMenuSubButton>
+                                            </SidebarMenuSubItem>
+                                            <SidebarMenuSubItem className="py-1">
+                                                <SidebarMenuSubButton asChild>
+                                                    <Link href="/admin/company-data">
                                                         <Building />
                                                         Datos de la Empresa
-                                                    </SidebarMenuButton>
-                                                </Link>
-                                            </SidebarMenuItem>
-                                        </CollapsibleContent>
-                                    </SidebarGroup>
+                                                    </Link>
+                                                </SidebarMenuSubButton>
+                                            </SidebarMenuSubItem>
+                                        </SidebarMenuSub>
+                                    </CollapsibleContent>
                                 </Collapsible>
+
                                 <SidebarMenuItem>
-                                    <SidebarMenuButton disabled>
+                                    <Link href="/admin/users">
+                                        <SidebarMenuButton>
+                                            <Users />
+                                            Admins
+                                        </SidebarMenuButton>
+                                    </Link>
+                                </SidebarMenuItem>
+
+                                <SidebarMenuItem>
+                                    <SidebarMenuButton className="opacity-50 cursor-not-allowed">
                                         <Settings />
                                         Configuración
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
-                            </SidebarGroup>
-                        </SidebarMenu>
+                            </SidebarMenu>
+                        </SidebarGroup>
                     </SidebarContent>
                 </Sidebar>
             </div>
