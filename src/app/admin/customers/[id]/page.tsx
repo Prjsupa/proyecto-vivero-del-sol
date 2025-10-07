@@ -59,7 +59,7 @@ function getInitials(name: string, lastName: string) {
     return `${name?.charAt(0) ?? ''}${lastName?.charAt(0) ?? ''}`.toUpperCase();
 }
 
-export default async function CustomerDetailPage({ params }: any) {
+export default async function CustomerDetailPage({ params }: { params: { id: string } }) {
     const cookieStore = cookies();
     const supabase = createClient(cookieStore);
     const { data: { user } } = await supabase.auth.getUser();
@@ -67,10 +67,8 @@ export default async function CustomerDetailPage({ params }: any) {
         redirect('/auth/login');
     }
 
-    const [{ client, invoices }, sellers] = await Promise.all([
-        getClientDetails(params.id),
-        getSellers(),
-    ]);
+    const { client, invoices } = await getClientDetails(params.id);
+    const sellers = await getSellers();
 
     const safeBirthDate = client.birth_date ? parseISO(client.birth_date) : null;
 
