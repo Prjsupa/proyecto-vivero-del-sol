@@ -59,7 +59,13 @@ function getInitials(name: string, lastName: string) {
     return `${name?.charAt(0) ?? ''}${lastName?.charAt(0) ?? ''}`.toUpperCase();
 }
 
-export default async function CustomerDetailPage({ params }: { params: { id: string } }) {
+export interface PageProps {
+    params: {
+        id: string;
+    }
+}
+
+export default async function CustomerDetailPage({ params }: PageProps) {
     const cookieStore = cookies();
     const supabase = createClient(cookieStore);
     const { data: { user } } = await supabase.auth.getUser();
